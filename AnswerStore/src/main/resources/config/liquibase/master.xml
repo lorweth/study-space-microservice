@@ -19,6 +19,7 @@
     <include file="config/liquibase/changelog/20210901110341_added_entity_GroupTimeTable.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110441_added_entity_AnswerSheet.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110541_added_entity_TimeTable.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210901162742_added_entity_GroupMember.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210901110241_added_entity_constraints_AnswerSheetItem.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110441_added_entity_constraints_AnswerSheet.xml" relativeToChangelogFile="false"/>

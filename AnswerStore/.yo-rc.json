@@ -43,7 +43,7 @@
     "nativeLanguage": "en",
     "creationTimestamp": 1630494101643,
     "jwtSecretKey": "MzM2MGFkNDIwZjYzZTI5MzczOGZhZTYzYTg1MDQ2NTlmNTMxZTQ3NDQzOGY4MTkwYzNjYzQ1YWYwNWViZjJhNWFlZjE2NzE0ZTA5MzY0ZjQyNjg5NGM0OTUxN2RlZGFhMzc0YjJhMWNlYTM5NWEyMWEwZmE5ODY1YWI3OTg3ZDk=",
-    "entities": ["AnswerSheetItem", "GroupTimeTable", "AnswerSheet", "TimeTable"],
-    "lastLiquibaseTimestamp": 1630494341000
+    "entities": ["AnswerSheetItem", "GroupTimeTable", "AnswerSheet", "TimeTable", "GroupMember"],
+    "lastLiquibaseTimestamp": 1630513662000
   }
 }
