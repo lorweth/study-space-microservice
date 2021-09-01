@@ -43,7 +43,7 @@
     "nativeLanguage": "en",
     "creationTimestamp": 1630494101601,
     "jwtSecretKey": "YzBmZTY3NWFiNjMwZDZjYmQ3YTMwYzcyZjYyNmNhMTRmNDBiYmJkYjE4NTY4ZjhlOGYyZmVmNGJkZjE1ODNmYWU4NWQ4MjNjZmFlYzNkNjEwMmZhYTM4N2E3MjQ0YTRlYjcwODcxYmVmMWUzNzQ1NTRiY2EyYTUxZTNmYWNjOWE=",
-    "entities": ["Question", "QuestionGroup", "Option", "Topic", "ExamItem", "Exam"],
-    "lastLiquibaseTimestamp": 1630494461000
+    "entities": ["Question", "QuestionGroup", "Option", "Topic", "ExamItem", "Exam", "GroupMember"],
+    "lastLiquibaseTimestamp": 1630513207000
   }
 }

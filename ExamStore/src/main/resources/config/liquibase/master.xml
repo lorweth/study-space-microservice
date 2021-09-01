@@ -21,6 +21,7 @@
     <include file="config/liquibase/changelog/20210901110541_added_entity_Topic.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110641_added_entity_ExamItem.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110741_added_entity_Exam.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210901162007_added_entity_GroupMember.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210901110241_added_entity_constraints_Question.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901110341_added_entity_constraints_QuestionGroup.xml" relativeToChangelogFile="false"/>
