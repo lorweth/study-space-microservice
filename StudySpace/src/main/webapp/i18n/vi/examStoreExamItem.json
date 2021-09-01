@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "examStoreExamItem": {
+      "home": {
+        "title": "Exam Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Exam Item",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Exam Item",
+        "notFound": "No Exam Items found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Exam Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Exam Item"
+      },
+      "id": "ID",
+      "numOfQuestion": "Num Of Question",
+      "repo": "Repo",
+      "exam": "Exam"
+    }
+  },
+  "examStoreApp": {
+    "examStoreExamItem": {
+      "created": "Một Exam Item mới được tạo với định danh {{ param }}",
+      "updated": "Một Exam Item cập nhật với định danh {{ param }}",
+      "deleted": "Một Exam Item đã xóa với định danh {{ param }}"
+    }
+  }
+}

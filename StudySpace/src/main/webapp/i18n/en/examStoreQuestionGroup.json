@@ -1,0 +1,31 @@
+{
+  "studySpaceApp": {
+    "examStoreQuestionGroup": {
+      "home": {
+        "title": "Question Groups",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Question Group",
+        "createOrEditLabel": "Create or edit a Question Group",
+        "notFound": "No Question Groups found"
+      },
+      "delete": {
+        "question": "Are you sure you want to delete Question Group {{ id }}?"
+      },
+      "detail": {
+        "title": "Question Group"
+      },
+      "id": "ID",
+      "name": "Name",
+      "groupId": "Group Id",
+      "userLogin": "User Login",
+      "topic": "Topic"
+    }
+  },
+  "examStoreApp": {
+    "examStoreQuestionGroup": {
+      "created": "A new Question Group is created with identifier {{ param }}",
+      "updated": "A Question Group is updated with identifier {{ param }}",
+      "deleted": "A Question Group is deleted with identifier {{ param }}"
+    }
+  }
+}

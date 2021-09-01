@@ -1,0 +1,43 @@
+{
+  "name": "GroupTimeTable",
+  "fields": [
+    {
+      "fieldName": "examId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "startAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "endAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "groupId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "note",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "group_time_table",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "AnswerStore"],
+  "microserviceName": "AnswerStore",
+  "clientRootFolder": "AnswerStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110741"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Topic",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength", "required"],
+      "fieldValidateRulesMinlength": "5",
+      "fieldValidateRulesMaxlength": "255"
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "topic",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "ExamStore"],
+  "microserviceName": "ExamStore",
+  "clientRootFolder": "ExamStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110541"
+}

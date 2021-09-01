@@ -1,0 +1,197 @@
+application {
+  config {
+   	baseName StudySpace
+    applicationType gateway
+    packageName vn.vnedu.studyspace
+    serverPort 8080
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    cacheProvider hazelcast
+    clientFramework react
+    buildTool gradle
+    languages [vi, en]
+    nativeLanguage vi
+    clientTheme flatly
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities *
+}
+
+application {
+  config {
+   	baseName GroupStore
+    applicationType microservice
+    packageName vn.vnedu.studyspace.group_store
+    serverPort 8081
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities Group, GroupMember
+}
+
+application {
+  config {
+   	baseName ExamStore
+    applicationType microservice
+    packageName vn.vnedu.studyspace.exam_store
+    serverPort 8082
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  
+  entities Topic, Exam, ExamItem, Question, Option, QuestionGroup
+ }
+
+application {
+  config {
+    baseName AnswerStore
+    reactive true
+    applicationType microservice
+    packageName vn.vnedu.studyspace.answer_store
+    serverPort 8083
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities GroupTimeTable, TimeTable, AnswerSheet, AnswerSheetItem
+}
+
+// Quản lý nhóm
+
+entity GroupMember {
+	userLogin String required
+    role Integer min(0) max(2) required // 0: chờ vào, 1: mem, 2: admin
+}
+
+entity Group {
+  name String minlength(5) maxlength(255) required
+}
+
+// Quản lý đề
+
+entity Topic {
+  	name String minlength(5) maxlength(255) required
+}
+
+entity QuestionGroup {
+    name String minlength(5) maxlength(255) required
+    groupId String
+    userLogin String required
+}
+
+entity Question {
+	content TextBlob required
+	note TextBlob
+}
+
+entity Option {
+	content TextBlob required
+	isCorrect Boolean required
+}
+
+entity Exam {
+    name String minlength(3) maxlength(155) required
+    duration Integer min(5) max(180) required
+    mix Integer min(0) max(2) required // 0: không trộn, 1: trộn theo nhóm, 2: trộn hết
+    groupId Long required
+}
+
+entity ExamItem {
+	numOfQuestion Integer required // số câu hỏi cần lấy trong danh mục câu hỏi
+}
+
+// Quản lý làm bài
+
+entity GroupTimeTable {
+	examId Long required
+    startAt Instant required
+    endAt Instant required
+    groupId String required
+    note String
+}
+
+entity TimeTable {
+	title String minlength(2) maxlength(255)
+    time Instant
+    note TextBlob required
+    userLogin String required
+}
+
+entity AnswerSheet {
+	time Instant required
+    userLogin String required
+}
+
+entity AnswerSheetItem {
+	questionId Long required
+  	answerId Long required
+}
+
+// relationship ManyToOne {
+
+//  GroupMember{user(login)} to User
+
+//  WaitingMember{user(login)} to User
+
+//  GroupAdmin{user(login)} to User
+
+//  AnswerSheet{user(login)} to User
+
+//  TimeTable{user(login)} to User
+
+//  QuestionGroup{user(login)} to User
+// }
+
+relationship ManyToOne {
+  GroupMember{group} to Group 
+
+  AnswerSheet{groupTimeTable} to GroupTimeTable
+
+  AnswerSheetItem{answerSheet} to AnswerSheet
+  
+  QuestionGroup{topic} to Topic
+  
+  Question{repo} to QuestionGroup
+  
+  Option{question} to Question
+  
+  ExamItem{repo} to QuestionGroup
+
+  ExamItem{exam} to Exam
+}
+
+service * with serviceClass
+dto * with mapstruct
+paginate * with infinite-scroll
+
+microservice Group, GroupMember with GroupStore
+microservice Topic, Exam, ExamItem, Question, Option, QuestionGroup with ExamStore
+microservice GroupTimeTable, TimeTable, AnswerSheet, AnswerSheetItem with AnswerStore
+

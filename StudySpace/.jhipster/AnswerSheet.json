@@ -1,0 +1,36 @@
+{
+  "name": "AnswerSheet",
+  "fields": [
+    {
+      "fieldName": "time",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "userLogin",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "groupTimeTable",
+      "otherEntityRelationshipName": "answerSheet",
+      "relationshipName": "groupTimeTable"
+    }
+  ],
+  "entityTableName": "answer_sheet",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "AnswerStore"],
+  "microserviceName": "AnswerStore",
+  "clientRootFolder": "AnswerStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901111041"
+}

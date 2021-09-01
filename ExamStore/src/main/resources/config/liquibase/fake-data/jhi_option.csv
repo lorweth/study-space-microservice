@@ -1,0 +1,11 @@
+id;content;is_correct
+1;../fake-data/blob/hipster.txt;true
+2;../fake-data/blob/hipster.txt;true
+3;../fake-data/blob/hipster.txt;false
+4;../fake-data/blob/hipster.txt;true
+5;../fake-data/blob/hipster.txt;false
+6;../fake-data/blob/hipster.txt;false
+7;../fake-data/blob/hipster.txt;false
+8;../fake-data/blob/hipster.txt;false
+9;../fake-data/blob/hipster.txt;false
+10;../fake-data/blob/hipster.txt;false

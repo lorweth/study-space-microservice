@@ -1,0 +1,42 @@
+{
+  "name": "QuestionGroup",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength", "required"],
+      "fieldValidateRulesMinlength": "5",
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "fieldName": "groupId",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "userLogin",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "topic",
+      "otherEntityRelationshipName": "questionGroup",
+      "relationshipName": "topic"
+    }
+  ],
+  "entityTableName": "question_group",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "ExamStore"],
+  "microserviceName": "ExamStore",
+  "clientRootFolder": "ExamStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110341"
+}

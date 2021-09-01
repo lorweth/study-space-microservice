@@ -1,0 +1,31 @@
+{
+  "studySpaceApp": {
+    "answerStoreTimeTable": {
+      "home": {
+        "title": "Time Tables",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Time Table",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Time Table",
+        "notFound": "No Time Tables found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Time Table {{ id }}?"
+      },
+      "detail": {
+        "title": "Time Table"
+      },
+      "id": "ID",
+      "title": "Title",
+      "time": "Time",
+      "note": "Note",
+      "userLogin": "User Login"
+    }
+  },
+  "answerStoreApp": {
+    "answerStoreTimeTable": {
+      "created": "Một Time Table mới được tạo với định danh {{ param }}",
+      "updated": "Một Time Table cập nhật với định danh {{ param }}",
+      "deleted": "Một Time Table đã xóa với định danh {{ param }}"
+    }
+  }
+}

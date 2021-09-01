@@ -1,0 +1,26 @@
+{
+  "name": "Group",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength", "required"],
+      "fieldValidateRulesMinlength": "5",
+      "fieldValidateRulesMaxlength": "255"
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "jhi_group",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "GroupStore"],
+  "microserviceName": "GroupStore",
+  "clientRootFolder": "GroupStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110341"
+}

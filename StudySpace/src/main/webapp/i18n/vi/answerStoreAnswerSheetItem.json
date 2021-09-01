@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "answerStoreAnswerSheetItem": {
+      "home": {
+        "title": "Answer Sheet Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Answer Sheet Item",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Answer Sheet Item",
+        "notFound": "No Answer Sheet Items found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Answer Sheet Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Answer Sheet Item"
+      },
+      "id": "ID",
+      "questionId": "Question Id",
+      "answerId": "Answer Id",
+      "answerSheet": "Answer Sheet"
+    }
+  },
+  "answerStoreApp": {
+    "answerStoreAnswerSheetItem": {
+      "created": "Một Answer Sheet Item mới được tạo với định danh {{ param }}",
+      "updated": "Một Answer Sheet Item cập nhật với định danh {{ param }}",
+      "deleted": "Một Answer Sheet Item đã xóa với định danh {{ param }}"
+    }
+  }
+}

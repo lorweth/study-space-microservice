@@ -1,0 +1,120 @@
+import axios from 'axios';
+import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/toolkit';
+import { loadMoreDataWhenScrolled, parseHeaderForLinks } from 'react-jhipster';
+
+import { cleanEntity } from 'app/shared/util/entity-utils';
+import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
+import { IGroupMember, defaultValue } from 'app/shared/model/GroupStore/group-member.model';
+
+const initialState: EntityState<IGroupMember> = {
+  loading: false,
+  errorMessage: null,
+  entities: [],
+  entity: defaultValue,
+  links: { next: 0 },
+  updating: false,
+  totalItems: 0,
+  updateSuccess: false,
+};
+
+const apiUrl = 'services/groupstore/api/group-members';
+
+// Actions
+
+export const getEntities = createAsyncThunk('groupMember/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
+  const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
+  return axios.get<IGroupMember[]>(requestUrl);
+});
+
+export const getEntity = createAsyncThunk(
+  'groupMember/fetch_entity',
+  async (id: string | number) => {
+    const requestUrl = `${apiUrl}/${id}`;
+    return axios.get<IGroupMember>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
+
+export const createEntity = createAsyncThunk(
+  'groupMember/create_entity',
+  async (entity: IGroupMember, thunkAPI) => {
+    return axios.post<IGroupMember>(apiUrl, cleanEntity(entity));
+  },
+  { serializeError: serializeAxiosError }
+);
+
+export const updateEntity = createAsyncThunk(
+  'groupMember/update_entity',
+  async (entity: IGroupMember, thunkAPI) => {
+    return axios.put<IGroupMember>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
+  },
+  { serializeError: serializeAxiosError }
+);
+
+export const partialUpdateEntity = createAsyncThunk(
+  'groupMember/partial_update_entity',
+  async (entity: IGroupMember, thunkAPI) => {
+    return axios.patch<IGroupMember>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
+  },
+  { serializeError: serializeAxiosError }
+);
+
+export const deleteEntity = createAsyncThunk(
+  'groupMember/delete_entity',
+  async (id: string | number, thunkAPI) => {
+    const requestUrl = `${apiUrl}/${id}`;
+    return await axios.delete<IGroupMember>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
+
+// slice
+
+export const GroupMemberSlice = createEntitySlice({
+  name: 'groupMember',
+  initialState,
+  extraReducers(builder) {
+    builder
+      .addCase(getEntity.fulfilled, (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addCase(deleteEntity.fulfilled, state => {
+        state.updating = false;
+        state.updateSuccess = true;
+        state.entity = {};
+      })
+      .addMatcher(isFulfilled(getEntities), (state, action) => {
+        const links = parseHeaderForLinks(action.payload.headers.link);
+
+        return {
+          ...state,
+          loading: false,
+          links,
+          entities: loadMoreDataWhenScrolled(state.entities, action.payload.data, links),
+          totalItems: parseInt(action.payload.headers['x-total-count'], 10),
+        };
+      })
+      .addMatcher(isFulfilled(createEntity, updateEntity, partialUpdateEntity), (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isPending(getEntities, getEntity), state => {
+        state.errorMessage = null;
+        state.updateSuccess = false;
+        state.loading = true;
+      })
+      .addMatcher(isPending(createEntity, updateEntity, partialUpdateEntity, deleteEntity), state => {
+        state.errorMessage = null;
+        state.updateSuccess = false;
+        state.updating = true;
+      });
+  },
+});
+
+export const { reset } = GroupMemberSlice.actions;
+
+// Reducer
+export default GroupMemberSlice.reducer;

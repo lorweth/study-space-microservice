@@ -1,0 +1,31 @@
+{
+  "studySpaceApp": {
+    "examStoreQuestionGroup": {
+      "home": {
+        "title": "Question Groups",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Question Group",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Question Group",
+        "notFound": "No Question Groups found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Question Group {{ id }}?"
+      },
+      "detail": {
+        "title": "Question Group"
+      },
+      "id": "ID",
+      "name": "Name",
+      "groupId": "Group Id",
+      "userLogin": "User Login",
+      "topic": "Topic"
+    }
+  },
+  "examStoreApp": {
+    "examStoreQuestionGroup": {
+      "created": "Một Question Group mới được tạo với định danh {{ param }}",
+      "updated": "Một Question Group cập nhật với định danh {{ param }}",
+      "deleted": "Một Question Group đã xóa với định danh {{ param }}"
+    }
+  }
+}

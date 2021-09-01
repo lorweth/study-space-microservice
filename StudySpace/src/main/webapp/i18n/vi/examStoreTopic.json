@@ -1,0 +1,28 @@
+{
+  "studySpaceApp": {
+    "examStoreTopic": {
+      "home": {
+        "title": "Topics",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Topic",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Topic",
+        "notFound": "No Topics found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Topic {{ id }}?"
+      },
+      "detail": {
+        "title": "Topic"
+      },
+      "id": "ID",
+      "name": "Name"
+    }
+  },
+  "examStoreApp": {
+    "examStoreTopic": {
+      "created": "Một Topic mới được tạo với định danh {{ param }}",
+      "updated": "Một Topic cập nhật với định danh {{ param }}",
+      "deleted": "Một Topic đã xóa với định danh {{ param }}"
+    }
+  }
+}

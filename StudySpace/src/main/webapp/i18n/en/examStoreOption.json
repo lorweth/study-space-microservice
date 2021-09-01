@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "examStoreOption": {
+      "home": {
+        "title": "Options",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Option",
+        "createOrEditLabel": "Create or edit a Option",
+        "notFound": "No Options found"
+      },
+      "delete": {
+        "question": "Are you sure you want to delete Option {{ id }}?"
+      },
+      "detail": {
+        "title": "Option"
+      },
+      "id": "ID",
+      "content": "Content",
+      "isCorrect": "Is Correct",
+      "question": "Question"
+    }
+  },
+  "examStoreApp": {
+    "examStoreOption": {
+      "created": "A new Option is created with identifier {{ param }}",
+      "updated": "A Option is updated with identifier {{ param }}",
+      "deleted": "A Option is deleted with identifier {{ param }}"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "ExamItem",
+  "fields": [
+    {
+      "fieldName": "numOfQuestion",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "questionGroup",
+      "otherEntityRelationshipName": "examItem",
+      "relationshipName": "repo"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "exam",
+      "otherEntityRelationshipName": "examItem",
+      "relationshipName": "exam"
+    }
+  ],
+  "entityTableName": "exam_item",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "ExamStore"],
+  "microserviceName": "ExamStore",
+  "clientRootFolder": "ExamStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110641"
+}

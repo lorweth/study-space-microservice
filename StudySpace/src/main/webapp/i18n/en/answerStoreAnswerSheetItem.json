@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "answerStoreAnswerSheetItem": {
+      "home": {
+        "title": "Answer Sheet Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Answer Sheet Item",
+        "createOrEditLabel": "Create or edit a Answer Sheet Item",
+        "notFound": "No Answer Sheet Items found"
+      },
+      "delete": {
+        "question": "Are you sure you want to delete Answer Sheet Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Answer Sheet Item"
+      },
+      "id": "ID",
+      "questionId": "Question Id",
+      "answerId": "Answer Id",
+      "answerSheet": "Answer Sheet"
+    }
+  },
+  "answerStoreApp": {
+    "answerStoreAnswerSheetItem": {
+      "created": "A new Answer Sheet Item is created with identifier {{ param }}",
+      "updated": "A Answer Sheet Item is updated with identifier {{ param }}",
+      "deleted": "A Answer Sheet Item is deleted with identifier {{ param }}"
+    }
+  }
+}

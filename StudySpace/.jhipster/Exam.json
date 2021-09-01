@@ -1,0 +1,45 @@
+{
+  "name": "Exam",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength", "required"],
+      "fieldValidateRulesMinlength": "3",
+      "fieldValidateRulesMaxlength": "155"
+    },
+    {
+      "fieldName": "duration",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min", "max", "required"],
+      "fieldValidateRulesMin": "5",
+      "fieldValidateRulesMax": "180"
+    },
+    {
+      "fieldName": "mix",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min", "max", "required"],
+      "fieldValidateRulesMin": "0",
+      "fieldValidateRulesMax": "2"
+    },
+    {
+      "fieldName": "groupId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "exam",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "ExamStore"],
+  "microserviceName": "ExamStore",
+  "clientRootFolder": "ExamStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901111341"
+}

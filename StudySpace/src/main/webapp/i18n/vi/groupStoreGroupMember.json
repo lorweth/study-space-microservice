@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "groupStoreGroupMember": {
+      "home": {
+        "title": "Group Members",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Thêm mới một Group Member",
+        "createOrEditLabel": "Thêm mới hoặc cập nhật Group Member",
+        "notFound": "No Group Members found"
+      },
+      "delete": {
+        "question": "Bạn có chắc là muốn xóa Group Member {{ id }}?"
+      },
+      "detail": {
+        "title": "Group Member"
+      },
+      "id": "ID",
+      "userLogin": "User Login",
+      "role": "Role",
+      "group": "Group"
+    }
+  },
+  "groupStoreApp": {
+    "groupStoreGroupMember": {
+      "created": "Một Group Member mới được tạo với định danh {{ param }}",
+      "updated": "Một Group Member cập nhật với định danh {{ param }}",
+      "deleted": "Một Group Member đã xóa với định danh {{ param }}"
+    }
+  }
+}

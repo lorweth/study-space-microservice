@@ -1,0 +1,36 @@
+{
+  "name": "AnswerSheetItem",
+  "fields": [
+    {
+      "fieldName": "questionId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "answerId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "answerSheet",
+      "otherEntityRelationshipName": "answerSheetItem",
+      "relationshipName": "answerSheet"
+    }
+  ],
+  "entityTableName": "answer_sheet_item",
+  "dto": "mapstruct",
+  "pagination": "infinite-scroll",
+  "service": "serviceClass",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": ["StudySpace", "AnswerStore"],
+  "microserviceName": "AnswerStore",
+  "clientRootFolder": "AnswerStore",
+  "databaseType": "sql",
+  "changelogDate": "20210901110241"
+}

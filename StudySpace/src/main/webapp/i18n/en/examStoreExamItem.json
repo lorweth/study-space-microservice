@@ -1,0 +1,30 @@
+{
+  "studySpaceApp": {
+    "examStoreExamItem": {
+      "home": {
+        "title": "Exam Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Exam Item",
+        "createOrEditLabel": "Create or edit a Exam Item",
+        "notFound": "No Exam Items found"
+      },
+      "delete": {
+        "question": "Are you sure you want to delete Exam Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Exam Item"
+      },
+      "id": "ID",
+      "numOfQuestion": "Num Of Question",
+      "repo": "Repo",
+      "exam": "Exam"
+    }
+  },
+  "examStoreApp": {
+    "examStoreExamItem": {
+      "created": "A new Exam Item is created with identifier {{ param }}",
+      "updated": "A Exam Item is updated with identifier {{ param }}",
+      "deleted": "A Exam Item is deleted with identifier {{ param }}"
+    }
+  }
+}
