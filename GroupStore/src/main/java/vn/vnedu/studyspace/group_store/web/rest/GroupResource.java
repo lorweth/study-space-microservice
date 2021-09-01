@@ -21,8 +21,12 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.group_store.repository.GroupRepository;
+import vn.vnedu.studyspace.group_store.security.SecurityUtils;
+import vn.vnedu.studyspace.group_store.service.GroupMemberService;
 import vn.vnedu.studyspace.group_store.service.GroupService;
+import vn.vnedu.studyspace.group_store.service.KafkaService;
 import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
+import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -43,9 +47,15 @@ public class GroupResource {
 
     private final GroupRepository groupRepository;
 
-    public GroupResource(GroupService groupService, GroupRepository groupRepository) {
+    private final GroupMemberService groupMemberService;
+
+    private final KafkaService kafkaService;
+
+    public GroupResource(GroupService groupService, GroupRepository groupRepository, GroupMemberService groupMemberService, KafkaService kafkaService) {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
+        this.groupMemberService = groupMemberService;
+        this.kafkaService = kafkaService;
     }
 
     /**
@@ -58,10 +68,18 @@ public class GroupResource {
     @PostMapping("/groups")
     public ResponseEntity<GroupDTO> createGroup(@Valid @RequestBody GroupDTO groupDTO) throws URISyntaxException {
         log.debug("REST request to save Group : {}", groupDTO);
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if(currentUserLogin == null) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
         if (groupDTO.getId() != null) {
             throw new BadRequestAlertException("A new group cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         GroupDTO result = groupService.save(groupDTO);
+        GroupMemberDTO groupMemberDTO = groupMemberService.saveAdmin(result, currentUserLogin);
+        kafkaService.sendGroupMember(groupMemberDTO);
+
         return ResponseEntity
             .created(new URI("/api/groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))

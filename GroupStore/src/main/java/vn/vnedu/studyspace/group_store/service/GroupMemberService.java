@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.vnedu.studyspace.group_store.domain.GroupMember;
 import vn.vnedu.studyspace.group_store.repository.GroupMemberRepository;
+import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.service.mapper.GroupMemberMapper;
 
@@ -28,6 +29,22 @@ public class GroupMemberService {
     public GroupMemberService(GroupMemberRepository groupMemberRepository, GroupMemberMapper groupMemberMapper) {
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberMapper = groupMemberMapper;
+    }
+
+    /**
+     * Save a groupMember as admin for group.
+     *
+     * @param groupDTO this dto contain group
+     * @param userLogin string contain user login
+     * @return the persisted entity.
+     */
+    public GroupMemberDTO saveAdmin(GroupDTO groupDTO, String userLogin) {
+        log.debug("Request to set admin for group: {}", groupDTO);
+        GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
+        groupMemberDTO.setGroup(groupDTO);
+        groupMemberDTO.setUserLogin(userLogin);
+        groupMemberDTO.setRole(2);
+        return save(groupMemberDTO);
     }
 
     /**

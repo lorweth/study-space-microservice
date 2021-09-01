@@ -11,4 +11,5 @@ import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 public interface GroupMemberMapper extends EntityMapper<GroupMemberDTO, GroupMember> {
     @Mapping(target = "group", source = "group", qualifiedByName = "id")
     GroupMemberDTO toDto(GroupMember s);
+
 }
