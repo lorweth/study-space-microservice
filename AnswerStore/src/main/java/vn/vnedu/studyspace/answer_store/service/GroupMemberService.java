@@ -44,6 +44,17 @@ public class GroupMemberService {
     }
 
     /**
+     * Insert a groupMember.
+     *
+     * @param groupMemberDTO the entity to insert.
+     * @return the persisted entity.
+     */
+    public Mono<GroupMemberDTO> insert(GroupMemberDTO groupMemberDTO) {
+        log.debug("Request to insert GroupMember : {}", groupMemberDTO);
+        return groupMemberRepository.insert(groupMemberMapper.toEntity(groupMemberDTO)).map(groupMemberMapper::toDto);
+    }
+
+    /**
      * Partially update a groupMember.
      *
      * @param groupMemberDTO the entity to update partially.
