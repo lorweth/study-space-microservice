@@ -58,8 +58,13 @@ public class KafkaConsumerService {
                 record -> {
                     try {
                         GroupMemberDTO groupMemberDTO = objectMapper.readValue(record, GroupMemberDTO.class);
-                        log.debug("Complete convert object: {}", groupMemberDTO);
-                        return groupMemberService.insert(groupMemberDTO);
+                        return groupMemberService
+                            .existById(groupMemberDTO.getId())
+                            .flatMap(exists -> {
+                                if(exists)
+                                    return groupMemberService.save(groupMemberDTO);
+                                return groupMemberService.insert(groupMemberDTO);
+                            });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }

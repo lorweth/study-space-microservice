@@ -78,14 +78,14 @@ public class GroupResource {
 
         GroupDTO result = groupService.save(groupDTO);
         GroupMemberDTO groupMemberDTO = groupMemberService.saveAdmin(result, currentUserLogin);
-        kafkaService.sendGroupMember(groupMemberDTO);
+        kafkaService.storeGroupMember(groupMemberDTO); // Save current user as admin of group in all microservice.
 
         return ResponseEntity
             .created(new URI("/api/groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
-
+    
     /**
      * {@code PUT  /groups/:id} : Updates an existing group.
      *
@@ -192,7 +192,14 @@ public class GroupResource {
     @DeleteMapping("/groups/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
         log.debug("REST request to delete Group : {}", id);
-        groupService.delete(id);
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
+        }
+        if(groupMemberService.isAdmin(currentUserLogin.get(), id)) {
+            groupService.delete(id);
+            kafkaService.deleteGroupMember(id);
+        }
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

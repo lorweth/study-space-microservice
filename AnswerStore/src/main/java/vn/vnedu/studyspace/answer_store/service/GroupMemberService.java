@@ -32,6 +32,11 @@ public class GroupMemberService {
         this.groupMemberMapper = groupMemberMapper;
     }
 
+    public Mono<Boolean> existById(Long groupMemberId) {
+        log.debug("Request to check exists GroupMember: {}", groupMemberId);
+        return groupMemberRepository.existsById(groupMemberId);
+    }
+
     /**
      * Save a groupMember.
      *

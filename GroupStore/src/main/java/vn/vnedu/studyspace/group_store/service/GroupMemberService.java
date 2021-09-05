@@ -12,6 +12,7 @@ import vn.vnedu.studyspace.group_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.service.mapper.GroupMemberMapper;
+import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
 /**
  * Service Implementation for managing {@link GroupMember}.
@@ -39,12 +40,37 @@ public class GroupMemberService {
      * @return the persisted entity.
      */
     public GroupMemberDTO saveAdmin(GroupDTO groupDTO, String userLogin) {
-        log.debug("Request to set admin for group: {}", groupDTO);
-        GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
-        groupMemberDTO.setGroup(groupDTO);
-        groupMemberDTO.setUserLogin(userLogin);
-        groupMemberDTO.setRole(2);
-        return save(groupMemberDTO);
+        return saveUserAs(groupDTO, userLogin, 2);
+    }
+
+    /**
+     * Save a groupMember as user for group.
+     *
+     * @param groupDTO this dto of group.
+     * @param userLogin name of user.
+     * @return the persisted entity.
+     */
+    public GroupMemberDTO saveMember(GroupDTO groupDTO, String userLogin) {
+        return saveUserAs(groupDTO, userLogin, 1);
+    }
+
+    /**
+     * Save a groupMember as waiting member for group.
+     *
+     * @param groupDTO this dto of group.
+     * @param userLogin name of user.
+     * @return the persisted entity.
+     */
+    public GroupMemberDTO saveWaitingMember(GroupDTO groupDTO, String userLogin) {
+        return saveUserAs(groupDTO, userLogin, 0);
+    }
+
+    public GroupMemberDTO saveUserAs(GroupDTO groupDTO, String userLogin, Integer role) {
+       GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
+       groupMemberDTO.setGroup(groupDTO);
+       groupMemberDTO.setUserLogin(userLogin);
+       groupMemberDTO.setRole(role);
+       return save(groupMemberDTO);
     }
 
     /**
@@ -58,6 +84,32 @@ public class GroupMemberService {
         GroupMember groupMember = groupMemberMapper.toEntity(groupMemberDTO);
         groupMember = groupMemberRepository.save(groupMember);
         return groupMemberMapper.toDto(groupMember);
+    }
+
+    /**
+     * Check if the user is admin of the group.
+     *
+     * @param userLogin the user login.
+     * @param groupId id of the group.
+     * @return the boolean.
+     */
+    public Boolean isAdmin(String userLogin, Long groupId) {
+        return checkRole(userLogin, groupId) == 2;
+    }
+
+    /**
+     * Get role of user for the group.
+     *
+     * @param userLogin user login.
+     * @param groupId id of the group.
+     * @return the persisted entity.
+     */
+    public Integer checkRole(String userLogin, Long groupId) {
+        Optional<GroupMember> groupMember = groupMemberRepository.findByUserLoginAndGroup_Id(userLogin, groupId);
+        if(groupMember.isEmpty()){
+            throw new BadRequestAlertException("user is not member of this group", "GroupMember", "userIsNotMemberOfTheGroup");
+        }
+        return groupMember.get().getRole();
     }
 
     /**

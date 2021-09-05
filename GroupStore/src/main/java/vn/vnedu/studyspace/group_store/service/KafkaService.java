@@ -20,7 +20,9 @@ public class KafkaService {
 
     private final Logger log = LoggerFactory.getLogger(KafkaService.class);
 
-    public static final String GROUP_USER_CREATE_TOPIC = "GROUP_STORE.GROUP_USER.SAVE"; //<application name>.<dataset name>.<event>
+    public static final String CREATE_TOPIC = "GROUP_STORE.GROUP_USER.SAVE"; //<application name>.<dataset name>.<event>
+
+    public static final String DELETE_TOPIC = "GROUP_STORE.GROUP_USER.DELETE";
 
     private final KafkaProperties kafkaProperties;
 
@@ -40,15 +42,26 @@ public class KafkaService {
         log.info("Kafka producer initialized");
     }
 
-    public void sendGroupMember(GroupMemberDTO groupMemberDTO) {
+    public void storeGroupMember(GroupMemberDTO groupMemberDTO) {
         try {
             GroupMemberKafkaDTO groupMemberKafkaDTO = new GroupMemberKafkaDTO(groupMemberDTO);
             String message = objectMapper.writeValueAsString(groupMemberKafkaDTO);
-            ProducerRecord<String, String> record = new ProducerRecord<>(GROUP_USER_CREATE_TOPIC, message);
+            ProducerRecord<String, String> record = new ProducerRecord<>(CREATE_TOPIC, message);
             kafkaProducer.send(record);
         }
         catch (JsonProcessingException e) {
             log.error("Could not send group member data with error: ", e);
+            throw new KafkaServiceException(e);
+        }
+    }
+
+    public void deleteGroupMember(Long groupMemberId) {
+        try {
+            String message = objectMapper.writeValueAsString(groupMemberId);
+            ProducerRecord<String, String> record = new ProducerRecord<>(DELETE_TOPIC, message);
+            kafkaProducer.send(record);
+        }catch (JsonProcessingException e) {
+            log.error("Could not delete group member data with error: ", e);
             throw new KafkaServiceException(e);
         }
     }
