@@ -114,6 +114,15 @@ public class GroupResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()){
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
+        }
+
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)){
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         GroupDTO result = groupService.save(groupDTO);
         return ResponseEntity
             .ok()
@@ -132,30 +141,30 @@ public class GroupResource {
      * or with status {@code 500 (Internal Server Error)} if the groupDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/groups/{id}", consumes = "application/merge-patch+json")
-    public ResponseEntity<GroupDTO> partialUpdateGroup(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody GroupDTO groupDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Group partially : {}, {}", id, groupDTO);
-        if (groupDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, groupDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!groupRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<GroupDTO> result = groupService.partialUpdate(groupDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupDTO.getId().toString())
-        );
-    }
+//    @PatchMapping(value = "/groups/{id}", consumes = "application/merge-patch+json")
+//    public ResponseEntity<GroupDTO> partialUpdateGroup(
+//        @PathVariable(value = "id", required = false) final Long id,
+//        @NotNull @RequestBody GroupDTO groupDTO
+//    ) throws URISyntaxException {
+//        log.debug("REST request to partial update Group partially : {}, {}", id, groupDTO);
+//        if (groupDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        if (!Objects.equals(id, groupDTO.getId())) {
+//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+//        }
+//
+//        if (!groupRepository.existsById(id)) {
+//            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+//        }
+//
+//        Optional<GroupDTO> result = groupService.partialUpdate(groupDTO);
+//
+//        return ResponseUtil.wrapOrNotFound(
+//            result,
+//            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupDTO.getId().toString())
+//        );
+//    }
 
     /**
      * {@code GET  /groups} : get all the groups.
@@ -197,7 +206,7 @@ public class GroupResource {
         if(currentUserLogin.isEmpty()) {
             throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)) { // lack of condition or function remove all groupMember
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)) {
             groupService.delete(id);
         }
         return ResponseEntity
