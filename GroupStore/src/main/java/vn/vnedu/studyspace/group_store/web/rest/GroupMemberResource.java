@@ -81,6 +81,7 @@ public class GroupMemberResource {
             throw new BadRequestAlertException("User is member of the group", ENTITY_NAME, "userIsMemberOfGroup");
         }
         GroupMemberDTO groupMemberDTO = groupMemberService.saveWaitingMember(groupDTO.get(), currentUserLogin.get());
+        // send message update groupMember to other microservice.
         kafkaService.storeGroupMember(groupMemberDTO);
         return ResponseEntity
             .created(new URI("/api/group-members" + groupMemberDTO.getId()))
@@ -125,7 +126,8 @@ public class GroupMemberResource {
         }
 
         GroupMemberDTO result = groupMemberService.save(groupMemberDTO);
-        kafkaService.storeGroupMember(result); // gui tin nhan cap nhat lai
+        // send message update groupMember to other microservices.
+        kafkaService.storeGroupMember(result);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupMemberDTO.getId().toString()))
@@ -160,8 +162,19 @@ public class GroupMemberResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<GroupMemberDTO> result = groupMemberService.partialUpdate(groupMemberDTO);
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()){
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
+        }
 
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        Optional<GroupMemberDTO> result = groupMemberService.partialUpdate(groupMemberDTO);
+        // Send message to update groupMember in other microservices.
+        result.ifPresent(kafkaService::storeGroupMember);
+        
         return ResponseUtil.wrapOrNotFound(
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupMemberDTO.getId().toString())
@@ -236,6 +249,7 @@ public class GroupMemberResource {
         }
 
         groupMemberService.delete(id);
+        // send message delete groupMember in other microservice
         kafkaService.deleteGroupMember(id);
 
         return ResponseEntity
