@@ -174,7 +174,7 @@ public class GroupMemberResource {
         Optional<GroupMemberDTO> result = groupMemberService.partialUpdate(groupMemberDTO);
         // Send message to update groupMember in other microservices.
         result.ifPresent(kafkaService::storeGroupMember);
-        
+
         return ResponseUtil.wrapOrNotFound(
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupMemberDTO.getId().toString())
@@ -244,7 +244,7 @@ public class GroupMemberResource {
             throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
 
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) { // or  not current user, A user may not want to join a group anymore
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) { // or not current user, A user may not want to join a group anymore
             throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
         }
 
