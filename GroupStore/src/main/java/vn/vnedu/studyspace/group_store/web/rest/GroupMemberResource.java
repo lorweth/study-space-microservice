@@ -233,7 +233,7 @@ public class GroupMemberResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/group-members/{id}")
-    public ResponseEntity<Void> deleteGroupMember(@PathVariable Long id, @Valid @RequestBody GroupMemberDTO groupMemberDTO) {
+    public ResponseEntity<Void> deleteGroupMember(@PathVariable Long id, @RequestBody GroupMemberDTO groupMemberDTO){
         log.debug("REST request to delete GroupMember : {}", id);
         if(!id.equals(groupMemberDTO.getId())) {
             throw new BadRequestAlertException("Id not invalid", ENTITY_NAME, "idNotInvalid");
