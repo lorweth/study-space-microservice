@@ -83,7 +83,7 @@ public class GroupMemberResource {
         GroupMemberDTO groupMemberDTO = groupMemberService.saveWaitingMember(groupDTO.get(), currentUserLogin.get());
         kafkaService.storeGroupMember(groupMemberDTO);
         return ResponseEntity
-            .created(new URI("/api/groups/{group-id}/join"))
+            .created(new URI("/api/group-members" + groupMemberDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "GroupMember", groupMemberDTO.getId().toString()))
             .body(groupMemberDTO);
     }
@@ -196,6 +196,24 @@ public class GroupMemberResource {
     }
 
     /**
+     * {@code GET /groups/:group-id/group-members} : get all member of "group-id" group.
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of groupMembers in body.
+     */
+    @GetMapping("/groups/{group-id}/group-members/")
+    public ResponseEntity<List<GroupMemberDTO>> getAllMemberOfGroup(@PathVariable("group-id") Long groupId, Pageable pageable) {
+        log.debug("REST request get all member of group: {}", groupId);
+        Page<GroupMemberDTO> page = groupMemberService.findAllByGroupId(groupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity
+            .ok()
+            .headers(headers)
+            .body(page.getContent());
+    }
+
+    /**
      * {@code DELETE  /group-members/:id} : delete the "id" groupMember.
      *
      * @param id the id of the groupMemberDTO to delete.
@@ -213,7 +231,7 @@ public class GroupMemberResource {
             throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
 
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) {
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) { // or  not current user, A user may not want to join a group anymore
             throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
         }
 

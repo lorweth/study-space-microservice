@@ -1,5 +1,7 @@
 package vn.vnedu.studyspace.group_store.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import vn.vnedu.studyspace.group_store.domain.GroupMember;
@@ -17,5 +19,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     Optional<GroupMember> findByUserLoginAndGroup_Id(String userLogin, Long id);
 
-    List<GroupMember> findByGroup_Id(Long id);
+    Page<GroupMember> findByGroup_Id(Long id, Pageable pageable);
 }

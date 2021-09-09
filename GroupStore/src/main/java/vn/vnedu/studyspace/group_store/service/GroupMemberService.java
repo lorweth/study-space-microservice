@@ -156,13 +156,11 @@ public class GroupMemberService {
      * @return the list of entities.
      */
     @Transactional(readOnly = true)
-    public List<GroupMemberDTO> findAllByGroupId(Long groupId) {
+    public Page<GroupMemberDTO> findAllByGroupId(Long groupId, Pageable pageable) {
         log.debug("Request to get all GroupMembers by GroupID: {}", groupId);
         return groupMemberRepository
-            .findByGroup_Id(groupId)
-            .stream()
-            .map(groupMemberMapper::toDto)
-            .collect(Collectors.toList());
+            .findByGroup_Id(groupId, pageable)
+            .map(groupMemberMapper::toDto);
     }
 
     /**
