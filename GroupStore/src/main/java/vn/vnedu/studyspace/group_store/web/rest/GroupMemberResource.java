@@ -21,7 +21,11 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.group_store.repository.GroupMemberRepository;
+import vn.vnedu.studyspace.group_store.security.SecurityUtils;
 import vn.vnedu.studyspace.group_store.service.GroupMemberService;
+import vn.vnedu.studyspace.group_store.service.GroupService;
+import vn.vnedu.studyspace.group_store.service.KafkaService;
+import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
@@ -43,29 +47,45 @@ public class GroupMemberResource {
 
     private final GroupMemberRepository groupMemberRepository;
 
-    public GroupMemberResource(GroupMemberService groupMemberService, GroupMemberRepository groupMemberRepository) {
+    private final GroupService groupService;
+
+    private final KafkaService kafkaService;
+
+    public GroupMemberResource(GroupMemberService groupMemberService, GroupMemberRepository groupMemberRepository, GroupService groupService, KafkaService kafkaService) {
         this.groupMemberService = groupMemberService;
         this.groupMemberRepository = groupMemberRepository;
+        this.groupService = groupService;
+        this.kafkaService = kafkaService;
     }
 
     /**
-     * {@code POST  /group-members} : Create a new groupMember.
+     * {@code POST /groups/:group-id/group-members} : Create new GroupMember waiting member.
      *
-     * @param groupMemberDTO the groupMemberDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new groupMemberDTO, or with status {@code 400 (Bad Request)} if the groupMember has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     * @param groupId id of the group want to join.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new groupDTO, or with status {@code 400 (Bad Request)} if the group has already an ID.
+     * @throws URISyntaxException of the Location URI syntax is incorrect.
      */
-    @PostMapping("/group-members")
-    public ResponseEntity<GroupMemberDTO> createGroupMember(@Valid @RequestBody GroupMemberDTO groupMemberDTO) throws URISyntaxException {
-        log.debug("REST request to save GroupMember : {}", groupMemberDTO);
-        if (groupMemberDTO.getId() != null) {
-            throw new BadRequestAlertException("A new groupMember cannot already have an ID", ENTITY_NAME, "idexists");
+    @PostMapping("/groups/{group-id}/group-members")
+    public ResponseEntity<GroupMemberDTO> joinGroup(@PathVariable("group-id") Long groupId) throws URISyntaxException {
+        log.debug("REST request to join group");
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
-        GroupMemberDTO result = groupMemberService.save(groupMemberDTO);
+        Optional<GroupDTO> groupDTO = groupService.findOne(groupId);
+        if(groupDTO.isEmpty()){
+            throw new BadRequestAlertException("Group is not available", ENTITY_NAME, "groupIsNotAvailable");
+        }
+        Integer roleOfUser = groupMemberService.checkRole(currentUserLogin.get(), groupId);
+        if(roleOfUser != -1){
+            throw new BadRequestAlertException("User is member of the group", ENTITY_NAME, "userIsMemberOfGroup");
+        }
+        GroupMemberDTO groupMemberDTO = groupMemberService.saveWaitingMember(groupDTO.get(), currentUserLogin.get());
+        kafkaService.storeGroupMember(groupMemberDTO);
         return ResponseEntity
-            .created(new URI("/api/group-members/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+            .created(new URI("/api/groups/{group-id}/join"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "GroupMember", groupMemberDTO.getId().toString()))
+            .body(groupMemberDTO);
     }
 
     /**
@@ -95,7 +115,17 @@ public class GroupMemberResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
+        }
+
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         GroupMemberDTO result = groupMemberService.save(groupMemberDTO);
+        kafkaService.storeGroupMember(result); // gui tin nhan cap nhat lai
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupMemberDTO.getId().toString()))
@@ -172,9 +202,24 @@ public class GroupMemberResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/group-members/{id}")
-    public ResponseEntity<Void> deleteGroupMember(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteGroupMember(@PathVariable Long id, @Valid @RequestBody GroupMemberDTO groupMemberDTO) {
         log.debug("REST request to delete GroupMember : {}", id);
+        if(!id.equals(groupMemberDTO.getId())) {
+            throw new BadRequestAlertException("Id not invalid", ENTITY_NAME, "idNotInvalid");
+        }
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
+        }
+
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         groupMemberService.delete(id);
+        kafkaService.deleteGroupMember(id);
+
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

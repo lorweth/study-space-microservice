@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.vnedu.studyspace.group_store.domain.GroupMember;
 import vn.vnedu.studyspace.group_store.repository.GroupRepository;
 import vn.vnedu.studyspace.group_store.security.SecurityUtils;
 import vn.vnedu.studyspace.group_store.service.GroupMemberService;
@@ -85,7 +86,7 @@ public class GroupResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
-    
+
     /**
      * {@code PUT  /groups/:id} : Updates an existing group.
      *
@@ -196,9 +197,8 @@ public class GroupResource {
         if(currentUserLogin.isEmpty()) {
             throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
-        if(groupMemberService.isAdmin(currentUserLogin.get(), id)) {
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)) { // lack of condition or function remove all groupMember
             groupService.delete(id);
-            kafkaService.deleteGroupMember(id);
         }
         return ResponseEntity
             .noContent()

@@ -1,6 +1,9 @@
 package vn.vnedu.studyspace.group_store.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -102,12 +105,12 @@ public class GroupMemberService {
      *
      * @param userLogin user login.
      * @param groupId id of the group.
-     * @return the persisted entity.
+     * @return the number of role, -1 is not exists entity.
      */
     public Integer checkRole(String userLogin, Long groupId) {
         Optional<GroupMember> groupMember = groupMemberRepository.findByUserLoginAndGroup_Id(userLogin, groupId);
         if(groupMember.isEmpty()){
-            throw new BadRequestAlertException("user is not member of this group", "GroupMember", "userIsNotMemberOfTheGroup");
+            return -1; // Khong co quyen
         }
         return groupMember.get().getRole();
     }
@@ -144,6 +147,22 @@ public class GroupMemberService {
     public Page<GroupMemberDTO> findAll(Pageable pageable) {
         log.debug("Request to get all GroupMembers");
         return groupMemberRepository.findAll(pageable).map(groupMemberMapper::toDto);
+    }
+
+    /**
+     * find all entity by groupId.
+     *
+     * @param groupId the id of group relation with entity.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<GroupMemberDTO> findAllByGroupId(Long groupId) {
+        log.debug("Request to get all GroupMembers by GroupID: {}", groupId);
+        return groupMemberRepository
+            .findByGroup_Id(groupId)
+            .stream()
+            .map(groupMemberMapper::toDto)
+            .collect(Collectors.toList());
     }
 
     /**
