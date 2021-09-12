@@ -180,11 +180,15 @@ relationship ManyToOne {
   
   Question{repo} to QuestionGroup
   
-  Option{question} to Question
+  // Option{question} to Question
   
   ExamItem{repo} to QuestionGroup
 
   ExamItem{exam} to Exam
+}
+
+relationship OneToMany {
+  Question{options} to Option{question}
 }
 
 service * with serviceClass
