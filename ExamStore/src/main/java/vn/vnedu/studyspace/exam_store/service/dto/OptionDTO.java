@@ -1,5 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Lob;
@@ -18,6 +20,7 @@ public class OptionDTO implements Serializable {
     @NotNull
     private Boolean isCorrect;
 
+    @JsonIgnoreProperties(value = { "options", "repo" }, allowSetters = true)
     private QuestionDTO question;
 
     public Long getId() {

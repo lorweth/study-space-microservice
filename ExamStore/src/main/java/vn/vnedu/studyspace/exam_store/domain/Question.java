@@ -2,6 +2,8 @@ package vn.vnedu.studyspace.exam_store.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
@@ -28,6 +30,11 @@ public class Question implements Serializable {
     @Lob
     @Column(name = "note")
     private String note;
+
+    @OneToMany(mappedBy = "question")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
+    private Set<Option> options = new HashSet<>();
 
     @ManyToOne
     @JsonIgnoreProperties(value = { "topic" }, allowSetters = true)
@@ -71,6 +78,37 @@ public class Question implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Set<Option> getOptions() {
+        return this.options;
+    }
+
+    public Question options(Set<Option> options) {
+        this.setOptions(options);
+        return this;
+    }
+
+    public Question addOptions(Option option) {
+        this.options.add(option);
+        option.setQuestion(this);
+        return this;
+    }
+
+    public Question removeOptions(Option option) {
+        this.options.remove(option);
+        option.setQuestion(null);
+        return this;
+    }
+
+    public void setOptions(Set<Option> options) {
+        if (this.options != null) {
+            this.options.forEach(i -> i.setQuestion(null));
+        }
+        if (options != null) {
+            options.forEach(i -> i.setQuestion(this));
+        }
+        this.options = options;
     }
 
     public QuestionGroup getRepo() {

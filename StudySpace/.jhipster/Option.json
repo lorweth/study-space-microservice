@@ -17,7 +17,7 @@
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "question",
-      "otherEntityRelationshipName": "option",
+      "otherEntityRelationshipName": "options",
       "relationshipName": "question"
     }
   ],

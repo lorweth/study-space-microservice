@@ -4,6 +4,8 @@ import org.mapstruct.*;
 import vn.vnedu.studyspace.exam_store.domain.*;
 import vn.vnedu.studyspace.exam_store.service.dto.OptionDTO;
 
+import java.util.Set;
+
 /**
  * Mapper for the entity {@link Option} and its DTO {@link OptionDTO}.
  */
@@ -11,4 +13,9 @@ import vn.vnedu.studyspace.exam_store.service.dto.OptionDTO;
 public interface OptionMapper extends EntityMapper<OptionDTO, Option> {
     @Mapping(target = "question", source = "question", qualifiedByName = "id")
     OptionDTO toDto(Option s);
+
+    @Mapping(target = "question", source = "question", qualifiedByName = "entityId")
+    Option toEntity(OptionDTO d);
+
+    Set<OptionDTO> toSetDTO(Set<Option> set);
 }

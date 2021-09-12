@@ -1,7 +1,13 @@
 package vn.vnedu.studyspace.exam_store.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import vn.vnedu.studyspace.exam_store.domain.Option;
+import vn.vnedu.studyspace.exam_store.domain.Question;
+
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.Lob;
 import javax.validation.constraints.*;
 
@@ -17,6 +23,9 @@ public class QuestionDTO implements Serializable {
 
     @Lob
     private String note;
+
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
+    private Set<OptionDTO> options = new HashSet<>();
 
     private QuestionGroupDTO repo;
 
@@ -42,6 +51,37 @@ public class QuestionDTO implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Set<OptionDTO> getOptions() {
+        return this.options;
+    }
+
+    public QuestionDTO options(Set<OptionDTO> options) {
+        this.setOptions(options);
+        return this;
+    }
+
+    public QuestionDTO addOptions(OptionDTO option) {
+        this.options.add(option);
+        option.setQuestion(this);
+        return this;
+    }
+
+    public QuestionDTO removeOptions(OptionDTO option) {
+        this.options.remove(option);
+        option.setQuestion(null);
+        return this;
+    }
+
+    public void setOptions(Set<OptionDTO> options) {
+        if (this.options != null) {
+            this.options.forEach(i -> i.setQuestion(null));
+        }
+        if (options != null) {
+            options.forEach(i -> i.setQuestion(this));
+        }
+        this.options = options;
     }
 
     public QuestionGroupDTO getRepo() {

@@ -30,7 +30,7 @@ public class Option implements Serializable {
     private Boolean isCorrect;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "repo" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "options", "repo" }, allowSetters = true)
     private Question question;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
