@@ -4,9 +4,12 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import vn.vnedu.studyspace.group_store.domain.Group;
 
+import java.util.List;
+
 /**
  * Spring Data SQL repository for the Group entity.
  */
 @SuppressWarnings("unused")
 @Repository
-public interface GroupRepository extends JpaRepository<Group, Long> {}
+public interface GroupRepository extends JpaRepository<Group, Long> {
+    List<Group> findByNameContainingIgnoreCase(String name);}

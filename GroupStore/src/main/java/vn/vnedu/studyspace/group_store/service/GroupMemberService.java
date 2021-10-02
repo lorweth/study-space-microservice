@@ -10,10 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.group_store.domain.Group;
 import vn.vnedu.studyspace.group_store.domain.GroupMember;
 import vn.vnedu.studyspace.group_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
+import vn.vnedu.studyspace.group_store.service.mapper.GroupMapper;
 import vn.vnedu.studyspace.group_store.service.mapper.GroupMemberMapper;
 import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
@@ -30,9 +32,12 @@ public class GroupMemberService {
 
     private final GroupMemberMapper groupMemberMapper;
 
-    public GroupMemberService(GroupMemberRepository groupMemberRepository, GroupMemberMapper groupMemberMapper) {
+    private final GroupMapper groupMapper;
+
+    public GroupMemberService(GroupMemberRepository groupMemberRepository, GroupMemberMapper groupMemberMapper, GroupMapper groupMapper) {
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberMapper = groupMemberMapper;
+        this.groupMapper = groupMapper;
     }
 
     /**
@@ -161,6 +166,17 @@ public class GroupMemberService {
         return groupMemberRepository
             .findByGroup_Id(groupId, pageable)
             .map(groupMemberMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupMemberDTO> findByGroupAndUserLoginContainingIgnoreCase(GroupDTO groupDTO, String userLogin) {
+        log.debug("Request to get all GroupMembers by group: {} and user: {}", groupDTO, userLogin);
+        Group selectedGroup = groupMapper.toEntity(groupDTO);
+        return groupMemberRepository
+            .findByGroupAndUserLoginContainingIgnoreCase(selectedGroup, userLogin)
+            .stream()
+            .map(groupMemberMapper::toDto)
+            .collect(Collectors.toList());
     }
 
     /**

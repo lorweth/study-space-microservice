@@ -1,6 +1,9 @@
 package vn.vnedu.studyspace.group_store.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -75,6 +78,21 @@ public class GroupService {
     public Page<GroupDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Groups");
         return groupRepository.findAll(pageable).map(groupMapper::toDto);
+    }
+
+    /**
+     * Get all groups whose names contain.
+     * @param name full-name or a part of the name of the group.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<GroupDTO> findByNameContainingIgnoreCase(String name) {
+        log.debug("Request to get all Groups whose names contain");
+        return groupRepository
+            .findByNameContainingIgnoreCase(name)
+            .stream()
+            .map(groupMapper::toDto)
+            .collect(Collectors.toList());
     }
 
     /**

@@ -59,13 +59,13 @@ public class GroupMemberResource {
     }
 
     /**
-     * {@code POST /groups/:group-id/group-members} : Create new GroupMember waiting member.
+     * {@code POST group-members/group-id/:groupId} : Create new member for group "groupId" by current user.
      *
-     * @param groupId id of the group want to join.
+     * @param groupId the id of the group.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new groupDTO, or with status {@code 400 (Bad Request)} if the group has already an ID.
      * @throws URISyntaxException of the Location URI syntax is incorrect.
      */
-    @PostMapping("/groups/{group-id}/group-members")
+    @PostMapping("group-members/group-id/{group-id}")
     public ResponseEntity<GroupMemberDTO> joinGroup(@PathVariable("group-id") Long groupId) throws URISyntaxException {
         log.debug("REST request to join group");
         Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
@@ -209,13 +209,13 @@ public class GroupMemberResource {
     }
 
     /**
-     * {@code GET /groups/:group-id/group-members} : get all member of "group-id" group.
+     * {@code GET /group-members/group-id/:group-id} : get all member of "group-id" group.
      *
      * @param groupId the id of the group.
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of groupMembers in body.
      */
-    @GetMapping("/groups/{group-id}/group-members/")
+    @GetMapping("group-members/group-id/{group-id}")
     public ResponseEntity<List<GroupMemberDTO>> getAllMemberOfGroup(@PathVariable("group-id") Long groupId, Pageable pageable) {
         log.debug("REST request get all member of group: {}", groupId);
         Page<GroupMemberDTO> page = groupMemberService.findAllByGroupId(groupId, pageable);
@@ -227,7 +227,27 @@ public class GroupMemberResource {
     }
 
     /**
-     * {@code DELETE  /group-members/:id} : delete the "id" groupMember.
+     * {@code GET group-members/group-id/{group-id}/username/{user-name}} : get all member by groupId and userLogin.
+     *
+     * @param groupId the id of the group.
+     * @param userName full of a part of userLogin.
+     * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of groupMembers in body.
+     */
+    @GetMapping("group-members/group-id/{group-id}/username/{user-name}")
+    public ResponseEntity<List<GroupMemberDTO>> getAllMemberByGroupIdAndUserLogin(@PathVariable("group-id") Long groupId, @PathVariable("user-name") String userName) {
+        log.debug("REST request get all member by groupId: {} and name: {}", groupId, userName);
+        Optional<GroupDTO> selectedGroup = groupService.findOne(groupId);
+        if(selectedGroup.isEmpty()){
+            throw new BadRequestAlertException("Group not found", ENTITY_NAME, "groupNotFound");
+        }
+        List<GroupMemberDTO> list = groupMemberService.findByGroupAndUserLoginContainingIgnoreCase(selectedGroup.get(), userName);
+        return ResponseEntity
+            .ok()
+            .body(list);
+    }
+
+    /**
+     * {@code DELETE /group-members/:id} : delete the "id" groupMember when current user "cancel join request" or admin "remove member".
      *
      * @param id the id of the groupMemberDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
@@ -238,19 +258,26 @@ public class GroupMemberResource {
         if(!id.equals(groupMemberDTO.getId())) {
             throw new BadRequestAlertException("Id not invalid", ENTITY_NAME, "idNotInvalid");
         }
-
+        // Request user logged in
         Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
         if(currentUserLogin.isEmpty()) {
             throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
         }
 
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) { // or not current user, A user may not want to join a group anymore
-            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        if(!groupMemberService.isAdmin(currentUserLogin.get(), groupMemberDTO.getGroup().getId())) {
+            if(currentUserLogin.get().equals(groupMemberDTO.getUserLogin())){
+                groupMemberService.delete(id);
+                // send message delete groupMember in other microservice
+                kafkaService.deleteGroupMember(id);
+            }
+            else {
+                throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+            }
+        } else {
+            groupMemberService.delete(id);
+            // send message delete groupMember in other microservice
+            kafkaService.deleteGroupMember(id);
         }
-
-        groupMemberService.delete(id);
-        // send message delete groupMember in other microservice
-        kafkaService.deleteGroupMember(id);
 
         return ResponseEntity
             .noContent()

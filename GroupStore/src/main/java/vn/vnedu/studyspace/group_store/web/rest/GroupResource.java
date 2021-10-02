@@ -194,6 +194,18 @@ public class GroupResource {
     }
 
     /**
+     * {@code GET /groups}: find all group contain "name" ignore case.
+     * @param name full-name of a part of the name of the group.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
+     */
+    @GetMapping("/groups/name/{name}")
+    public ResponseEntity<List<GroupDTO>> findGroupByName(@PathVariable String name) {
+        log.debug("REST request to find group by name: {}", name);
+        List<GroupDTO> list = groupService.findByNameContainingIgnoreCase(name);
+        return ResponseEntity.ok().body(list);
+    }
+
+    /**
      * {@code DELETE  /groups/:id} : delete the "id" group.
      *
      * @param id the id of the groupDTO to delete.
