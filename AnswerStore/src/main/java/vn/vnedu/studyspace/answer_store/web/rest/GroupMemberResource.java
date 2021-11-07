@@ -20,7 +20,6 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.reactive.ResponseUtil;
 import vn.vnedu.studyspace.answer_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.answer_store.service.GroupMemberService;
-import vn.vnedu.studyspace.answer_store.service.KafkaConsumerService;
 import vn.vnedu.studyspace.answer_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
 

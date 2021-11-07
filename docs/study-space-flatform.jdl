@@ -102,8 +102,8 @@ entity Topic {
 
 entity QuestionGroup {
     name String minlength(5) maxlength(255) required
-    groupId String
-    userLogin String required
+    groupId Long
+    userLogin String
 }
 
 entity Question {
@@ -133,7 +133,7 @@ entity GroupTimeTable {
 	examId Long required
     startAt Instant required
     endAt Instant required
-    groupId String required
+    groupId Long required
     note String
 }
 
