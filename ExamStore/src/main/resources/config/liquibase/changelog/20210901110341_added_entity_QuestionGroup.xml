@@ -17,11 +17,11 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="group_id" type="varchar(255)">
+            <column name="group_id" type="bigint">
                 <constraints nullable="true" />
             </column>
             <column name="user_login" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="true" />
             </column>
             <column name="topic_id" type="bigint">
                 <constraints nullable="true" />
@@ -47,7 +47,7 @@
                   tableName="question_group">
             <column name="id" type="numeric"/>
             <column name="name" type="string"/>
-            <column name="group_id" type="string"/>
+            <column name="group_id" type="numeric"/>
             <column name="user_login" type="string"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>

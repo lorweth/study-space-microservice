@@ -111,9 +111,9 @@ describe('GroupTimeTable e2e test', () => {
 
     cy.get(`[data-cy="endAt"]`).type('2021-09-01T00:47').should('have.value', '2021-09-01T00:47');
 
-    cy.get(`[data-cy="groupId"]`).type('Dam').should('have.value', 'Dam');
+    cy.get(`[data-cy="groupId"]`).type('3959').should('have.value', '3959');
 
-    cy.get(`[data-cy="note"]`).type('holistic Soft Wooden').should('have.value', 'holistic Soft Wooden');
+    cy.get(`[data-cy="note"]`).type('Gloves holistic').should('have.value', 'Gloves holistic');
 
     cy.get(entityCreateSaveButtonSelector).click({ force: true });
     cy.scrollTo('top', { ensureScrollable: false });

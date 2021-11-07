@@ -3,8 +3,8 @@ import { ITopic } from 'app/shared/model/ExamStore/topic.model';
 export interface IQuestionGroup {
   id?: number;
   name?: string;
-  groupId?: string | null;
-  userLogin?: string;
+  groupId?: number | null;
+  userLogin?: string | null;
   topic?: ITopic | null;
 }
 

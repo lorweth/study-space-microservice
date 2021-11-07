@@ -107,9 +107,9 @@ describe('QuestionGroup e2e test', () => {
 
     cy.get(`[data-cy="name"]`).type('bluetooth input').should('have.value', 'bluetooth input');
 
-    cy.get(`[data-cy="groupId"]`).type('mobile').should('have.value', 'mobile');
+    cy.get(`[data-cy="groupId"]`).type('16780').should('have.value', '16780');
 
-    cy.get(`[data-cy="userLogin"]`).type('Metal customized Strategist').should('have.value', 'Metal customized Strategist');
+    cy.get(`[data-cy="userLogin"]`).type('Account').should('have.value', 'Account');
 
     cy.setFieldSelectToLastOfEntity('topic');
 

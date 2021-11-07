@@ -17,6 +17,7 @@
       "id": "ID",
       "content": "Content",
       "note": "Note",
+      "options": "Options",
       "repo": "Repo"
     }
   },

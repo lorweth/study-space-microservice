@@ -113,9 +113,6 @@ export const QuestionGroupUpdate = (props: RouteComponentProps<{ id: string }>) 
                 name="userLogin"
                 data-cy="userLogin"
                 type="text"
-                validate={{
-                  required: { value: true, message: translate('entity.validation.required') },
-                }}
               />
               <ValidatedField
                 id="question-group-topic"

@@ -13,6 +13,8 @@ import vn.vnedu.studyspace.exam_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.exam_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.GroupMemberMapper;
 
+import javax.swing.*;
+
 /**
  * Service Implementation for managing {@link GroupMember}.
  */
@@ -29,6 +31,23 @@ public class GroupMemberService {
     public GroupMemberService(GroupMemberRepository groupMemberRepository, GroupMemberMapper groupMemberMapper) {
         this.groupMemberRepository = groupMemberRepository;
         this.groupMemberMapper = groupMemberMapper;
+    }
+
+    public Optional<GroupMemberDTO> findByGroupIdAndUserLogin(Long groupId, String userLogin) {
+        log.debug("Request to check exists user {} in group {}", userLogin, groupId);
+        return groupMemberRepository
+            .findByGroupIdAndUserLogin(groupId, userLogin)
+            .map(groupMemberMapper::toDto);
+    }
+
+    public Boolean isGroupAdmin(Long groupId, String userLogin) {
+        log.debug("Request to check {} is admin of {}", userLogin, groupId);
+        Optional<GroupMemberDTO> dtoOptional = findByGroupIdAndUserLogin(groupId, userLogin);
+        if(dtoOptional.isEmpty()) {
+            return false;
+        }
+        log.debug("Role of user: {}", dtoOptional.get().getRole());//
+        return dtoOptional.get().getRole() == 2;
     }
 
     /**

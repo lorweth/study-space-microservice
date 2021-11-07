@@ -5,7 +5,7 @@ export interface IGroupTimeTable {
   examId?: number;
   startAt?: string;
   endAt?: string;
-  groupId?: string;
+  groupId?: number;
   note?: string | null;
 }
 
