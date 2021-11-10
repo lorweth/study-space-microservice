@@ -35,8 +35,8 @@ class QuestionGroupResourceIT {
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
 
-    private static final String DEFAULT_GROUP_ID = "AAAAAAAAAA";
-    private static final String UPDATED_GROUP_ID = "BBBBBBBBBB";
+    private static final Long DEFAULT_GROUP_ID = 1L;
+    private static final Long UPDATED_GROUP_ID = 2L;
 
     private static final String DEFAULT_USER_LOGIN = "AAAAAAAAAA";
     private static final String UPDATED_USER_LOGIN = "BBBBBBBBBB";
@@ -161,29 +161,6 @@ class QuestionGroupResourceIT {
 
     @Test
     @Transactional
-    void checkUserLoginIsRequired() throws Exception {
-        int databaseSizeBeforeTest = questionGroupRepository.findAll().size();
-        // set the field null
-        questionGroup.setUserLogin(null);
-
-        // Create the QuestionGroup, which fails.
-        QuestionGroupDTO questionGroupDTO = questionGroupMapper.toDto(questionGroup);
-
-        restQuestionGroupMockMvc
-            .perform(
-                post(ENTITY_API_URL)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(questionGroupDTO))
-            )
-            .andExpect(status().isBadRequest());
-
-        List<QuestionGroup> questionGroupList = questionGroupRepository.findAll();
-        assertThat(questionGroupList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void getAllQuestionGroups() throws Exception {
         // Initialize the database
         questionGroupRepository.saveAndFlush(questionGroup);
@@ -195,7 +172,7 @@ class QuestionGroupResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(questionGroup.getId().intValue())))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
-            .andExpect(jsonPath("$.[*].groupId").value(hasItem(DEFAULT_GROUP_ID)))
+            .andExpect(jsonPath("$.[*].groupId").value(hasItem(DEFAULT_GROUP_ID.intValue())))
             .andExpect(jsonPath("$.[*].userLogin").value(hasItem(DEFAULT_USER_LOGIN)));
     }
 
@@ -212,7 +189,7 @@ class QuestionGroupResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(questionGroup.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
-            .andExpect(jsonPath("$.groupId").value(DEFAULT_GROUP_ID))
+            .andExpect(jsonPath("$.groupId").value(DEFAULT_GROUP_ID.intValue()))
             .andExpect(jsonPath("$.userLogin").value(DEFAULT_USER_LOGIN));
     }
 

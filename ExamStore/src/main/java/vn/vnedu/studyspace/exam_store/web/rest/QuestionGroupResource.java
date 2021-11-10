@@ -20,8 +20,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
 import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
+import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
 import vn.vnedu.studyspace.exam_store.service.QuestionGroupService;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
@@ -42,32 +44,77 @@ public class QuestionGroupResource {
 
     private final QuestionGroupService questionGroupService;
 
+    private final GroupMemberService groupMemberService;
+
     private final QuestionGroupRepository questionGroupRepository;
 
-    public QuestionGroupResource(QuestionGroupService questionGroupService, QuestionGroupRepository questionGroupRepository) {
+    public QuestionGroupResource(QuestionGroupService questionGroupService, QuestionGroupRepository questionGroupRepository, GroupMemberService groupMemberService) {
         this.questionGroupService = questionGroupService;
         this.questionGroupRepository = questionGroupRepository;
+        this.groupMemberService = groupMemberService;
     }
 
     /**
-     * {@code POST  /question-groups} : Create a new questionGroup.
+     * {@code POST  /question-groups} : Create a new questionGroup for current user login.
      *
      * @param questionGroupDTO the questionGroupDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID or if user not logged in.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/question-groups")
     public ResponseEntity<QuestionGroupDTO> createQuestionGroup(@Valid @RequestBody QuestionGroupDTO questionGroupDTO)
         throws URISyntaxException {
         log.debug("REST request to save QuestionGroup : {}", questionGroupDTO);
-        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
-        if(currentUserLogin.isEmpty()){
-            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
-        }
-
         if (questionGroupDTO.getId() != null) {
             throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
+        // Check current user
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        // set user login for question groups
+        questionGroupDTO.setUserLogin(currentUserLoginOptional.get());
+
+        QuestionGroupDTO result = questionGroupService.save(questionGroupDTO);
+        return ResponseEntity
+            .created(new URI("/api/question-groups/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * {@code POST /question-groups} : Create a new questionGroup for group.
+     *
+     * @param groupId the group to create questionGroup.
+     * @param questionGroupDTO the questionGroupDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID or if user not logged in or if user is not admin of group.
+     * @throws URISyntaxException
+     */
+    @PostMapping("/question-groups/group/{group-id}")
+    public ResponseEntity<QuestionGroupDTO> createQuestionGroupForGroup(@PathVariable("group-id") Long groupId, @Valid @RequestBody QuestionGroupDTO questionGroupDTO)
+        throws URISyntaxException {
+        log.debug("REST request to save QuestionGroup: {} for group {}", questionGroupDTO, groupId);
+        if(questionGroupDTO.getId() !=null){
+            throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+
+        // Check current user
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        // is admin of group?
+        if (!groupMemberService.isGroupAdmin(groupId,currentUserLoginOptional.get())){
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        // set groupId for questionGroup
+        questionGroupDTO.setGroupId(groupId);
+
         QuestionGroupDTO result = questionGroupService.save(questionGroupDTO);
         return ResponseEntity
             .created(new URI("/api/question-groups/" + result.getId()))
@@ -98,11 +145,30 @@ public class QuestionGroupResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!questionGroupRepository.existsById(id)) {
+        Optional<QuestionGroupDTO> prevQuestionGroup = questionGroupService.findOne(questionGroupDTO.getId());
+
+        if (prevQuestionGroup.isEmpty()) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
+        // Check current user
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        // permission of current user
+        if (
+            Boolean.FALSE.equals(groupMemberService.isGroupAdmin(prevQuestionGroup.get().getGroupId(),currentUserLoginOptional.get()))
+                && !Objects.equals(prevQuestionGroup.get().getUserLogin(), currentUserLoginOptional.get())
+        ){
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        questionGroupDTO.setGroupId(prevQuestionGroup.get().getGroupId());
+        questionGroupDTO.setUserLogin(prevQuestionGroup.get().getUserLogin());
         QuestionGroupDTO result = questionGroupService.save(questionGroupDTO);
+
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, questionGroupDTO.getId().toString()))
@@ -154,7 +220,13 @@ public class QuestionGroupResource {
     @GetMapping("/question-groups")
     public ResponseEntity<List<QuestionGroupDTO>> getAllQuestionGroups(Pageable pageable) {
         log.debug("REST request to get a page of QuestionGroups");
-        Page<QuestionGroupDTO> page = questionGroupService.findAll(pageable);
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        Page<QuestionGroupDTO> page = questionGroupService.findAllByUserLogin(currentUserLogin.get(), pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -170,6 +242,30 @@ public class QuestionGroupResource {
         log.debug("REST request to get QuestionGroup : {}", id);
         Optional<QuestionGroupDTO> questionGroupDTO = questionGroupService.findOne(id);
         return ResponseUtil.wrapOrNotFound(questionGroupDTO);
+    }
+
+    /**
+     * {@code GET /question-groups/group/:groupId} : get all questionGroup contain "groupId".
+     *
+     * @param groupId the id of the group.
+     * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of questionGroups in body.
+     */
+    @GetMapping("/question-groups/group/{groupId}")
+    public ResponseEntity<List<QuestionGroupDTO>> getQuestionGroupByGroup(@PathVariable Long groupId, Pageable pageable) {
+        log.debug("REST request to get QuestionGroup by Group: {}", groupId);
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId, currentUserLogin.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        Page<QuestionGroupDTO> page = questionGroupService.findAllByGroupId(groupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**

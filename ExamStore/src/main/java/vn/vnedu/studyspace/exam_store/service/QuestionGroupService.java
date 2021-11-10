@@ -1,6 +1,9 @@
 package vn.vnedu.studyspace.exam_store.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -75,6 +78,34 @@ public class QuestionGroupService {
     public Page<QuestionGroupDTO> findAll(Pageable pageable) {
         log.debug("Request to get all QuestionGroups");
         return questionGroupRepository.findAll(pageable).map(questionGroupMapper::toDto);
+    }
+
+    /**
+     * Get all the questionGroups contain userLogin.
+     *
+     * @param userLogin the userLogin to find questionGroup.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionGroupDTO> findAllByUserLogin(String userLogin, Pageable pageable) {
+        log.debug("Request to get all QuestionGroups by userLogin: {}", userLogin);
+        return questionGroupRepository
+            .findAllByUserLogin(userLogin, pageable)
+            .map(questionGroupMapper::toDto);
+    }
+
+    /**
+     * Get all the questionGroups in group.
+     *
+     * @param groupId the id of Group want to find.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionGroupDTO> findAllByGroupId(Long groupId, Pageable pageable) {
+        log.debug("Request to find all questionGroup by groupId: {}", groupId);
+        return questionGroupRepository
+            .findAllByGroupId(groupId, pageable)
+            .map(questionGroupMapper::toDto);
     }
 
     /**

@@ -15,9 +15,8 @@ public class QuestionGroupDTO implements Serializable {
     @Size(min = 5, max = 255)
     private String name;
 
-    private String groupId;
+    private Long groupId;
 
-    @NotNull
     private String userLogin;
 
     private TopicDTO topic;
@@ -38,11 +37,11 @@ public class QuestionGroupDTO implements Serializable {
         this.name = name;
     }
 
-    public String getGroupId() {
+    public Long getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
 
@@ -89,7 +88,7 @@ public class QuestionGroupDTO implements Serializable {
         return "QuestionGroupDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", groupId='" + getGroupId() + "'" +
+            ", groupId=" + getGroupId() +
             ", userLogin='" + getUserLogin() + "'" +
             ", topic=" + getTopic() +
             "}";
