@@ -64,18 +64,24 @@ public class QuestionService {
         log.debug("Request to save Question consist of list option");
         Question question = questionMapper.toEntity(questionDTO);
         question = questionRepository.save(question);
+        QuestionDTO result = questionMapper.toDto(question);
 
-        Set<OptionDTO> optionDTOSet = new HashSet<>();
-        for (OptionDTO optionDTO: questionDTO.getOptions()) {
-            Option newOption = optionMapper.toEntity(optionDTO);
-            newOption.setQuestion(question);
-            log.debug("Request to save Option: {}", newOption);
-            newOption = optionRepository.save(newOption);
-            optionDTOSet.add(optionMapper.toDto(newOption));
+        Set<OptionDTO> currentOptionDTOSet = questionDTO.getOptions();
+
+        if (!currentOptionDTOSet.isEmpty()) {
+            Set<OptionDTO> newOptionDTOSet = new HashSet<>();
+
+            for (OptionDTO optionDTO : currentOptionDTOSet) {
+                Option newOption = optionMapper.toEntity(optionDTO);
+                newOption.setQuestion(question);
+                log.debug("Request to save Option: {}", newOption);
+                newOption = optionRepository.save(newOption);
+                newOptionDTOSet.add(optionMapper.toDto(newOption));
+            }
+
+            result.setOptions(newOptionDTOSet);
         }
 
-        QuestionDTO result = questionMapper.toDto(question);
-        result.setOptions(optionDTOSet);
         return result;
     }
 
@@ -111,6 +117,18 @@ public class QuestionService {
     public Page<QuestionDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Questions");
         return questionRepository.findAll(pageable).map(questionMapper::toDto);
+    }
+
+    /**
+     * Get all the questions by questionGroupId
+     * @param questionGroupId the id of the QuestionGroup.
+     * @param pageable pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionDTO> findByRepo(Long questionGroupId, Pageable pageable) {
+        log.debug("Request to get all Question by QuestionGroup: {}", questionGroupId);
+        return questionRepository.findByRepoId(questionGroupId, pageable).map(questionMapper::toDto);
     }
 
     /**

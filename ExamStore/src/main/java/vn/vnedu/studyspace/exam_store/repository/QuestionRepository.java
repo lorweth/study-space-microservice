@@ -1,5 +1,7 @@
 package vn.vnedu.studyspace.exam_store.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import vn.vnedu.studyspace.exam_store.domain.Question;
@@ -12,5 +14,5 @@ import java.util.List;
 @SuppressWarnings("unused")
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findByRepo_Id(Long id);
+    Page<Question> findByRepoId(Long id, Pageable pageable);
 }
