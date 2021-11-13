@@ -50,6 +50,16 @@ public class GroupMemberService {
         return dtoOptional.get().getRole() == 2;
     }
 
+    public Boolean isGroupMember(Long groupId, String userLogin) {
+        log.debug("Request to check {} is admin of {}", userLogin, groupId);
+        Optional<GroupMemberDTO> dtoOptional = findByGroupIdAndUserLogin(groupId, userLogin);
+        if(dtoOptional.isEmpty()) {
+            return false;
+        }
+        log.debug("Role of user: {}", dtoOptional.get().getRole());//
+        return dtoOptional.get().getRole() == 1;
+    }
+
     /**
      * Save a groupMember.
      *
