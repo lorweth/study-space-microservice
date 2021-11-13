@@ -108,7 +108,7 @@ public class QuestionGroupResource {
         }
 
         // is admin of group?
-        if (!groupMemberService.isGroupAdmin(groupId,currentUserLoginOptional.get())){
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId,currentUserLoginOptional.get()))){
             throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
         }
 
@@ -240,8 +240,24 @@ public class QuestionGroupResource {
     @GetMapping("/question-groups/{id}")
     public ResponseEntity<QuestionGroupDTO> getQuestionGroup(@PathVariable Long id) {
         log.debug("REST request to get QuestionGroup : {}", id);
-        Optional<QuestionGroupDTO> questionGroupDTO = questionGroupService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(questionGroupDTO);
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        Optional<QuestionGroupDTO> questionGroupDTOOptional = questionGroupService.findOne(id);
+        if(questionGroupDTOOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        if (
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTOOptional.get().getGroupId(), currentUserLogin.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroupDTOOptional.get().getGroupId(), currentUserLogin.get()))
+            && !Objects.equals(questionGroupDTOOptional.get().getUserLogin(), currentUserLogin.get())
+        ) {
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+        return ResponseEntity.ok().body(questionGroupDTOOptional.get());
     }
 
     /**
@@ -259,8 +275,8 @@ public class QuestionGroupResource {
             throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
         }
 
-        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId, currentUserLogin.get()))) {
-            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        if (Boolean.FALSE.equals(groupMemberService.isGroupMember(groupId, currentUserLogin.get()))) {
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
         }
 
         Page<QuestionGroupDTO> page = questionGroupService.findAllByGroupId(groupId, pageable);
