@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
@@ -59,7 +60,7 @@ public class QuestionResource {
     }
 
     /**
-     * {@code POST  /questions} : Create a new question.
+     * {@code POST  /questions} : Create a new question with list Option.
      *
      * @param questionDTO the questionDTO to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionDTO, or with status {@code 400 (Bad Request)} if the question has already an ID.
@@ -71,6 +72,7 @@ public class QuestionResource {
         if (questionDTO.getId() != null) {
             throw new BadRequestAlertException("A new question cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         if (Objects.isNull(questionDTO.getRepo())) {
             throw new BadRequestAlertException("A new Question must be created in a QuestionGroup", ENTITY_NAME, "questionGroupNotFound");
         }
@@ -85,9 +87,6 @@ public class QuestionResource {
             throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
         }
 
-        // Neu user khong phai admin nhom so huu danh muc
-        // && danh muc cau hoi khong phai cua user
-        // thi throw error
         if(Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentQuestionGroupDTO.get().getGroupId(), currentUserLoginOptional.get()))
             && !Objects.equals(currentQuestionGroupDTO.get().getUserLogin(), currentUserLoginOptional.get())
         ) {
@@ -102,7 +101,7 @@ public class QuestionResource {
     }
 
     /**
-     * {@code PUT  /questions/:id} : Updates an existing question.
+     * {@code PUT  /questions/:id} : Updates an existing question and option.
      *
      * @param id the id of the questionDTO to save.
      * @param questionDTO the questionDTO to update.
@@ -124,11 +123,27 @@ public class QuestionResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!questionRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        if (Objects.isNull(questionDTO.getRepo())) {
+            throw new BadRequestAlertException("A Question must be in a QuestionGroup", ENTITY_NAME, "questionGroupNotFound");
+        }
+        Optional<QuestionGroupDTO> currentQuestionGroupDTO = questionGroupService.findOne(questionDTO.getRepo().getId());
+        if (currentQuestionGroupDTO.isEmpty()) {
+            throw new BadRequestAlertException("QuestionGroup: "+questionDTO.getRepo().getId()+" not exists", ENTITY_NAME, "questionGroupNotExists");
         }
 
-        QuestionDTO result = questionService.save(questionDTO);
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if(
+            Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentQuestionGroupDTO.get().getGroupId(), currentUserLoginOptional.get()))
+            && !Objects.equals(currentQuestionGroupDTO.get().getUserLogin(), currentUserLoginOptional.get())
+        ) {
+            throw new BadRequestAlertException("Full Authenticate for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        QuestionDTO result = questionService.saveWithListOption(questionDTO);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, questionDTO.getId().toString()))
@@ -196,6 +211,38 @@ public class QuestionResource {
         log.debug("REST request to get Question : {}", id);
         Optional<QuestionDTO> questionDTO = questionService.findOne(id);
         return ResponseUtil.wrapOrNotFound(questionDTO);
+    }
+
+    /**
+     * {@code GET /questions/repo/:questionGroupId} : Get all the question by questionGroup.
+     * @param questionGroupId the id of QuestionGroup.
+     * @param pageable pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of questions in body.
+     */
+    @GetMapping("/questions/repo/{questionGroupId}")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestionsByRepo(@PathVariable Long questionGroupId, Pageable pageable) {
+        log.debug("REST request get all Questions by QuestionGroup");
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        Optional<QuestionGroupDTO> questionGroupDTOOptional = questionGroupService.findOne(questionGroupId);
+        if(questionGroupDTOOptional.isEmpty()) {
+            throw new BadRequestAlertException("QuestionGroup not exists", ENTITY_NAME, "entityNotFound");
+        }
+
+        if(
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTOOptional.get().getGroupId(), currentUserLoginOptional.get()))
+            && !Objects.equals(questionGroupDTOOptional.get().getUserLogin(), currentUserLoginOptional.get())
+        ){
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+
+        Page<QuestionDTO> page = questionService.findByRepo(questionGroupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
