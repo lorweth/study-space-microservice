@@ -21,8 +21,12 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
+import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
+import vn.vnedu.studyspace.exam_store.service.QuestionGroupService;
 import vn.vnedu.studyspace.exam_store.service.QuestionService;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
+import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -41,11 +45,17 @@ public class QuestionResource {
 
     private final QuestionService questionService;
 
+    private final GroupMemberService groupMemberService;
+
+    private final QuestionGroupService questionGroupService;
+
     private final QuestionRepository questionRepository;
 
-    public QuestionResource(QuestionService questionService, QuestionRepository questionRepository) {
+    public QuestionResource(QuestionService questionService, QuestionRepository questionRepository, GroupMemberService groupMemberService, QuestionGroupService questionGroupService) {
         this.questionService = questionService;
         this.questionRepository = questionRepository;
+        this.groupMemberService = groupMemberService;
+        this.questionGroupService = questionGroupService;
     }
 
     /**
@@ -61,7 +71,30 @@ public class QuestionResource {
         if (questionDTO.getId() != null) {
             throw new BadRequestAlertException("A new question cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        QuestionDTO result = questionService.save(questionDTO);
+        if (Objects.isNull(questionDTO.getRepo())) {
+            throw new BadRequestAlertException("A new Question must be created in a QuestionGroup", ENTITY_NAME, "questionGroupNotFound");
+        }
+
+        Optional<QuestionGroupDTO> currentQuestionGroupDTO = questionGroupService.findOne(questionDTO.getRepo().getId());
+        if(currentQuestionGroupDTO.isEmpty()){
+            throw new BadRequestAlertException("QuestionGroup: "+questionDTO.getRepo().getId()+" not exists", ENTITY_NAME, "questionGroupNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLoginOptional.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        // Neu user khong phai admin nhom so huu danh muc
+        // && danh muc cau hoi khong phai cua user
+        // thi throw error
+        if(Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentQuestionGroupDTO.get().getGroupId(), currentUserLoginOptional.get()))
+            && !Objects.equals(currentQuestionGroupDTO.get().getUserLogin(), currentUserLoginOptional.get())
+        ) {
+            throw new BadRequestAlertException("Full Authenticate for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        QuestionDTO result = questionService.saveWithListOption(questionDTO);
         return ResponseEntity
             .created(new URI("/api/questions/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))

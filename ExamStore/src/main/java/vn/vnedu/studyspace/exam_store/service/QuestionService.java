@@ -1,9 +1,6 @@
 package vn.vnedu.studyspace.exam_store.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +12,7 @@ import vn.vnedu.studyspace.exam_store.domain.Option;
 import vn.vnedu.studyspace.exam_store.domain.Question;
 import vn.vnedu.studyspace.exam_store.repository.OptionRepository;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.OptionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.OptionMapper;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
@@ -30,18 +28,13 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
-    private final QuestionMapper questionMapper;
-
     private final OptionRepository optionRepository;
+
+    private final QuestionMapper questionMapper;
 
     private final OptionMapper optionMapper;
 
-    public QuestionService(
-        QuestionRepository questionRepository,
-        QuestionMapper questionMapper,
-        OptionRepository optionRepository,
-        OptionMapper optionMapper
-    ) {
+    public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper, OptionRepository optionRepository, OptionMapper optionMapper) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.optionRepository = optionRepository;
@@ -58,14 +51,32 @@ public class QuestionService {
         log.debug("Request to save Question : {}", questionDTO);
         Question question = questionMapper.toEntity(questionDTO);
         question = questionRepository.save(question);
-
-        Set<Option> options = new HashSet<>();
-        for(Option option: question.getOptions()){
-            options.add(optionRepository.save(option));
-        }
-        question.setOptions(options);
-
         return questionMapper.toDto(question);
+    }
+
+    /**
+     * Save a new question with list options.
+     *
+     * @param questionDTO the entity to save.
+     * @return the persisted entity.
+     */
+    public QuestionDTO saveWithListOption(QuestionDTO questionDTO) {
+        log.debug("Request to save Question consist of list option");
+        Question question = questionMapper.toEntity(questionDTO);
+        question = questionRepository.save(question);
+
+        Set<OptionDTO> optionDTOSet = new HashSet<>();
+        for (OptionDTO optionDTO: questionDTO.getOptions()) {
+            Option newOption = optionMapper.toEntity(optionDTO);
+            newOption.setQuestion(question);
+            log.debug("Request to save Option: {}", newOption);
+            newOption = optionRepository.save(newOption);
+            optionDTOSet.add(optionMapper.toDto(newOption));
+        }
+
+        QuestionDTO result = questionMapper.toDto(question);
+        result.setOptions(optionDTOSet);
+        return result;
     }
 
     /**
@@ -99,9 +110,7 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public Page<QuestionDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Questions");
-        return questionRepository
-            .findAll(pageable)
-            .map(questionMapper::toDto);
+        return questionRepository.findAll(pageable).map(questionMapper::toDto);
     }
 
     /**
@@ -113,15 +122,7 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public Optional<QuestionDTO> findOne(Long id) {
         log.debug("Request to get Question : {}", id);
-        return questionRepository
-            .findById(id)
-            .map(question -> {
-                // get all Answer of question to return
-                List<Option> options = optionRepository.findByQuestion_Id(question.getId());
-                question.setOptions(new HashSet<>(options));
-                return question;
-            })
-            .map(questionMapper::toDto);
+        return questionRepository.findById(id).map(questionMapper::toDto);
     }
 
     /**
