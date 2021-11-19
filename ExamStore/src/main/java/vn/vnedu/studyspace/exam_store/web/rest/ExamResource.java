@@ -21,7 +21,9 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.ExamRepository;
+import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.ExamService;
+import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
@@ -41,11 +43,14 @@ public class ExamResource {
 
     private final ExamService examService;
 
+    private final GroupMemberService groupMemberService;
+
     private final ExamRepository examRepository;
 
-    public ExamResource(ExamService examService, ExamRepository examRepository) {
+    public ExamResource(ExamService examService, ExamRepository examRepository, GroupMemberService groupMemberService) {
         this.examService = examService;
         this.examRepository = examRepository;
+        this.groupMemberService = groupMemberService;
     }
 
     /**
@@ -61,6 +66,16 @@ public class ExamResource {
         if (examDTO.getId() != null) {
             throw new BadRequestAlertException("A new exam cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(examDTO.getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         ExamDTO result = examService.save(examDTO);
         return ResponseEntity
             .created(new URI("/api/exams/" + result.getId()))
