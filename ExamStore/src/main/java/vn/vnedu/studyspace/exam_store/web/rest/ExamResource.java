@@ -110,6 +110,15 @@ public class ExamResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(examDTO.getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         ExamDTO result = examService.save(examDTO);
         return ResponseEntity
             .ok()
@@ -168,6 +177,31 @@ public class ExamResource {
     }
 
     /**
+     * {@code GET  /exams/group/:groupId} : get all the exams by group.
+     *
+     * @param groupId the id of the Group.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of exams in body.
+     */
+    @GetMapping("/exams/group/:groupId")
+    public ResponseEntity<List<ExamDTO>> getExamsByGroup(@PathVariable Long groupId, Pageable pageable) {
+        log.debug("REST request to get a page of Exams by Group: {}", groupId);
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId, currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        Page<ExamDTO> page = examService.findByGroup(groupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
      * {@code GET  /exams/:id} : get the "id" exam.
      *
      * @param id the id of the examDTO to retrieve.
@@ -177,6 +211,23 @@ public class ExamResource {
     public ResponseEntity<ExamDTO> getExam(@PathVariable Long id) {
         log.debug("REST request to get Exam : {}", id);
         Optional<ExamDTO> examDTO = examService.findOne(id);
+        if (examDTO.isEmpty()) {
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+        long groupId = examDTO.get().getGroupId();
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (
+            Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId, currentUserLoginOptional.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupMember(groupId, currentUserLoginOptional.get()))
+        ) {
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+
         return ResponseUtil.wrapOrNotFound(examDTO);
     }
 
@@ -189,6 +240,20 @@ public class ExamResource {
     @DeleteMapping("/exams/{id}")
     public ResponseEntity<Void> deleteExam(@PathVariable Long id) {
         log.debug("REST request to delete Exam : {}", id);
+        Optional<ExamDTO> examDTO = examService.findOne(id);
+        if (examDTO.isEmpty()) {
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(examDTO.get().getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
         examService.delete(id);
         return ResponseEntity
             .noContent()

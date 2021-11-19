@@ -1,6 +1,9 @@
 package vn.vnedu.studyspace.exam_store.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -75,6 +78,21 @@ public class OptionService {
     public Page<OptionDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Options");
         return optionRepository.findAll(pageable).map(optionMapper::toDto);
+    }
+
+    /**
+     * Get all the options by Question.
+     *
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<OptionDTO> findByQuestion(long questionId) {
+        log.debug("Request to get all Options");
+        return optionRepository
+            .findByQuestionId(questionId)
+            .stream()
+            .map(optionMapper::toDto)
+            .collect(Collectors.toList());
     }
 
     /**

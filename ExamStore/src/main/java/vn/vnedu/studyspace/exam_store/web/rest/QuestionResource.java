@@ -209,8 +209,31 @@ public class QuestionResource {
     @GetMapping("/questions/{id}")
     public ResponseEntity<QuestionDTO> getQuestion(@PathVariable Long id) {
         log.debug("REST request to get Question : {}", id);
-        Optional<QuestionDTO> questionDTO = questionService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(questionDTO);
+        Optional<QuestionDTO> questionDTO = questionService.findOneWithOption(id);
+        if (questionDTO.isEmpty()) {
+            throw new BadRequestAlertException("Question not Exists", ENTITY_NAME, "questionNotExists");
+        }
+
+        long questionGroupId = questionDTO.get().getRepo().getId();
+        Optional<QuestionGroupDTO> questionGroupDTO = questionGroupService.findOne(questionGroupId);
+        if (questionGroupDTO.isEmpty()) {
+            throw new BadRequestAlertException("QuestionGroup not Exists", ENTITY_NAME, "questionGroupNotExists");
+        }
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if(
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTO.get().getGroupId(), currentUserLogin.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroupDTO.get().getGroupId(), currentUserLogin.get()))
+            && !Objects.equals(questionGroupDTO.get().getUserLogin(), currentUserLogin.get())
+        ) {
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+
+        return ResponseEntity.ok().body(questionDTO.get());
     }
 
     /**

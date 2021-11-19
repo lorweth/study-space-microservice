@@ -1,12 +1,16 @@
 package vn.vnedu.studyspace.exam_store.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.exam_store.domain.Exam;
 import vn.vnedu.studyspace.exam_store.domain.ExamItem;
 import vn.vnedu.studyspace.exam_store.repository.ExamItemRepository;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
@@ -75,6 +79,35 @@ public class ExamItemService {
     public Page<ExamItemDTO> findAll(Pageable pageable) {
         log.debug("Request to get all ExamItems");
         return examItemRepository.findAll(pageable).map(examItemMapper::toDto);
+    }
+
+    /**
+     * Get all the examItems by Exam.
+     *
+     * @param examId the id of the exam.=
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<ExamItemDTO> findByExam(long examId) {
+        log.debug("Request to get all ExamItems by Exam: {}", examId);
+        return examItemRepository
+            .findByExamId(examId)
+            .stream()
+            .map(examItemMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all the examItems by Exam.
+     *
+     * @param examId the id of the exam.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<ExamItemDTO> findByExam(long examId, Pageable pageable) {
+        log.debug("Request to get all ExamItems by Exam: {}", examId);
+        return examItemRepository.findByExamId(examId, pageable).map(examItemMapper::toDto);
     }
 
     /**

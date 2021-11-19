@@ -1,6 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +123,40 @@ public class QuestionService {
     /**
      * Get all the questions by questionGroupId
      * @param questionGroupId the id of the QuestionGroup.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> findByRepo(Long questionGroupId) {
+        log.debug("Request to get all Question by QuestionGroup: {}", questionGroupId);
+        return questionRepository
+            .findByRepoId(questionGroupId)
+            .stream()
+            .map(questionMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all the questions (Contain Option list) by questionGroupId
+     * @param questionGroupId the id of the QuestionGroup.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> findByRepoWithOption(Long questionGroupId) {
+        log.debug("Request to get all Question by QuestionGroup: {}", questionGroupId);
+        return questionRepository
+            .findByRepoId(questionGroupId)
+            .stream()
+            .peek(question -> {
+                List<Option> optionList = optionRepository.findByQuestionId(question.getId());
+                question.setOptions(new HashSet<>(optionList));
+            })
+            .map(questionMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all the questions by questionGroupId
+     * @param questionGroupId the id of the QuestionGroup.
      * @param pageable pagination information.
      * @return the list of entities.
      */
@@ -141,6 +176,38 @@ public class QuestionService {
     public Optional<QuestionDTO> findOne(Long id) {
         log.debug("Request to get Question : {}", id);
         return questionRepository.findById(id).map(questionMapper::toDto);
+    }
+
+    /**
+     * Get one question by id.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    @Transactional(readOnly = true)
+    public Optional<QuestionDTO> findOneWithOption(Long id) {
+        log.debug("Request to get Question : {}", id);
+        return questionRepository
+            .findById(id)
+            .map(
+                question -> {
+                    List<Option> optionList = optionRepository.findByQuestionId(id);
+                    question.setOptions(new HashSet<>(optionList));
+                    return question;
+                }
+            )
+            .map(questionMapper::toDto);
+    }
+
+    /**
+     * Get count of questions by QuestionGroupId.
+     * @param questionGroupId the id of QuestionGroup.
+     * @return number of questions.
+     */
+    @Transactional(readOnly = true)
+    public long countByRepo(Long questionGroupId) {
+        log.debug("Request to get count of question in QuestionGroup: {}", questionGroupId);
+        return questionRepository.countByRepoId(questionGroupId);
     }
 
     /**

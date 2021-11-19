@@ -21,7 +21,12 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.ExamItemRepository;
+import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.ExamItemService;
+import vn.vnedu.studyspace.exam_store.service.ExamService;
+import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
+import vn.vnedu.studyspace.exam_store.service.QuestionService;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
@@ -43,9 +48,18 @@ public class ExamItemResource {
 
     private final ExamItemRepository examItemRepository;
 
-    public ExamItemResource(ExamItemService examItemService, ExamItemRepository examItemRepository) {
+    private final GroupMemberService groupMemberService;
+
+    private final ExamService examService;
+
+    private final QuestionService questionService;
+
+    public ExamItemResource(ExamItemService examItemService, ExamItemRepository examItemRepository, GroupMemberService groupMemberService, ExamService examService, QuestionService questionService) {
         this.examItemService = examItemService;
         this.examItemRepository = examItemRepository;
+        this.groupMemberService = groupMemberService;
+        this.examService = examService;
+        this.questionService = questionService;
     }
 
     /**
@@ -61,6 +75,36 @@ public class ExamItemResource {
         if (examItemDTO.getId() != null) {
             throw new BadRequestAlertException("A new examItem cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
+        if (Objects.isNull(examItemDTO.getExam().getId())) {
+            throw new BadRequestAlertException("Exam not found", ENTITY_NAME, "examNotFound");
+        }
+        if (Objects.isNull(examItemDTO.getRepo().getId())) {
+            throw new BadRequestAlertException("Repo not found", ENTITY_NAME, "repoNotFound");
+        }
+
+        long examId = examItemDTO.getExam().getId();
+        long repoId = examItemDTO.getRepo().getId();
+
+        Optional<ExamDTO> currentExamDTO = examService.findOne(examId);
+        if (currentExamDTO.isEmpty()){
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentExamDTO.get().getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        long total = questionService.countByRepo(repoId);
+        if (total < examItemDTO.getNumOfQuestion()) {
+            throw new BadRequestAlertException("Out of questions number", ENTITY_NAME, "outOfNumber");
+        }
+
         ExamItemDTO result = examItemService.save(examItemDTO);
         return ResponseEntity
             .created(new URI("/api/exam-items/" + result.getId()))
@@ -93,6 +137,35 @@ public class ExamItemResource {
 
         if (!examItemRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        if (Objects.isNull(examItemDTO.getExam().getId())) {
+            throw new BadRequestAlertException("Exam not found", ENTITY_NAME, "examNotFound");
+        }
+        if (Objects.isNull(examItemDTO.getRepo().getId())) {
+            throw new BadRequestAlertException("Repo not found", ENTITY_NAME, "repoNotFound");
+        }
+
+        long examId = examItemDTO.getExam().getId();
+        long repoId = examItemDTO.getRepo().getId();
+
+        Optional<ExamDTO> currentExamDTO = examService.findOne(examId);
+        if (currentExamDTO.isEmpty()){
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentExamDTO.get().getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+
+        long total = questionService.countByRepo(repoId);
+        if (total < examItemDTO.getNumOfQuestion()) {
+            throw new BadRequestAlertException("Out of questions number", ENTITY_NAME, "outOfNumber");
         }
 
         ExamItemDTO result = examItemService.save(examItemDTO);
@@ -153,6 +226,35 @@ public class ExamItemResource {
     }
 
     /**
+     * {@code GET / exam-items/exam/:examId} : Get all the examItems by Exam.
+     *
+     * @param examId the id of the exam.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of examItems in body.
+     */
+    @GetMapping("/exam-items/exam/{examId}")
+    public ResponseEntity<List<ExamItemDTO>> getExamItemsByExam(@PathVariable Long examId, Pageable pageable) {
+        log.debug("REST request to get a page of ExamItems by Exam: {}", examId);
+
+        Optional<ExamDTO> currentExamDTO = examService.findOne(examId);
+        if (currentExamDTO.isEmpty()){
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentExamDTO.get().getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
+        Page<ExamItemDTO> page = examItemService.findByExam(examId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
      * {@code GET  /exam-items/:id} : get the "id" examItem.
      *
      * @param id the id of the examItemDTO to retrieve.
@@ -174,6 +276,28 @@ public class ExamItemResource {
     @DeleteMapping("/exam-items/{id}")
     public ResponseEntity<Void> deleteExamItem(@PathVariable Long id) {
         log.debug("REST request to delete ExamItem : {}", id);
+        Optional<ExamItemDTO> currentExamItem = examItemService.findOne(id);
+        if (currentExamItem.isEmpty()) {
+            throw new BadRequestAlertException("ExamItem not exitsts", ENTITY_NAME, "examItemNotExists");
+        }
+
+        if (Objects.isNull(currentExamItem.get().getExam().getId())) {
+            throw new BadRequestAlertException("Exam not found", ENTITY_NAME, "examNotFound");
+        }
+
+        Optional<ExamDTO> currentExamDTO = examService.findOne(currentExamItem.get().getExam().getId());
+        if (currentExamDTO.isEmpty()){
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (Boolean.FALSE.equals(groupMemberService.isGroupAdmin(currentExamDTO.get().getGroupId(), currentUserLoginOptional.get()))) {
+            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
+        }
         examItemService.delete(id);
         return ResponseEntity
             .noContent()
