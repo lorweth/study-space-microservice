@@ -23,9 +23,11 @@ import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
+import vn.vnedu.studyspace.exam_store.service.ExamService;
 import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
 import vn.vnedu.studyspace.exam_store.service.QuestionGroupService;
 import vn.vnedu.studyspace.exam_store.service.QuestionService;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
@@ -48,15 +50,18 @@ public class QuestionResource {
 
     private final GroupMemberService groupMemberService;
 
+    private final ExamService examService;
+
     private final QuestionGroupService questionGroupService;
 
     private final QuestionRepository questionRepository;
 
-    public QuestionResource(QuestionService questionService, QuestionRepository questionRepository, GroupMemberService groupMemberService, QuestionGroupService questionGroupService) {
+    public QuestionResource(QuestionService questionService, QuestionRepository questionRepository, GroupMemberService groupMemberService, QuestionGroupService questionGroupService, ExamService examService) {
         this.questionService = questionService;
         this.questionRepository = questionRepository;
         this.groupMemberService = groupMemberService;
         this.questionGroupService = questionGroupService;
+        this.examService = examService;
     }
 
     /**
@@ -258,7 +263,8 @@ public class QuestionResource {
 
         if(
             Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTOOptional.get().getGroupId(), currentUserLoginOptional.get()))
-            && !Objects.equals(questionGroupDTOOptional.get().getUserLogin(), currentUserLoginOptional.get())
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroupDTOOptional.get().getGroupId(), currentUserLoginOptional.get()))
+            && Objects.equals(questionGroupDTOOptional.get().getUserLogin(), currentUserLoginOptional.get())
         ){
             throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
         }
@@ -266,6 +272,38 @@ public class QuestionResource {
         Page<QuestionDTO> page = questionService.findByRepo(questionGroupId, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code GET /questions/exam/:examId} : Get all question of the exam.
+     *
+     * @param examId the id of the exam.
+     * @return the {@link ResponseEntity} with status {@code 200(OK)} and the list of questions in body.
+     */
+    @GetMapping("/questions/exam/{examId}")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestionsByExam(@PathVariable Long examId) {
+        log.debug("REST request get all Questions by Exam");
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        Optional<ExamDTO> examDTO = examService.findOne(examId);
+        if(examDTO.isEmpty()) {
+            throw new BadRequestAlertException("Exam not exists", ENTITY_NAME, "examNotExists");
+        }
+
+        if(
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(examDTO.get().getGroupId(), currentUserLogin.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(examDTO.get().getGroupId(), currentUserLogin.get()))
+        ){
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+
+        List<QuestionDTO> questionList = examService.getQuestions(examId);
+
+        return ResponseEntity.ok().body(questionList);
     }
 
     /**

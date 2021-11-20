@@ -25,6 +25,7 @@ import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
 import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.GroupMemberService;
 import vn.vnedu.studyspace.exam_store.service.QuestionGroupService;
+import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
@@ -120,6 +121,15 @@ public class QuestionGroupResource {
             .created(new URI("/api/question-groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
+    }
+
+    @PostMapping("/question-groups/saveExam")
+    public ResponseEntity<QuestionGroupDTO> saveExam(@Valid @RequestBody List<QuestionDTO> questionList) {
+        log.debug("REST request to save Exam to QuestionGroup");
+        if (questionGroup.getId() != null) {
+            throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+
     }
 
     /**
@@ -275,7 +285,10 @@ public class QuestionGroupResource {
             throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
         }
 
-        if (Boolean.FALSE.equals(groupMemberService.isGroupMember(groupId, currentUserLogin.get()))) {
+        if (
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(groupId, currentUserLogin.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(groupId, currentUserLogin.get()))
+        ) {
             throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
         }
 
@@ -293,6 +306,24 @@ public class QuestionGroupResource {
     @DeleteMapping("/question-groups/{id}")
     public ResponseEntity<Void> deleteQuestionGroup(@PathVariable Long id) {
         log.debug("REST request to delete QuestionGroup : {}", id);
+
+        Optional<QuestionGroupDTO> questionGroup = questionGroupService.findOne(id);
+        if(questionGroup.isEmpty()) {
+            throw new BadRequestAlertException("QuestionGroup not exists", ENTITY_NAME, "questionGroupNotExists");
+        }
+
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLogin.isEmpty()) {
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        if (
+            Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroup.get().getGroupId(), currentUserLogin.get()))
+            && Objects.equals(questionGroup.get().getUserLogin(), currentUserLogin.get())
+        ) {
+            throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
+        }
+
         questionGroupService.delete(id);
         return ResponseEntity
             .noContent()

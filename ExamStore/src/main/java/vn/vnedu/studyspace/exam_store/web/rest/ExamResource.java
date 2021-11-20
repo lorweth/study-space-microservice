@@ -183,7 +183,7 @@ public class ExamResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of exams in body.
      */
-    @GetMapping("/exams/group/:groupId")
+    @GetMapping("/exams/group/{groupId}")
     public ResponseEntity<List<ExamDTO>> getExamsByGroup(@PathVariable Long groupId, Pageable pageable) {
         log.debug("REST request to get a page of Exams by Group: {}", groupId);
 
@@ -228,7 +228,7 @@ public class ExamResource {
             throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
         }
 
-        return ResponseUtil.wrapOrNotFound(examDTO);
+        return ResponseEntity.ok().body(examDTO.get());
     }
 
     /**
