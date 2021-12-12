@@ -1,7 +1,6 @@
 package vn.vnedu.studyspace.exam_store.service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -10,10 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.exam_store.domain.Question;
 import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
+import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionGroupMapper;
+import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
 
 /**
  * Service Implementation for managing {@link QuestionGroup}.
@@ -26,11 +29,20 @@ public class QuestionGroupService {
 
     private final QuestionGroupRepository questionGroupRepository;
 
+    private final QuestionRepository questionRepository;
+
+    private final QuestionService questionService;
+
     private final QuestionGroupMapper questionGroupMapper;
 
-    public QuestionGroupService(QuestionGroupRepository questionGroupRepository, QuestionGroupMapper questionGroupMapper) {
+    private final QuestionMapper questionMapper;
+
+    public QuestionGroupService(QuestionGroupRepository questionGroupRepository, QuestionGroupMapper questionGroupMapper, QuestionService questionService,QuestionRepository questionRepository, QuestionMapper questionMapper) {
         this.questionGroupRepository = questionGroupRepository;
         this.questionGroupMapper = questionGroupMapper;
+        this.questionRepository = questionRepository;
+        this.questionService = questionService;
+        this.questionMapper = questionMapper;
     }
 
     /**
@@ -44,6 +56,20 @@ public class QuestionGroupService {
         QuestionGroup questionGroup = questionGroupMapper.toEntity(questionGroupDTO);
         questionGroup = questionGroupRepository.save(questionGroup);
         return questionGroupMapper.toDto(questionGroup);
+    }
+
+    /**
+     * Save all question of exam to new questionGroup.
+     * ! Can nhac gop voi save
+     *
+     * @param questionGroupDTO the dto contain question
+     * @return the persisted entity.
+     */
+    public QuestionGroupDTO saveWithListQuestion() {
+        log.debug("Request to save QuestionGroup and Question List");
+        QuestionGroupDTO questionGroupDTO = new QuestionGroupDTO();
+        questionGroupDTO.setUserLogin(currentUserLogin);
+        questionGroupDTO.set
     }
 
     /**

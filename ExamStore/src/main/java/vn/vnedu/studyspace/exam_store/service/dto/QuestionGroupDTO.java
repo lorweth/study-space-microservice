@@ -1,7 +1,9 @@
 package vn.vnedu.studyspace.exam_store.service.dto;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.validation.constraints.*;
 
 /**
@@ -14,6 +16,8 @@ public class QuestionGroupDTO implements Serializable {
     @NotNull
     @Size(min = 5, max = 255)
     private String name;
+
+    private Set<QuestionDTO> questionList = new HashSet<>();
 
     private Long groupId;
 
@@ -35,6 +39,14 @@ public class QuestionGroupDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<QuestionDTO> getQuestionList() {
+        return questionList;
+    }
+
+    public void setQuestionList(Set<QuestionDTO> questionList) {
+        this.questionList = questionList;
     }
 
     public Long getGroupId() {

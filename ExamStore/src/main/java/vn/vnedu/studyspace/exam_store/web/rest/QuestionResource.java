@@ -251,20 +251,20 @@ public class QuestionResource {
     public ResponseEntity<List<QuestionDTO>> getAllQuestionsByRepo(@PathVariable Long questionGroupId, Pageable pageable) {
         log.debug("REST request get all Questions by QuestionGroup");
 
-        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
-        if(currentUserLoginOptional.isEmpty()){
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()){
             throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
         }
 
-        Optional<QuestionGroupDTO> questionGroupDTOOptional = questionGroupService.findOne(questionGroupId);
-        if(questionGroupDTOOptional.isEmpty()) {
+        Optional<QuestionGroupDTO> questionGroupDTO = questionGroupService.findOne(questionGroupId);
+        if(questionGroupDTO.isEmpty()) {
             throw new BadRequestAlertException("QuestionGroup not exists", ENTITY_NAME, "entityNotFound");
         }
 
         if(
-            Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTOOptional.get().getGroupId(), currentUserLoginOptional.get()))
-            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroupDTOOptional.get().getGroupId(), currentUserLoginOptional.get()))
-            && Objects.equals(questionGroupDTOOptional.get().getUserLogin(), currentUserLoginOptional.get())
+            Boolean.FALSE.equals(groupMemberService.isGroupMember(questionGroupDTO.get().getGroupId(), currentUserLogin.get()))
+            && Boolean.FALSE.equals(groupMemberService.isGroupAdmin(questionGroupDTO.get().getGroupId(), currentUserLogin.get()))
+            && !Objects.equals(questionGroupDTO.get().getUserLogin(), currentUserLogin.get())
         ){
             throw new BadRequestAlertException("Unauthorized access", ENTITY_NAME, "unauthorizedAccess");
         }

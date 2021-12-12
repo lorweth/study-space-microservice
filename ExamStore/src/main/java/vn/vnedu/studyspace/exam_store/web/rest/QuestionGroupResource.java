@@ -123,13 +123,30 @@ public class QuestionGroupResource {
             .body(result);
     }
 
-    @PostMapping("/question-groups/saveExam")
-    public ResponseEntity<QuestionGroupDTO> saveExam(@Valid @RequestBody List<QuestionDTO> questionList) {
+    /**
+     * {@code POST /question-groups/save-all} : Create new QuestionGroup with question list.
+     *
+     * @param questionGroupDTO the list contains the id of the questions.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID or if user not logged in.
+     * @throws URISyntaxException
+     */
+    @PostMapping("/question-groups/save-to-my-repo")
+    public ResponseEntity<QuestionGroupDTO> saveExam(@Valid @RequestBody QuestionGroupDTO questionGroupDTO) throws URISyntaxException {
         log.debug("REST request to save Exam to QuestionGroup");
-        if (questionGroup.getId() != null) {
-            throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
+        if(questionIdList.isEmpty()){
+            throw new BadRequestAlertException("The list is empty", ENTITY_NAME, "listEmpty");
         }
 
+        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        if(currentUserLogin.isEmpty()){
+            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
+        }
+
+        QuestionGroupDTO result = questionGroupService.
+        return ResponseEntity
+            .created(new URI("/api/question-groups/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
     }
 
     /**
