@@ -17,7 +17,8 @@
       "id": "ID",
       "content": "Content",
       "note": "Note",
-      "repo": "Repo"
+      "options": "Options",
+      "questionGroup": "Question Group"
     }
   },
   "examStoreApp": {

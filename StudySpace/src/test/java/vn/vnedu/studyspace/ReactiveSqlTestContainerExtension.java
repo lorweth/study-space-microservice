@@ -11,7 +11,7 @@ public class ReactiveSqlTestContainerExtension implements BeforeAllCallback {
 
     private static AtomicBoolean started = new AtomicBoolean(false);
 
-    private static MySQLContainer<?> container = new MySQLContainer<>("mysql:8.0.25")
+    private static MySQLContainer<?> container = new MySQLContainer<>("mysql:8.0.27")
         .withDatabaseName("StudySpace")
         .withTmpFs(Collections.singletonMap("/testtmpfs", "rw"));
 

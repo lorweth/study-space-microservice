@@ -17,6 +17,7 @@ public class AnswerSheetItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column("id")
     private Long id;
 
     @NotNull(message = "must not be null")
@@ -27,25 +28,26 @@ public class AnswerSheetItem implements Serializable {
     @Column("answer_id")
     private Long answerId;
 
-    @JsonIgnoreProperties(value = { "groupTimeTable" }, allowSetters = true)
     @Transient
+    @JsonIgnoreProperties(value = { "answerSheetItems", "groupTimeTable" }, allowSetters = true)
     private AnswerSheet answerSheet;
 
     @Column("answer_sheet_id")
     private Long answerSheetId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public AnswerSheetItem id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public AnswerSheetItem id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public Long getQuestionId() {
@@ -53,7 +55,7 @@ public class AnswerSheetItem implements Serializable {
     }
 
     public AnswerSheetItem questionId(Long questionId) {
-        this.questionId = questionId;
+        this.setQuestionId(questionId);
         return this;
     }
 
@@ -66,7 +68,7 @@ public class AnswerSheetItem implements Serializable {
     }
 
     public AnswerSheetItem answerId(Long answerId) {
-        this.answerId = answerId;
+        this.setAnswerId(answerId);
         return this;
     }
 
@@ -78,15 +80,14 @@ public class AnswerSheetItem implements Serializable {
         return this.answerSheet;
     }
 
-    public AnswerSheetItem answerSheet(AnswerSheet answerSheet) {
-        this.setAnswerSheet(answerSheet);
-        this.answerSheetId = answerSheet != null ? answerSheet.getId() : null;
-        return this;
-    }
-
     public void setAnswerSheet(AnswerSheet answerSheet) {
         this.answerSheet = answerSheet;
         this.answerSheetId = answerSheet != null ? answerSheet.getId() : null;
+    }
+
+    public AnswerSheetItem answerSheet(AnswerSheet answerSheet) {
+        this.setAnswerSheet(answerSheet);
+        return this;
     }
 
     public Long getAnswerSheetId() {

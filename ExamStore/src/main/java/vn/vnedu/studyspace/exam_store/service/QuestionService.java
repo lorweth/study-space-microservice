@@ -54,13 +54,11 @@ public class QuestionService {
 
         return questionRepository
             .findById(questionDTO.getId())
-            .map(
-                existingQuestion -> {
-                    questionMapper.partialUpdate(existingQuestion, questionDTO);
+            .map(existingQuestion -> {
+                questionMapper.partialUpdate(existingQuestion, questionDTO);
 
-                    return existingQuestion;
-                }
-            )
+                return existingQuestion;
+            })
             .map(questionRepository::save)
             .map(questionMapper::toDto);
     }

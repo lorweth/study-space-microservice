@@ -4,7 +4,7 @@ import { IExam } from 'app/shared/model/ExamStore/exam.model';
 export interface IExamItem {
   id?: number;
   numOfQuestion?: number;
-  repo?: IQuestionGroup | null;
+  questionGroup?: IQuestionGroup | null;
   exam?: IExam | null;
 }
 

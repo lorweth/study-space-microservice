@@ -113,7 +113,7 @@ public class TopicResource {
      * or with status {@code 500 (Internal Server Error)} if the topicDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/topics/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/topics/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<TopicDTO> partialUpdateTopic(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody TopicDTO topicDTO

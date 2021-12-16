@@ -19,7 +19,6 @@ export const GroupTimeTableUpdate = (props: RouteComponentProps<{ id: string }>)
   const loading = useAppSelector(state => state.groupTimeTable.loading);
   const updating = useAppSelector(state => state.groupTimeTable.updating);
   const updateSuccess = useAppSelector(state => state.groupTimeTable.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/group-time-table');
   };

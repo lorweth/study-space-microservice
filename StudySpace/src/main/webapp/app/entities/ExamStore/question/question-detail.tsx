@@ -42,9 +42,9 @@ export const QuestionDetail = (props: RouteComponentProps<{ id: string }>) => {
           </dt>
           <dd>{questionEntity.note}</dd>
           <dt>
-            <Translate contentKey="studySpaceApp.examStoreQuestion.repo">Repo</Translate>
+            <Translate contentKey="studySpaceApp.examStoreQuestion.questionGroup">Question Group</Translate>
           </dt>
-          <dd>{questionEntity.repo ? questionEntity.repo.id : ''}</dd>
+          <dd>{questionEntity.questionGroup ? questionEntity.questionGroup.id : ''}</dd>
         </dl>
         <Button tag={Link} to="/question" replace color="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}

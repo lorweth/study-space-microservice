@@ -3,7 +3,6 @@ import axios from 'axios';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import sinon from 'sinon';
-import { parseHeaderForLinks } from 'react-jhipster';
 
 import reducer, {
   createEntity,
@@ -31,9 +30,6 @@ describe('Entities reducer tests', () => {
     errorMessage: null,
     entities: [],
     entity: defaultValue,
-    links: {
-      next: 0,
-    },
     totalItems: 0,
     updating: false,
     updateSuccess: false,
@@ -122,8 +118,7 @@ describe('Entities reducer tests', () => {
 
   describe('Successes', () => {
     it('should fetch all entities', () => {
-      const payload = { data: [{ 1: 'fake1' }, { 2: 'fake2' }], headers: { 'x-total-count': 123, link: ';' } };
-      const links = parseHeaderForLinks(payload.headers.link);
+      const payload = { data: [{ 1: 'fake1' }, { 2: 'fake2' }], headers: { 'x-total-count': 123 } };
       expect(
         reducer(undefined, {
           type: getEntities.fulfilled.type,
@@ -131,7 +126,6 @@ describe('Entities reducer tests', () => {
         })
       ).toEqual({
         ...initialState,
-        links,
         loading: false,
         totalItems: payload.headers['x-total-count'],
         entities: payload.data,
@@ -230,6 +224,9 @@ describe('Entities reducer tests', () => {
           type: createEntity.pending.type,
         },
         {
+          type: getEntities.pending.type,
+        },
+        {
           type: createEntity.fulfilled.type,
           payload: resolvedObject,
         },
@@ -237,12 +234,16 @@ describe('Entities reducer tests', () => {
       await store.dispatch(createEntity({ id: 456 }));
       expect(store.getActions()[0]).toMatchObject(expectedActions[0]);
       expect(store.getActions()[1]).toMatchObject(expectedActions[1]);
+      expect(store.getActions()[2]).toMatchObject(expectedActions[2]);
     });
 
     it('dispatches UPDATE_GROUPMEMBER actions', async () => {
       const expectedActions = [
         {
           type: updateEntity.pending.type,
+        },
+        {
+          type: getEntities.pending.type,
         },
         {
           type: updateEntity.fulfilled.type,
@@ -252,12 +253,16 @@ describe('Entities reducer tests', () => {
       await store.dispatch(updateEntity({ id: 456 }));
       expect(store.getActions()[0]).toMatchObject(expectedActions[0]);
       expect(store.getActions()[1]).toMatchObject(expectedActions[1]);
+      expect(store.getActions()[2]).toMatchObject(expectedActions[2]);
     });
 
     it('dispatches PARTIAL_UPDATE_GROUPMEMBER actions', async () => {
       const expectedActions = [
         {
           type: partialUpdateEntity.pending.type,
+        },
+        {
+          type: getEntities.pending.type,
         },
         {
           type: partialUpdateEntity.fulfilled.type,
@@ -267,12 +272,16 @@ describe('Entities reducer tests', () => {
       await store.dispatch(partialUpdateEntity({ id: 123 }));
       expect(store.getActions()[0]).toMatchObject(expectedActions[0]);
       expect(store.getActions()[1]).toMatchObject(expectedActions[1]);
+      expect(store.getActions()[2]).toMatchObject(expectedActions[2]);
     });
 
     it('dispatches DELETE_GROUPMEMBER actions', async () => {
       const expectedActions = [
         {
           type: deleteEntity.pending.type,
+        },
+        {
+          type: getEntities.pending.type,
         },
         {
           type: deleteEntity.fulfilled.type,
@@ -282,6 +291,7 @@ describe('Entities reducer tests', () => {
       await store.dispatch(deleteEntity(42666));
       expect(store.getActions()[0]).toMatchObject(expectedActions[0]);
       expect(store.getActions()[1]).toMatchObject(expectedActions[1]);
+      expect(store.getActions()[2]).toMatchObject(expectedActions[2]);
     });
 
     it('dispatches RESET actions', async () => {

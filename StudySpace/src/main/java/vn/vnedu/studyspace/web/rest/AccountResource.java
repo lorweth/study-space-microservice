@@ -12,7 +12,6 @@ import reactor.core.publisher.Mono;
 import vn.vnedu.studyspace.security.SecurityUtils;
 import vn.vnedu.studyspace.service.UserService;
 import vn.vnedu.studyspace.service.dto.AdminUserDTO;
-import vn.vnedu.studyspace.service.dto.UserDTO;
 
 /**
  * REST controller for managing the current user's account.

@@ -14,7 +14,7 @@ public class ExamItemDTO implements Serializable {
     @NotNull
     private Integer numOfQuestion;
 
-    private QuestionGroupDTO repo;
+    private QuestionGroupDTO questionGroup;
 
     private ExamDTO exam;
 
@@ -34,12 +34,12 @@ public class ExamItemDTO implements Serializable {
         this.numOfQuestion = numOfQuestion;
     }
 
-    public QuestionGroupDTO getRepo() {
-        return repo;
+    public QuestionGroupDTO getQuestionGroup() {
+        return questionGroup;
     }
 
-    public void setRepo(QuestionGroupDTO repo) {
-        this.repo = repo;
+    public void setQuestionGroup(QuestionGroupDTO questionGroup) {
+        this.questionGroup = questionGroup;
     }
 
     public ExamDTO getExam() {
@@ -77,7 +77,7 @@ public class ExamItemDTO implements Serializable {
         return "ExamItemDTO{" +
             "id=" + getId() +
             ", numOfQuestion=" + getNumOfQuestion() +
-            ", repo=" + getRepo() +
+            ", questionGroup=" + getQuestionGroup() +
             ", exam=" + getExam() +
             "}";
     }

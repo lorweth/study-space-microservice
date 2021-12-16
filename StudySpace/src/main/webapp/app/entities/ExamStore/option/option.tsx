@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { byteSize, Translate, getSortState } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -98,7 +98,7 @@ export const Option = (props: RouteComponentProps<{ url: string }>) => {
       <h2 id="option-heading" data-cy="OptionHeading">
         <Translate contentKey="studySpaceApp.examStoreOption.home.title">Options</Translate>
         <div className="d-flex justify-content-end">
-          <Button className="mr-2" color="info" onClick={handleSyncList} disabled={loading}>
+          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
             <FontAwesomeIcon icon="sync" spin={loading} />{' '}
             <Translate contentKey="studySpaceApp.examStoreOption.home.refreshListLabel">Refresh List</Translate>
           </Button>
@@ -111,12 +111,10 @@ export const Option = (props: RouteComponentProps<{ url: string }>) => {
       </h2>
       <div className="table-responsive">
         <InfiniteScroll
-          pageStart={paginationState.activePage}
-          loadMore={handleLoadMore}
+          dataLength={optionList ? optionList.length : 0}
+          next={handleLoadMore}
           hasMore={paginationState.activePage - 1 < links.next}
           loader={<div className="loader">Loading ...</div>}
-          threshold={0}
-          initialLoad={false}
         >
           {optionList && optionList.length > 0 ? (
             <Table responsive>
@@ -148,7 +146,7 @@ export const Option = (props: RouteComponentProps<{ url: string }>) => {
                     <td>{option.content}</td>
                     <td>{option.isCorrect ? 'true' : 'false'}</td>
                     <td>{option.question ? <Link to={`question/${option.question.id}`}>{option.question.id}</Link> : ''}</td>
-                    <td className="text-right">
+                    <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
                         <Button tag={Link} to={`${match.url}/${option.id}`} color="info" size="sm" data-cy="entityDetailsButton">
                           <FontAwesomeIcon icon="eye" />{' '}

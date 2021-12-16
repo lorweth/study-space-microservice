@@ -82,16 +82,15 @@ class AnswerSheetItemRepositoryInternalImpl implements AnswerSheetItemRepository
         String alias = entityTable.getReferenceName().getReference();
         String selectWhere = Optional
             .ofNullable(criteria)
-            .map(
-                crit ->
-                    new StringBuilder(select)
-                        .append(" ")
-                        .append("WHERE")
-                        .append(" ")
-                        .append(alias)
-                        .append(".")
-                        .append(crit.toString())
-                        .toString()
+            .map(crit ->
+                new StringBuilder(select)
+                    .append(" ")
+                    .append("WHERE")
+                    .append(" ")
+                    .append(alias)
+                    .append(".")
+                    .append(crit.toString())
+                    .toString()
             )
             .orElse(select); // TODO remove once https://github.com/spring-projects/spring-data-jdbc/issues/907 will be fixed
         return db.sql(selectWhere).map(this::process);
@@ -124,14 +123,12 @@ class AnswerSheetItemRepositoryInternalImpl implements AnswerSheetItemRepository
             return insert(entity);
         } else {
             return update(entity)
-                .map(
-                    numberOfUpdates -> {
-                        if (numberOfUpdates.intValue() <= 0) {
-                            throw new IllegalStateException("Unable to update AnswerSheetItem with id = " + entity.getId());
-                        }
-                        return entity;
+                .map(numberOfUpdates -> {
+                    if (numberOfUpdates.intValue() <= 0) {
+                        throw new IllegalStateException("Unable to update AnswerSheetItem with id = " + entity.getId());
                     }
-                );
+                    return entity;
+                });
         }
     }
 
@@ -139,18 +136,5 @@ class AnswerSheetItemRepositoryInternalImpl implements AnswerSheetItemRepository
     public Mono<Integer> update(AnswerSheetItem entity) {
         //fixme is this the proper way?
         return r2dbcEntityTemplate.update(entity).thenReturn(1);
-    }
-}
-
-class AnswerSheetItemSqlHelper {
-
-    static List<Expression> getColumns(Table table, String columnPrefix) {
-        List<Expression> columns = new ArrayList<>();
-        columns.add(Column.aliased("id", table, columnPrefix + "_id"));
-        columns.add(Column.aliased("question_id", table, columnPrefix + "_question_id"));
-        columns.add(Column.aliased("answer_id", table, columnPrefix + "_answer_id"));
-
-        columns.add(Column.aliased("answer_sheet_id", table, columnPrefix + "_answer_sheet_id"));
-        return columns;
     }
 }

@@ -17,6 +17,7 @@ public class GroupTimeTable implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column("id")
     private Long id;
 
     @NotNull(message = "must not be null")
@@ -39,17 +40,18 @@ public class GroupTimeTable implements Serializable {
     private String note;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public GroupTimeTable id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public GroupTimeTable id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public Long getExamId() {
@@ -57,7 +59,7 @@ public class GroupTimeTable implements Serializable {
     }
 
     public GroupTimeTable examId(Long examId) {
-        this.examId = examId;
+        this.setExamId(examId);
         return this;
     }
 
@@ -70,7 +72,7 @@ public class GroupTimeTable implements Serializable {
     }
 
     public GroupTimeTable startAt(Instant startAt) {
-        this.startAt = startAt;
+        this.setStartAt(startAt);
         return this;
     }
 
@@ -83,7 +85,7 @@ public class GroupTimeTable implements Serializable {
     }
 
     public GroupTimeTable endAt(Instant endAt) {
-        this.endAt = endAt;
+        this.setEndAt(endAt);
         return this;
     }
 
@@ -96,7 +98,7 @@ public class GroupTimeTable implements Serializable {
     }
 
     public GroupTimeTable groupId(String groupId) {
-        this.groupId = groupId;
+        this.setGroupId(groupId);
         return this;
     }
 
@@ -109,7 +111,7 @@ public class GroupTimeTable implements Serializable {
     }
 
     public GroupTimeTable note(String note) {
-        this.note = note;
+        this.setNote(note);
         return this;
     }
 

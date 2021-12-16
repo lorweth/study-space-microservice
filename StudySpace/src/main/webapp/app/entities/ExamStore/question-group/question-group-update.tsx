@@ -22,7 +22,6 @@ export const QuestionGroupUpdate = (props: RouteComponentProps<{ id: string }>) 
   const loading = useAppSelector(state => state.questionGroup.loading);
   const updating = useAppSelector(state => state.questionGroup.updating);
   const updateSuccess = useAppSelector(state => state.questionGroup.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/question-group');
   };
@@ -45,7 +44,7 @@ export const QuestionGroupUpdate = (props: RouteComponentProps<{ id: string }>) 
     const entity = {
       ...questionGroupEntity,
       ...values,
-      topic: topics.find(it => it.id.toString() === values.topicId.toString()),
+      topic: topics.find(it => it.id.toString() === values.topic.toString()),
     };
 
     if (isNew) {
@@ -60,7 +59,7 @@ export const QuestionGroupUpdate = (props: RouteComponentProps<{ id: string }>) 
       ? {}
       : {
           ...questionGroupEntity,
-          topicId: questionGroupEntity?.topic?.id,
+          topic: questionGroupEntity?.topic?.id,
         };
 
   return (
@@ -119,7 +118,7 @@ export const QuestionGroupUpdate = (props: RouteComponentProps<{ id: string }>) 
               />
               <ValidatedField
                 id="question-group-topic"
-                name="topicId"
+                name="topic"
                 data-cy="topic"
                 label={translate('studySpaceApp.examStoreQuestionGroup.topic')}
                 type="select"

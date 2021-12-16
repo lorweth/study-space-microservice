@@ -13,7 +13,6 @@ export const initialState = {
   errorMessage: null as unknown as string, // Errors returned from server side
   redirectMessage: null as unknown as string,
   sessionHasBeenFetched: false,
-  idToken: null as unknown as string,
   logoutUrl: null as unknown as string,
 };
 
@@ -89,7 +88,6 @@ export const AuthenticationSlice = createSlice({
       })
       .addCase(logoutServer.fulfilled, (state, action) => ({
         ...initialState,
-        idToken: action.payload.data.idToken,
         logoutUrl: action.payload.data.logoutUrl,
       }))
       .addCase(getAccount.pending, state => {

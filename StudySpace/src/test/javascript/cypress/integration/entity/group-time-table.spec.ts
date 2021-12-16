@@ -16,6 +16,14 @@ describe('GroupTimeTable e2e test', () => {
   const groupTimeTablePageUrlPattern = new RegExp('/group-time-table(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
+  const groupTimeTableSample = {
+    examId: 59325,
+    startAt: '2021-12-16T08:59:33.506Z',
+    endAt: '2021-12-15T19:04:10.084Z',
+    groupId: 'Facilitator lavender Chair',
+  };
+
+  let groupTimeTable: any;
 
   beforeEach(() => {
     cy.getOauth2Data();
@@ -27,11 +35,8 @@ describe('GroupTimeTable e2e test', () => {
     cy.get(entityItemSelector).should('exist');
   });
 
-  afterEach(() => {
-    cy.get('@oauth2Data').then(oauth2Data => {
-      cy.oauthLogout(oauth2Data);
-    });
-    cy.clearCache();
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('XSRF-TOKEN', 'JSESSIONID');
   });
 
   beforeEach(() => {
@@ -40,11 +45,27 @@ describe('GroupTimeTable e2e test', () => {
     cy.intercept('DELETE', '/services/answerstore/api/group-time-tables/*').as('deleteEntityRequest');
   });
 
-  it('should load GroupTimeTables', () => {
+  afterEach(() => {
+    if (groupTimeTable) {
+      cy.authenticatedRequest({
+        method: 'DELETE',
+        url: `/services/answerstore/api/group-time-tables/${groupTimeTable.id}`,
+      }).then(() => {
+        groupTimeTable = undefined;
+      });
+    }
+  });
+
+  afterEach(() => {
+    cy.oauthLogout();
+    cy.clearCache();
+  });
+
+  it('GroupTimeTables menu should load GroupTimeTables page', () => {
     cy.visit('/');
     cy.clickOnEntityMenuItem('group-time-table');
     cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
+      if (response!.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');
       } else {
         cy.get(entityTableSelector).should('exist');
@@ -54,99 +75,121 @@ describe('GroupTimeTable e2e test', () => {
     cy.url().should('match', groupTimeTablePageUrlPattern);
   });
 
-  it('should load details GroupTimeTable page', function () {
-    cy.visit(groupTimeTablePageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
+  describe('GroupTimeTable page', () => {
+    describe('create button click', () => {
+      beforeEach(() => {
+        cy.visit(groupTimeTablePageUrl);
+        cy.wait('@entitiesRequest');
+      });
+
+      it('should load create GroupTimeTable page', () => {
+        cy.get(entityCreateButtonSelector).click({ force: true });
+        cy.url().should('match', new RegExp('/group-time-table/new$'));
+        cy.getEntityCreateUpdateHeading('GroupTimeTable');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', groupTimeTablePageUrlPattern);
+      });
     });
-    cy.get(entityDetailsButtonSelector).first().click({ force: true });
-    cy.getEntityDetailsHeading('groupTimeTable');
-    cy.get(entityDetailsBackButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', groupTimeTablePageUrlPattern);
-  });
 
-  it('should load create GroupTimeTable page', () => {
-    cy.visit(groupTimeTablePageUrl);
-    cy.wait('@entitiesRequest');
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('GroupTimeTable');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', groupTimeTablePageUrlPattern);
-  });
+    describe('with existing value', () => {
+      beforeEach(() => {
+        cy.authenticatedRequest({
+          method: 'POST',
+          url: '/services/answerstore/api/group-time-tables',
+          body: groupTimeTableSample,
+        }).then(({ body }) => {
+          groupTimeTable = body;
 
-  it('should load edit GroupTimeTable page', function () {
-    cy.visit(groupTimeTablePageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
-    });
-    cy.get(entityEditButtonSelector).first().click({ force: true });
-    cy.getEntityCreateUpdateHeading('GroupTimeTable');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', groupTimeTablePageUrlPattern);
-  });
+          cy.intercept(
+            {
+              method: 'GET',
+              url: '/services/answerstore/api/group-time-tables+(?*|)',
+              times: 1,
+            },
+            {
+              statusCode: 200,
+              body: [groupTimeTable],
+            }
+          ).as('entitiesRequestInternal');
+        });
 
-  it('should create an instance of GroupTimeTable', () => {
-    cy.visit(groupTimeTablePageUrl);
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('GroupTimeTable');
+        cy.visit(groupTimeTablePageUrl);
 
-    cy.get(`[data-cy="examId"]`).type('6778').should('have.value', '6778');
+        cy.wait('@entitiesRequestInternal');
+      });
 
-    cy.get(`[data-cy="startAt"]`).type('2021-08-31T19:28').should('have.value', '2021-08-31T19:28');
+      it('detail button click should load details GroupTimeTable page', () => {
+        cy.get(entityDetailsButtonSelector).first().click();
+        cy.getEntityDetailsHeading('groupTimeTable');
+        cy.get(entityDetailsBackButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', groupTimeTablePageUrlPattern);
+      });
 
-    cy.get(`[data-cy="endAt"]`).type('2021-09-01T00:47').should('have.value', '2021-09-01T00:47');
+      it('edit button click should load edit GroupTimeTable page', () => {
+        cy.get(entityEditButtonSelector).first().click();
+        cy.getEntityCreateUpdateHeading('GroupTimeTable');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', groupTimeTablePageUrlPattern);
+      });
 
-    cy.get(`[data-cy="groupId"]`).type('Dam').should('have.value', 'Dam');
-
-    cy.get(`[data-cy="note"]`).type('holistic Soft Wooden').should('have.value', 'holistic Soft Wooden');
-
-    cy.get(entityCreateSaveButtonSelector).click({ force: true });
-    cy.scrollTo('top', { ensureScrollable: false });
-    cy.get(entityCreateSaveButtonSelector).should('not.exist');
-    cy.wait('@postEntityRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(201);
-    });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', groupTimeTablePageUrlPattern);
-  });
-
-  it('should delete last instance of GroupTimeTable', function () {
-    cy.intercept('GET', '/services/answerstore/api/group-time-tables/*').as('dialogDeleteRequest');
-    cy.visit(groupTimeTablePageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length > 0) {
-        cy.get(entityTableSelector).should('have.lengthOf', response.body.length);
-        cy.get(entityDeleteButtonSelector).last().click({ force: true });
+      it('last delete button click should delete instance of GroupTimeTable', () => {
+        cy.intercept('GET', '/services/answerstore/api/group-time-tables/*').as('dialogDeleteRequest');
+        cy.get(entityDeleteButtonSelector).last().click();
         cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('groupTimeTable').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click({ force: true });
         cy.wait('@deleteEntityRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(204);
+          expect(response!.statusCode).to.equal(204);
         });
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response!.statusCode).to.equal(200);
         });
         cy.url().should('match', groupTimeTablePageUrlPattern);
-      } else {
-        this.skip();
-      }
+
+        groupTimeTable = undefined;
+      });
+    });
+  });
+
+  describe('new GroupTimeTable page', () => {
+    beforeEach(() => {
+      cy.visit(`${groupTimeTablePageUrl}`);
+      cy.get(entityCreateButtonSelector).click({ force: true });
+      cy.getEntityCreateUpdateHeading('GroupTimeTable');
+    });
+
+    it('should create an instance of GroupTimeTable', () => {
+      cy.get(`[data-cy="examId"]`).type('6778').should('have.value', '6778');
+
+      cy.get(`[data-cy="startAt"]`).type('2021-12-15T23:29').should('have.value', '2021-12-15T23:29');
+
+      cy.get(`[data-cy="endAt"]`).type('2021-12-16T04:48').should('have.value', '2021-12-16T04:48');
+
+      cy.get(`[data-cy="groupId"]`).type('Dam').should('have.value', 'Dam');
+
+      cy.get(`[data-cy="note"]`).type('holistic Soft Wooden').should('have.value', 'holistic Soft Wooden');
+
+      cy.get(entityCreateSaveButtonSelector).click();
+
+      cy.wait('@postEntityRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(201);
+        groupTimeTable = response!.body;
+      });
+      cy.wait('@entitiesRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(200);
+      });
+      cy.url().should('match', groupTimeTablePageUrlPattern);
     });
   });
 });

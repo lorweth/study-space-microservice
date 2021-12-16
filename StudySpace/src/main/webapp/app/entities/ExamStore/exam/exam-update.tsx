@@ -19,7 +19,6 @@ export const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.exam.loading);
   const updating = useAppSelector(state => state.exam.updating);
   const updateSuccess = useAppSelector(state => state.exam.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/exam');
   };

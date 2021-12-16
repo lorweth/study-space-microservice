@@ -22,7 +22,6 @@ export const OptionUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.option.loading);
   const updating = useAppSelector(state => state.option.updating);
   const updateSuccess = useAppSelector(state => state.option.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/option');
   };
@@ -45,7 +44,7 @@ export const OptionUpdate = (props: RouteComponentProps<{ id: string }>) => {
     const entity = {
       ...optionEntity,
       ...values,
-      question: questions.find(it => it.id.toString() === values.questionId.toString()),
+      question: questions.find(it => it.id.toString() === values.question.toString()),
     };
 
     if (isNew) {
@@ -60,7 +59,7 @@ export const OptionUpdate = (props: RouteComponentProps<{ id: string }>) => {
       ? {}
       : {
           ...optionEntity,
-          questionId: optionEntity?.question?.id,
+          question: optionEntity?.question?.id,
         };
 
   return (
@@ -108,7 +107,7 @@ export const OptionUpdate = (props: RouteComponentProps<{ id: string }>) => {
               />
               <ValidatedField
                 id="option-question"
-                name="questionId"
+                name="question"
                 data-cy="question"
                 label={translate('studySpaceApp.examStoreOption.question')}
                 type="select"

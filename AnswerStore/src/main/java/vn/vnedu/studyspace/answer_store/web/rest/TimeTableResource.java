@@ -70,18 +70,16 @@ public class TimeTableResource {
         }
         return timeTableService
             .save(timeTableDTO)
-            .map(
-                result -> {
-                    try {
-                        return ResponseEntity
-                            .created(new URI("/api/time-tables/" + result.getId()))
-                            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-                            .body(result);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
+            .map(result -> {
+                try {
+                    return ResponseEntity
+                        .created(new URI("/api/time-tables/" + result.getId()))
+                        .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                        .body(result);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
                 }
-            );
+            });
     }
 
     /**
@@ -109,26 +107,21 @@ public class TimeTableResource {
 
         return timeTableRepository
             .existsById(id)
-            .flatMap(
-                exists -> {
-                    if (!exists) {
-                        return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                    }
-
-                    return timeTableService
-                        .save(timeTableDTO)
-                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                        .map(
-                            result ->
-                                ResponseEntity
-                                    .ok()
-                                    .headers(
-                                        HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString())
-                                    )
-                                    .body(result)
-                        );
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
                 }
-            );
+
+                return timeTableService
+                    .save(timeTableDTO)
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                    .map(result ->
+                        ResponseEntity
+                            .ok()
+                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                            .body(result)
+                    );
+            });
     }
 
     /**
@@ -142,7 +135,7 @@ public class TimeTableResource {
      * or with status {@code 500 (Internal Server Error)} if the timeTableDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/time-tables/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/time-tables/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public Mono<ResponseEntity<TimeTableDTO>> partialUpdateTimeTable(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody TimeTableDTO timeTableDTO
@@ -157,25 +150,22 @@ public class TimeTableResource {
 
         return timeTableRepository
             .existsById(id)
-            .flatMap(
-                exists -> {
-                    if (!exists) {
-                        return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                    }
-
-                    Mono<TimeTableDTO> result = timeTableService.partialUpdate(timeTableDTO);
-
-                    return result
-                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                        .map(
-                            res ->
-                                ResponseEntity
-                                    .ok()
-                                    .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
-                                    .body(res)
-                        );
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
                 }
-            );
+
+                Mono<TimeTableDTO> result = timeTableService.partialUpdate(timeTableDTO);
+
+                return result
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                    .map(res ->
+                        ResponseEntity
+                            .ok()
+                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
+                            .body(res)
+                    );
+            });
     }
 
     /**
@@ -191,19 +181,17 @@ public class TimeTableResource {
         return timeTableService
             .countAll()
             .zipWith(timeTableService.findAll(pageable).collectList())
-            .map(
-                countWithEntities -> {
-                    return ResponseEntity
-                        .ok()
-                        .headers(
-                            PaginationUtil.generatePaginationHttpHeaders(
-                                UriComponentsBuilder.fromHttpRequest(request),
-                                new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
-                            )
+            .map(countWithEntities -> {
+                return ResponseEntity
+                    .ok()
+                    .headers(
+                        PaginationUtil.generatePaginationHttpHeaders(
+                            UriComponentsBuilder.fromHttpRequest(request),
+                            new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
                         )
-                        .body(countWithEntities.getT2());
-                }
-            );
+                    )
+                    .body(countWithEntities.getT2());
+            });
     }
 
     /**
@@ -231,12 +219,11 @@ public class TimeTableResource {
         log.debug("REST request to delete TimeTable : {}", id);
         return timeTableService
             .delete(id)
-            .map(
-                result ->
-                    ResponseEntity
-                        .noContent()
-                        .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-                        .build()
+            .map(result ->
+                ResponseEntity
+                    .noContent()
+                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                    .build()
             );
     }
 }

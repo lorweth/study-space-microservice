@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
+import { IAnswerSheetItem } from 'app/shared/model/AnswerStore/answer-sheet-item.model';
 import { IGroupTimeTable } from 'app/shared/model/AnswerStore/group-time-table.model';
 
 export interface IAnswerSheet {
   id?: number;
   time?: string;
   userLogin?: string;
+  answerSheetItems?: IAnswerSheetItem[] | null;
   groupTimeTable?: IGroupTimeTable | null;
 }
 

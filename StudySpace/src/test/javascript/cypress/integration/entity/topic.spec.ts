@@ -16,6 +16,9 @@ describe('Topic e2e test', () => {
   const topicPageUrlPattern = new RegExp('/topic(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
+  const topicSample = { name: 'Books' };
+
+  let topic: any;
 
   beforeEach(() => {
     cy.getOauth2Data();
@@ -27,11 +30,8 @@ describe('Topic e2e test', () => {
     cy.get(entityItemSelector).should('exist');
   });
 
-  afterEach(() => {
-    cy.get('@oauth2Data').then(oauth2Data => {
-      cy.oauthLogout(oauth2Data);
-    });
-    cy.clearCache();
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('XSRF-TOKEN', 'JSESSIONID');
   });
 
   beforeEach(() => {
@@ -40,11 +40,27 @@ describe('Topic e2e test', () => {
     cy.intercept('DELETE', '/services/examstore/api/topics/*').as('deleteEntityRequest');
   });
 
-  it('should load Topics', () => {
+  afterEach(() => {
+    if (topic) {
+      cy.authenticatedRequest({
+        method: 'DELETE',
+        url: `/services/examstore/api/topics/${topic.id}`,
+      }).then(() => {
+        topic = undefined;
+      });
+    }
+  });
+
+  afterEach(() => {
+    cy.oauthLogout();
+    cy.clearCache();
+  });
+
+  it('Topics menu should load Topics page', () => {
     cy.visit('/');
     cy.clickOnEntityMenuItem('topic');
     cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
+      if (response!.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');
       } else {
         cy.get(entityTableSelector).should('exist');
@@ -54,91 +70,113 @@ describe('Topic e2e test', () => {
     cy.url().should('match', topicPageUrlPattern);
   });
 
-  it('should load details Topic page', function () {
-    cy.visit(topicPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
-    });
-    cy.get(entityDetailsButtonSelector).first().click({ force: true });
-    cy.getEntityDetailsHeading('topic');
-    cy.get(entityDetailsBackButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', topicPageUrlPattern);
-  });
+  describe('Topic page', () => {
+    describe('create button click', () => {
+      beforeEach(() => {
+        cy.visit(topicPageUrl);
+        cy.wait('@entitiesRequest');
+      });
 
-  it('should load create Topic page', () => {
-    cy.visit(topicPageUrl);
-    cy.wait('@entitiesRequest');
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('Topic');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
+      it('should load create Topic page', () => {
+        cy.get(entityCreateButtonSelector).click({ force: true });
+        cy.url().should('match', new RegExp('/topic/new$'));
+        cy.getEntityCreateUpdateHeading('Topic');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', topicPageUrlPattern);
+      });
     });
-    cy.url().should('match', topicPageUrlPattern);
-  });
 
-  it('should load edit Topic page', function () {
-    cy.visit(topicPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
-    });
-    cy.get(entityEditButtonSelector).first().click({ force: true });
-    cy.getEntityCreateUpdateHeading('Topic');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', topicPageUrlPattern);
-  });
+    describe('with existing value', () => {
+      beforeEach(() => {
+        cy.authenticatedRequest({
+          method: 'POST',
+          url: '/services/examstore/api/topics',
+          body: topicSample,
+        }).then(({ body }) => {
+          topic = body;
 
-  it('should create an instance of Topic', () => {
-    cy.visit(topicPageUrl);
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('Topic');
+          cy.intercept(
+            {
+              method: 'GET',
+              url: '/services/examstore/api/topics+(?*|)',
+              times: 1,
+            },
+            {
+              statusCode: 200,
+              body: [topic],
+            }
+          ).as('entitiesRequestInternal');
+        });
 
-    cy.get(`[data-cy="name"]`).type('digital SAS Accountability').should('have.value', 'digital SAS Accountability');
+        cy.visit(topicPageUrl);
 
-    cy.get(entityCreateSaveButtonSelector).click({ force: true });
-    cy.scrollTo('top', { ensureScrollable: false });
-    cy.get(entityCreateSaveButtonSelector).should('not.exist');
-    cy.wait('@postEntityRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(201);
-    });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', topicPageUrlPattern);
-  });
+        cy.wait('@entitiesRequestInternal');
+      });
 
-  it('should delete last instance of Topic', function () {
-    cy.intercept('GET', '/services/examstore/api/topics/*').as('dialogDeleteRequest');
-    cy.visit(topicPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length > 0) {
-        cy.get(entityTableSelector).should('have.lengthOf', response.body.length);
-        cy.get(entityDeleteButtonSelector).last().click({ force: true });
+      it('detail button click should load details Topic page', () => {
+        cy.get(entityDetailsButtonSelector).first().click();
+        cy.getEntityDetailsHeading('topic');
+        cy.get(entityDetailsBackButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', topicPageUrlPattern);
+      });
+
+      it('edit button click should load edit Topic page', () => {
+        cy.get(entityEditButtonSelector).first().click();
+        cy.getEntityCreateUpdateHeading('Topic');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', topicPageUrlPattern);
+      });
+
+      it('last delete button click should delete instance of Topic', () => {
+        cy.intercept('GET', '/services/examstore/api/topics/*').as('dialogDeleteRequest');
+        cy.get(entityDeleteButtonSelector).last().click();
         cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('topic').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click({ force: true });
         cy.wait('@deleteEntityRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(204);
+          expect(response!.statusCode).to.equal(204);
         });
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response!.statusCode).to.equal(200);
         });
         cy.url().should('match', topicPageUrlPattern);
-      } else {
-        this.skip();
-      }
+
+        topic = undefined;
+      });
+    });
+  });
+
+  describe('new Topic page', () => {
+    beforeEach(() => {
+      cy.visit(`${topicPageUrl}`);
+      cy.get(entityCreateButtonSelector).click({ force: true });
+      cy.getEntityCreateUpdateHeading('Topic');
+    });
+
+    it('should create an instance of Topic', () => {
+      cy.get(`[data-cy="name"]`).type('digital SAS Accountability').should('have.value', 'digital SAS Accountability');
+
+      cy.get(entityCreateSaveButtonSelector).click();
+
+      cy.wait('@postEntityRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(201);
+        topic = response!.body;
+      });
+      cy.wait('@entitiesRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(200);
+      });
+      cy.url().should('match', topicPageUrlPattern);
     });
   });
 });

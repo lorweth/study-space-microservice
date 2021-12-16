@@ -71,18 +71,16 @@ public class AnswerSheetResource {
         }
         return answerSheetService
             .save(answerSheetDTO)
-            .map(
-                result -> {
-                    try {
-                        return ResponseEntity
-                            .created(new URI("/api/answer-sheets/" + result.getId()))
-                            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-                            .body(result);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
+            .map(result -> {
+                try {
+                    return ResponseEntity
+                        .created(new URI("/api/answer-sheets/" + result.getId()))
+                        .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                        .body(result);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
                 }
-            );
+            });
     }
 
     /**
@@ -110,26 +108,21 @@ public class AnswerSheetResource {
 
         return answerSheetRepository
             .existsById(id)
-            .flatMap(
-                exists -> {
-                    if (!exists) {
-                        return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                    }
-
-                    return answerSheetService
-                        .save(answerSheetDTO)
-                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                        .map(
-                            result ->
-                                ResponseEntity
-                                    .ok()
-                                    .headers(
-                                        HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString())
-                                    )
-                                    .body(result)
-                        );
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
                 }
-            );
+
+                return answerSheetService
+                    .save(answerSheetDTO)
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                    .map(result ->
+                        ResponseEntity
+                            .ok()
+                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                            .body(result)
+                    );
+            });
     }
 
     /**
@@ -143,7 +136,7 @@ public class AnswerSheetResource {
      * or with status {@code 500 (Internal Server Error)} if the answerSheetDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/answer-sheets/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/answer-sheets/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public Mono<ResponseEntity<AnswerSheetDTO>> partialUpdateAnswerSheet(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody AnswerSheetDTO answerSheetDTO
@@ -158,25 +151,22 @@ public class AnswerSheetResource {
 
         return answerSheetRepository
             .existsById(id)
-            .flatMap(
-                exists -> {
-                    if (!exists) {
-                        return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                    }
-
-                    Mono<AnswerSheetDTO> result = answerSheetService.partialUpdate(answerSheetDTO);
-
-                    return result
-                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                        .map(
-                            res ->
-                                ResponseEntity
-                                    .ok()
-                                    .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
-                                    .body(res)
-                        );
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
                 }
-            );
+
+                Mono<AnswerSheetDTO> result = answerSheetService.partialUpdate(answerSheetDTO);
+
+                return result
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                    .map(res ->
+                        ResponseEntity
+                            .ok()
+                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
+                            .body(res)
+                    );
+            });
     }
 
     /**
@@ -192,19 +182,17 @@ public class AnswerSheetResource {
         return answerSheetService
             .countAll()
             .zipWith(answerSheetService.findAll(pageable).collectList())
-            .map(
-                countWithEntities -> {
-                    return ResponseEntity
-                        .ok()
-                        .headers(
-                            PaginationUtil.generatePaginationHttpHeaders(
-                                UriComponentsBuilder.fromHttpRequest(request),
-                                new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
-                            )
+            .map(countWithEntities -> {
+                return ResponseEntity
+                    .ok()
+                    .headers(
+                        PaginationUtil.generatePaginationHttpHeaders(
+                            UriComponentsBuilder.fromHttpRequest(request),
+                            new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
                         )
-                        .body(countWithEntities.getT2());
-                }
-            );
+                    )
+                    .body(countWithEntities.getT2());
+            });
     }
 
     /**
@@ -232,12 +220,11 @@ public class AnswerSheetResource {
         log.debug("REST request to delete AnswerSheet : {}", id);
         return answerSheetService
             .delete(id)
-            .map(
-                result ->
-                    ResponseEntity
-                        .noContent()
-                        .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-                        .build()
+            .map(result ->
+                ResponseEntity
+                    .noContent()
+                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                    .build()
             );
     }
 }

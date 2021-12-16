@@ -16,7 +16,7 @@
       },
       "id": "ID",
       "numOfQuestion": "Num Of Question",
-      "repo": "Repo",
+      "questionGroup": "Question Group",
       "exam": "Exam"
     }
   },

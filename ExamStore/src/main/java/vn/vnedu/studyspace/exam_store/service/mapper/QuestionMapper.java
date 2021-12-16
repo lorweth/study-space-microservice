@@ -1,7 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service.mapper;
 
 import org.mapstruct.*;
-import vn.vnedu.studyspace.exam_store.domain.*;
+import vn.vnedu.studyspace.exam_store.domain.Question;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 
 /**
@@ -9,7 +9,7 @@ import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
  */
 @Mapper(componentModel = "spring", uses = { QuestionGroupMapper.class })
 public interface QuestionMapper extends EntityMapper<QuestionDTO, Question> {
-    @Mapping(target = "repo", source = "repo", qualifiedByName = "id")
+    @Mapping(target = "questionGroup", source = "questionGroup", qualifiedByName = "id")
     QuestionDTO toDto(Question s);
 
     @Named("id")

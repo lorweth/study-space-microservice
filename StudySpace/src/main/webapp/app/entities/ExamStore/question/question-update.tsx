@@ -22,7 +22,6 @@ export const QuestionUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.question.loading);
   const updating = useAppSelector(state => state.question.updating);
   const updateSuccess = useAppSelector(state => state.question.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/question');
   };
@@ -45,7 +44,7 @@ export const QuestionUpdate = (props: RouteComponentProps<{ id: string }>) => {
     const entity = {
       ...questionEntity,
       ...values,
-      repo: questionGroups.find(it => it.id.toString() === values.repoId.toString()),
+      questionGroup: questionGroups.find(it => it.id.toString() === values.questionGroup.toString()),
     };
 
     if (isNew) {
@@ -60,7 +59,7 @@ export const QuestionUpdate = (props: RouteComponentProps<{ id: string }>) => {
       ? {}
       : {
           ...questionEntity,
-          repoId: questionEntity?.repo?.id,
+          questionGroup: questionEntity?.questionGroup?.id,
         };
 
   return (
@@ -106,10 +105,10 @@ export const QuestionUpdate = (props: RouteComponentProps<{ id: string }>) => {
                 type="textarea"
               />
               <ValidatedField
-                id="question-repo"
-                name="repoId"
-                data-cy="repo"
-                label={translate('studySpaceApp.examStoreQuestion.repo')}
+                id="question-questionGroup"
+                name="questionGroup"
+                data-cy="questionGroup"
+                label={translate('studySpaceApp.examStoreQuestion.questionGroup')}
                 type="select"
               >
                 <option value="" key="0" />

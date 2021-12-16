@@ -1,5 +1,6 @@
 package vn.vnedu.studyspace.exam_store.security.oauth2;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -95,11 +96,9 @@ class AuthorizationHeaderUtilTest {
         doReturn(authorizedClient).when(clientService).loadAuthorizedClient(eq(VALID_REGISTRATION_ID), eq(SUB_VALUE));
 
         Assertions
-            .assertThatThrownBy(
-                () -> {
-                    Optional<String> header = authorizationHeaderUtil.getAuthorizationHeader();
-                }
-            )
+            .assertThatThrownBy(() -> {
+                Optional<String> header = authorizationHeaderUtil.getAuthorizationHeader();
+            })
             .isInstanceOf(OAuth2AuthorizationException.class)
             .hasMessageContaining("[access_denied] The token is expired");
     }
@@ -165,11 +164,9 @@ class AuthorizationHeaderUtilTest {
         doReturn(restTemplate).when(restTemplateBuilder).build();
 
         Assertions
-            .assertThatThrownBy(
-                () -> {
-                    Optional<String> header = authorizationHeaderUtil.getAuthorizationHeader();
-                }
-            )
+            .assertThatThrownBy(() -> {
+                Optional<String> header = authorizationHeaderUtil.getAuthorizationHeader();
+            })
             .isInstanceOf(OAuth2AuthenticationException.class)
             .hasMessageContaining("error");
     }
@@ -179,6 +176,20 @@ class AuthorizationHeaderUtilTest {
     }
 
     private OAuth2AuthorizedClient getTestOAuth2AuthorizedClient(boolean accessTokenExpired) {
+        Instant issuedAt = Instant.now();
+        Instant expiresAt;
+        if (accessTokenExpired) {
+            expiresAt = issuedAt.plus(Duration.ofNanos(1));
+            try {
+                Thread.sleep(1);
+            } catch (Exception e) {
+                fail("Error in Thread.sleep(1) : " + e.getMessage());
+            }
+        } else {
+            expiresAt = issuedAt.plus(Duration.ofMinutes(3));
+        }
+        OAuth2AccessToken token = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, "tokenVal", issuedAt, expiresAt);
+
         return new OAuth2AuthorizedClient(
             ClientRegistration
                 .withRegistrationId(VALID_REGISTRATION_ID)
@@ -190,12 +201,7 @@ class AuthorizationHeaderUtilTest {
                 .tokenUri("https://localhost:8080/auth/realms/master/protocol/openid-connect/token")
                 .build(),
             "sub",
-            new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER,
-                "tokenVal",
-                Instant.now(),
-                accessTokenExpired ? Instant.now() : Instant.now().plus(Duration.ofMinutes(3))
-            ),
+            token,
             new OAuth2RefreshToken("refreshVal", Instant.now())
         );
     }

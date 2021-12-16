@@ -19,7 +19,6 @@ export const TimeTableUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.timeTable.loading);
   const updating = useAppSelector(state => state.timeTable.updating);
   const updateSuccess = useAppSelector(state => state.timeTable.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/time-table');
   };

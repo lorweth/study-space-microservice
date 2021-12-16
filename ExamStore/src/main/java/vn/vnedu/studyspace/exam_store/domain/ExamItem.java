@@ -19,6 +19,7 @@ public class ExamItem implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @NotNull
@@ -27,23 +28,25 @@ public class ExamItem implements Serializable {
 
     @ManyToOne
     @JsonIgnoreProperties(value = { "topic" }, allowSetters = true)
-    private QuestionGroup repo;
+    private QuestionGroup questionGroup;
 
     @ManyToOne
+    @JsonIgnoreProperties(value = { "items" }, allowSetters = true)
     private Exam exam;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public ExamItem id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public ExamItem id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public Integer getNumOfQuestion() {
@@ -51,7 +54,7 @@ public class ExamItem implements Serializable {
     }
 
     public ExamItem numOfQuestion(Integer numOfQuestion) {
-        this.numOfQuestion = numOfQuestion;
+        this.setNumOfQuestion(numOfQuestion);
         return this;
     }
 
@@ -59,30 +62,30 @@ public class ExamItem implements Serializable {
         this.numOfQuestion = numOfQuestion;
     }
 
-    public QuestionGroup getRepo() {
-        return this.repo;
+    public QuestionGroup getQuestionGroup() {
+        return this.questionGroup;
     }
 
-    public ExamItem repo(QuestionGroup questionGroup) {
-        this.setRepo(questionGroup);
+    public void setQuestionGroup(QuestionGroup questionGroup) {
+        this.questionGroup = questionGroup;
+    }
+
+    public ExamItem questionGroup(QuestionGroup questionGroup) {
+        this.setQuestionGroup(questionGroup);
         return this;
-    }
-
-    public void setRepo(QuestionGroup questionGroup) {
-        this.repo = questionGroup;
     }
 
     public Exam getExam() {
         return this.exam;
     }
 
+    public void setExam(Exam exam) {
+        this.exam = exam;
+    }
+
     public ExamItem exam(Exam exam) {
         this.setExam(exam);
         return this;
-    }
-
-    public void setExam(Exam exam) {
-        this.exam = exam;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

@@ -1,7 +1,7 @@
 package vn.vnedu.studyspace.answer_store.service.mapper;
 
 import org.mapstruct.*;
-import vn.vnedu.studyspace.answer_store.domain.*;
+import vn.vnedu.studyspace.answer_store.domain.AnswerSheetItem;
 import vn.vnedu.studyspace.answer_store.service.dto.AnswerSheetItemDTO;
 
 /**

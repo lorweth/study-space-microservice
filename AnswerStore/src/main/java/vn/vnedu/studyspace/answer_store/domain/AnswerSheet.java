@@ -1,7 +1,10 @@
 package vn.vnedu.studyspace.answer_store.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -17,6 +20,7 @@ public class AnswerSheet implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column("id")
     private Long id;
 
     @NotNull(message = "must not be null")
@@ -28,23 +32,28 @@ public class AnswerSheet implements Serializable {
     private String userLogin;
 
     @Transient
+    @JsonIgnoreProperties(value = { "answerSheet" }, allowSetters = true)
+    private Set<AnswerSheetItem> answerSheetItems = new HashSet<>();
+
+    @Transient
     private GroupTimeTable groupTimeTable;
 
     @Column("group_time_table_id")
     private Long groupTimeTableId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public AnswerSheet id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public AnswerSheet id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public Instant getTime() {
@@ -52,7 +61,7 @@ public class AnswerSheet implements Serializable {
     }
 
     public AnswerSheet time(Instant time) {
-        this.time = time;
+        this.setTime(time);
         return this;
     }
 
@@ -65,7 +74,7 @@ public class AnswerSheet implements Serializable {
     }
 
     public AnswerSheet userLogin(String userLogin) {
-        this.userLogin = userLogin;
+        this.setUserLogin(userLogin);
         return this;
     }
 
@@ -73,19 +82,49 @@ public class AnswerSheet implements Serializable {
         this.userLogin = userLogin;
     }
 
-    public GroupTimeTable getGroupTimeTable() {
-        return this.groupTimeTable;
+    public Set<AnswerSheetItem> getAnswerSheetItems() {
+        return this.answerSheetItems;
     }
 
-    public AnswerSheet groupTimeTable(GroupTimeTable groupTimeTable) {
-        this.setGroupTimeTable(groupTimeTable);
-        this.groupTimeTableId = groupTimeTable != null ? groupTimeTable.getId() : null;
+    public void setAnswerSheetItems(Set<AnswerSheetItem> answerSheetItems) {
+        if (this.answerSheetItems != null) {
+            this.answerSheetItems.forEach(i -> i.setAnswerSheet(null));
+        }
+        if (answerSheetItems != null) {
+            answerSheetItems.forEach(i -> i.setAnswerSheet(this));
+        }
+        this.answerSheetItems = answerSheetItems;
+    }
+
+    public AnswerSheet answerSheetItems(Set<AnswerSheetItem> answerSheetItems) {
+        this.setAnswerSheetItems(answerSheetItems);
         return this;
+    }
+
+    public AnswerSheet addAnswerSheetItem(AnswerSheetItem answerSheetItem) {
+        this.answerSheetItems.add(answerSheetItem);
+        answerSheetItem.setAnswerSheet(this);
+        return this;
+    }
+
+    public AnswerSheet removeAnswerSheetItem(AnswerSheetItem answerSheetItem) {
+        this.answerSheetItems.remove(answerSheetItem);
+        answerSheetItem.setAnswerSheet(null);
+        return this;
+    }
+
+    public GroupTimeTable getGroupTimeTable() {
+        return this.groupTimeTable;
     }
 
     public void setGroupTimeTable(GroupTimeTable groupTimeTable) {
         this.groupTimeTable = groupTimeTable;
         this.groupTimeTableId = groupTimeTable != null ? groupTimeTable.getId() : null;
+    }
+
+    public AnswerSheet groupTimeTable(GroupTimeTable groupTimeTable) {
+        this.setGroupTimeTable(groupTimeTable);
+        return this;
     }
 
     public Long getGroupTimeTableId() {

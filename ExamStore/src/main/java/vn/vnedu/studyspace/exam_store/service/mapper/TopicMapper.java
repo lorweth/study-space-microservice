@@ -1,7 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service.mapper;
 
 import org.mapstruct.*;
-import vn.vnedu.studyspace.exam_store.domain.*;
+import vn.vnedu.studyspace.exam_store.domain.Topic;
 import vn.vnedu.studyspace.exam_store.service.dto.TopicDTO;
 
 /**

@@ -67,16 +67,15 @@ class TimeTableRepositoryInternalImpl implements TimeTableRepositoryInternal {
         String alias = entityTable.getReferenceName().getReference();
         String selectWhere = Optional
             .ofNullable(criteria)
-            .map(
-                crit ->
-                    new StringBuilder(select)
-                        .append(" ")
-                        .append("WHERE")
-                        .append(" ")
-                        .append(alias)
-                        .append(".")
-                        .append(crit.toString())
-                        .toString()
+            .map(crit ->
+                new StringBuilder(select)
+                    .append(" ")
+                    .append("WHERE")
+                    .append(" ")
+                    .append(alias)
+                    .append(".")
+                    .append(crit.toString())
+                    .toString()
             )
             .orElse(select); // TODO remove once https://github.com/spring-projects/spring-data-jdbc/issues/907 will be fixed
         return db.sql(selectWhere).map(this::process);
@@ -108,14 +107,12 @@ class TimeTableRepositoryInternalImpl implements TimeTableRepositoryInternal {
             return insert(entity);
         } else {
             return update(entity)
-                .map(
-                    numberOfUpdates -> {
-                        if (numberOfUpdates.intValue() <= 0) {
-                            throw new IllegalStateException("Unable to update TimeTable with id = " + entity.getId());
-                        }
-                        return entity;
+                .map(numberOfUpdates -> {
+                    if (numberOfUpdates.intValue() <= 0) {
+                        throw new IllegalStateException("Unable to update TimeTable with id = " + entity.getId());
                     }
-                );
+                    return entity;
+                });
         }
     }
 
@@ -123,19 +120,5 @@ class TimeTableRepositoryInternalImpl implements TimeTableRepositoryInternal {
     public Mono<Integer> update(TimeTable entity) {
         //fixme is this the proper way?
         return r2dbcEntityTemplate.update(entity).thenReturn(1);
-    }
-}
-
-class TimeTableSqlHelper {
-
-    static List<Expression> getColumns(Table table, String columnPrefix) {
-        List<Expression> columns = new ArrayList<>();
-        columns.add(Column.aliased("id", table, columnPrefix + "_id"));
-        columns.add(Column.aliased("title", table, columnPrefix + "_title"));
-        columns.add(Column.aliased("time", table, columnPrefix + "_time"));
-        columns.add(Column.aliased("note", table, columnPrefix + "_note"));
-        columns.add(Column.aliased("user_login", table, columnPrefix + "_user_login"));
-
-        return columns;
     }
 }

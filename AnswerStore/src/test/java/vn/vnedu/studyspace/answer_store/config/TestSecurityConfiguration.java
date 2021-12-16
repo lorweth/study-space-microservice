@@ -7,13 +7,10 @@ import java.util.Map;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
@@ -24,23 +21,23 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 @TestConfiguration
 public class TestSecurityConfiguration {
 
-    private final ClientRegistration clientRegistration;
-
-    public TestSecurityConfiguration() {
-        this.clientRegistration = clientRegistration().build();
+    @Bean
+    ClientRegistration clientRegistration() {
+        return clientRegistrationBuilder().build();
     }
 
     @Bean
-    ReactiveClientRegistrationRepository clientRegistrationRepository() {
+    ReactiveClientRegistrationRepository clientRegistrationRepository(ClientRegistration clientRegistration) {
         return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
     }
 
-    private ClientRegistration.Builder clientRegistration() {
+    private ClientRegistration.Builder clientRegistrationBuilder() {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("end_session_endpoint", "https://jhipster.org/logout");
 
         return ClientRegistration
             .withRegistrationId("oidc")
+            .issuerUri("{baseUrl}")
             .redirectUri("{baseUrl}/{action}/oauth2/code/{registrationId}")
             .clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -62,14 +59,7 @@ public class TestSecurityConfiguration {
     }
 
     @Bean
-    public ReactiveOAuth2AuthorizedClientService authorizedClientService(
-        ReactiveClientRegistrationRepository clientRegistrationRepository
-    ) {
+    ReactiveOAuth2AuthorizedClientService authorizedClientService(ReactiveClientRegistrationRepository clientRegistrationRepository) {
         return new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrationRepository);
-    }
-
-    @Bean
-    public OAuth2AuthorizedClientRepository authorizedClientRepository(OAuth2AuthorizedClientService authorizedClientService) {
-        return new AuthenticatedPrincipalOAuth2AuthorizedClientRepository(authorizedClientService);
     }
 }

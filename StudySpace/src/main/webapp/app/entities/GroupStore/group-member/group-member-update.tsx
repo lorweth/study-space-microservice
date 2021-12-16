@@ -22,13 +22,14 @@ export const GroupMemberUpdate = (props: RouteComponentProps<{ id: string }>) =>
   const loading = useAppSelector(state => state.groupMember.loading);
   const updating = useAppSelector(state => state.groupMember.updating);
   const updateSuccess = useAppSelector(state => state.groupMember.updateSuccess);
-
   const handleClose = () => {
-    props.history.push('/group-member');
+    props.history.push('/group-member' + props.location.search);
   };
 
   useEffect(() => {
-    if (!isNew) {
+    if (isNew) {
+      dispatch(reset());
+    } else {
       dispatch(getEntity(props.match.params.id));
     }
 
@@ -45,7 +46,7 @@ export const GroupMemberUpdate = (props: RouteComponentProps<{ id: string }>) =>
     const entity = {
       ...groupMemberEntity,
       ...values,
-      group: groups.find(it => it.id.toString() === values.groupId.toString()),
+      group: groups.find(it => it.id.toString() === values.group.toString()),
     };
 
     if (isNew) {
@@ -60,7 +61,7 @@ export const GroupMemberUpdate = (props: RouteComponentProps<{ id: string }>) =>
       ? {}
       : {
           ...groupMemberEntity,
-          groupId: groupMemberEntity?.group?.id,
+          group: groupMemberEntity?.group?.id,
         };
 
   return (
@@ -113,7 +114,7 @@ export const GroupMemberUpdate = (props: RouteComponentProps<{ id: string }>) =>
               />
               <ValidatedField
                 id="group-member-group"
-                name="groupId"
+                name="group"
                 data-cy="group"
                 label={translate('studySpaceApp.groupStoreGroupMember.group')}
                 type="select"
@@ -122,7 +123,7 @@ export const GroupMemberUpdate = (props: RouteComponentProps<{ id: string }>) =>
                 {groups
                   ? groups.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.name}
                       </option>
                     ))
                   : null}

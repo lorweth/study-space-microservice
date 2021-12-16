@@ -123,10 +123,6 @@ class UserResourceIT {
     void getAllUsers() {
         // Initialize the database
         userRepository.create(user).block();
-        authorityRepository
-            .findById(AuthoritiesConstants.USER)
-            .flatMap(authority -> userRepository.saveUserAuthority(user.getId(), authority.getName()))
-            .block();
 
         // Get all the users
         AdminUserDTO foundUser = webTestClient
@@ -148,17 +144,12 @@ class UserResourceIT {
         assertThat(foundUser.getEmail()).isEqualTo(DEFAULT_EMAIL);
         assertThat(foundUser.getImageUrl()).isEqualTo(DEFAULT_IMAGEURL);
         assertThat(foundUser.getLangKey()).isEqualTo(DEFAULT_LANGKEY);
-        assertThat(foundUser.getAuthorities()).containsExactly(AuthoritiesConstants.USER);
     }
 
     @Test
     void getUser() {
         // Initialize the database
         userRepository.create(user).block();
-        authorityRepository
-            .findById(AuthoritiesConstants.USER)
-            .flatMap(authority -> userRepository.saveUserAuthority(user.getId(), authority.getName()))
-            .block();
 
         // Get the user
         webTestClient
@@ -181,9 +172,7 @@ class UserResourceIT {
             .jsonPath("$.imageUrl")
             .isEqualTo(DEFAULT_IMAGEURL)
             .jsonPath("$.langKey")
-            .isEqualTo(DEFAULT_LANGKEY)
-            .jsonPath("$.authorities")
-            .isEqualTo(AuthoritiesConstants.USER);
+            .isEqualTo(DEFAULT_LANGKEY);
     }
 
     @Test

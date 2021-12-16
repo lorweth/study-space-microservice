@@ -54,13 +54,11 @@ public class ExamItemService {
 
         return examItemRepository
             .findById(examItemDTO.getId())
-            .map(
-                existingExamItem -> {
-                    examItemMapper.partialUpdate(existingExamItem, examItemDTO);
+            .map(existingExamItem -> {
+                examItemMapper.partialUpdate(existingExamItem, examItemDTO);
 
-                    return existingExamItem;
-                }
-            )
+                return existingExamItem;
+            })
             .map(examItemRepository::save)
             .map(examItemMapper::toDto);
     }

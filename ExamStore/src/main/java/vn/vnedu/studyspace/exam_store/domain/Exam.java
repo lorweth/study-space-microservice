@@ -1,6 +1,9 @@
 package vn.vnedu.studyspace.exam_store.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
@@ -18,6 +21,7 @@ public class Exam implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @NotNull
@@ -41,18 +45,24 @@ public class Exam implements Serializable {
     @Column(name = "group_id", nullable = false)
     private Long groupId;
 
+    @OneToMany(mappedBy = "exam")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @JsonIgnoreProperties(value = { "questionGroup", "exam" }, allowSetters = true)
+    private Set<ExamItem> items = new HashSet<>();
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public Exam id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Exam id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getName() {
@@ -60,7 +70,7 @@ public class Exam implements Serializable {
     }
 
     public Exam name(String name) {
-        this.name = name;
+        this.setName(name);
         return this;
     }
 
@@ -73,7 +83,7 @@ public class Exam implements Serializable {
     }
 
     public Exam duration(Integer duration) {
-        this.duration = duration;
+        this.setDuration(duration);
         return this;
     }
 
@@ -86,7 +96,7 @@ public class Exam implements Serializable {
     }
 
     public Exam mix(Integer mix) {
-        this.mix = mix;
+        this.setMix(mix);
         return this;
     }
 
@@ -99,12 +109,43 @@ public class Exam implements Serializable {
     }
 
     public Exam groupId(Long groupId) {
-        this.groupId = groupId;
+        this.setGroupId(groupId);
         return this;
     }
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Set<ExamItem> getItems() {
+        return this.items;
+    }
+
+    public void setItems(Set<ExamItem> examItems) {
+        if (this.items != null) {
+            this.items.forEach(i -> i.setExam(null));
+        }
+        if (examItems != null) {
+            examItems.forEach(i -> i.setExam(this));
+        }
+        this.items = examItems;
+    }
+
+    public Exam items(Set<ExamItem> examItems) {
+        this.setItems(examItems);
+        return this;
+    }
+
+    public Exam addItems(ExamItem examItem) {
+        this.items.add(examItem);
+        examItem.setExam(this);
+        return this;
+    }
+
+    public Exam removeItems(ExamItem examItem) {
+        this.items.remove(examItem);
+        examItem.setExam(null);
+        return this;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

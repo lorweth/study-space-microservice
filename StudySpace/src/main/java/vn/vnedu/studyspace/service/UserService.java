@@ -56,18 +56,16 @@ public class UserService {
         return SecurityUtils
             .getCurrentUserLogin()
             .flatMap(userRepository::findOneByLogin)
-            .flatMap(
-                user -> {
-                    user.setFirstName(firstName);
-                    user.setLastName(lastName);
-                    if (email != null) {
-                        user.setEmail(email.toLowerCase());
-                    }
-                    user.setLangKey(langKey);
-                    user.setImageUrl(imageUrl);
-                    return saveUser(user);
+            .flatMap(user -> {
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                if (email != null) {
+                    user.setEmail(email.toLowerCase());
                 }
-            )
+                user.setLangKey(langKey);
+                user.setImageUrl(imageUrl);
+                return saveUser(user);
+            })
             .doOnNext(user -> log.debug("Changed Information for User: {}", user))
             .then();
     }
@@ -82,29 +80,26 @@ public class UserService {
         return SecurityUtils
             .getCurrentUserLogin()
             .switchIfEmpty(Mono.just(Constants.SYSTEM))
-            .flatMap(
-                login -> {
-                    if (user.getCreatedBy() == null) {
-                        user.setCreatedBy(login);
-                    }
-                    user.setLastModifiedBy(login);
-                    // Saving the relationship can be done in an entity callback
-                    // once https://github.com/spring-projects/spring-data-r2dbc/issues/215 is done
-                    Mono<User> persistedUser;
-                    if (forceCreate) {
-                        persistedUser = userRepository.create(user);
-                    } else {
-                        persistedUser = userRepository.save(user);
-                    }
-                    return persistedUser.flatMap(
-                        savedUser ->
-                            Flux
-                                .fromIterable(user.getAuthorities())
-                                .flatMap(authority -> userRepository.saveUserAuthority(savedUser.getId(), authority.getName()))
-                                .then(Mono.just(savedUser))
-                    );
+            .flatMap(login -> {
+                if (user.getCreatedBy() == null) {
+                    user.setCreatedBy(login);
                 }
-            );
+                user.setLastModifiedBy(login);
+                // Saving the relationship can be done in an entity callback
+                // once https://github.com/spring-projects/spring-data-r2dbc/issues/215 is done
+                Mono<User> persistedUser;
+                if (forceCreate) {
+                    persistedUser = userRepository.create(user);
+                } else {
+                    persistedUser = userRepository.save(user);
+                }
+                return persistedUser.flatMap(savedUser ->
+                    Flux
+                        .fromIterable(user.getAuthorities())
+                        .flatMap(authority -> userRepository.saveUserAuthority(savedUser.getId(), authority.getName()))
+                        .then(Mono.just(savedUser))
+                );
+            });
     }
 
     @Transactional(readOnly = true)
@@ -142,50 +137,38 @@ public class UserService {
 
         return getAuthorities()
             .collectList()
-            .flatMapMany(
-                dbAuthorities -> {
-                    List<Authority> authoritiesToSave = userAuthorities
-                        .stream()
-                        .filter(authority -> !dbAuthorities.contains(authority))
-                        .map(
-                            authority -> {
-                                Authority authorityToSave = new Authority();
-                                authorityToSave.setName(authority);
-                                return authorityToSave;
-                            }
-                        )
-                        .collect(Collectors.toList());
-                    return Flux.fromIterable(authoritiesToSave);
-                }
-            )
+            .flatMapMany(dbAuthorities -> {
+                List<Authority> authoritiesToSave = userAuthorities
+                    .stream()
+                    .filter(authority -> !dbAuthorities.contains(authority))
+                    .map(authority -> {
+                        Authority authorityToSave = new Authority();
+                        authorityToSave.setName(authority);
+                        return authorityToSave;
+                    })
+                    .collect(Collectors.toList());
+                return Flux.fromIterable(authoritiesToSave);
+            })
             .doOnNext(authority -> log.debug("Saving authority '{}' in local database", authority))
             .flatMap(authorityRepository::save)
             .then(userRepository.findOneByLogin(user.getLogin()))
             .switchIfEmpty(saveUser(user, true))
-            .flatMap(
-                existingUser -> {
-                    // if IdP sends last updated information, use it to determine if an update should happen
-                    if (details.get("updated_at") != null) {
-                        Instant dbModifiedDate = existingUser.getLastModifiedDate();
-                        Instant idpModifiedDate = (Instant) details.get("updated_at");
-                        if (idpModifiedDate.isAfter(dbModifiedDate)) {
-                            log.debug("Updating user '{}' in local database", user.getLogin());
-                            return updateUser(
-                                user.getFirstName(),
-                                user.getLastName(),
-                                user.getEmail(),
-                                user.getLangKey(),
-                                user.getImageUrl()
-                            );
-                        }
-                        // no last updated info, blindly update
-                    } else {
+            .flatMap(existingUser -> {
+                // if IdP sends last updated information, use it to determine if an update should happen
+                if (details.get("updated_at") != null) {
+                    Instant dbModifiedDate = existingUser.getLastModifiedDate();
+                    Instant idpModifiedDate = (Instant) details.get("updated_at");
+                    if (idpModifiedDate.isAfter(dbModifiedDate)) {
                         log.debug("Updating user '{}' in local database", user.getLogin());
                         return updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getImageUrl());
                     }
-                    return Mono.empty();
+                    // no last updated info, blindly update
+                } else {
+                    log.debug("Updating user '{}' in local database", user.getLogin());
+                    return updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getImageUrl());
                 }
-            )
+                return Mono.empty();
+            })
             .thenReturn(user);
     }
 
@@ -212,35 +195,41 @@ public class UserService {
                 .getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .map(
-                    authority -> {
-                        Authority auth = new Authority();
-                        auth.setName(authority);
-                        return auth;
-                    }
-                )
+                .map(authority -> {
+                    Authority auth = new Authority();
+                    auth.setName(authority);
+                    return auth;
+                })
                 .collect(Collectors.toSet())
         );
+
         return syncUserWithIdP(attributes, user).flatMap(u -> Mono.just(new AdminUserDTO(u)));
     }
 
     private static User getUser(Map<String, Object> details) {
         User user = new User();
         Boolean activated = Boolean.TRUE;
+        String sub = String.valueOf(details.get("sub"));
+        String username = null;
+        if (details.get("preferred_username") != null) {
+            username = ((String) details.get("preferred_username")).toLowerCase();
+        }
         // handle resource server JWT, where sub claim is email and uid is ID
         if (details.get("uid") != null) {
             user.setId((String) details.get("uid"));
-            user.setLogin((String) details.get("sub"));
+            user.setLogin(sub);
         } else {
-            user.setId((String) details.get("sub"));
+            user.setId(sub);
         }
-        if (details.get("preferred_username") != null) {
-            user.setLogin(((String) details.get("preferred_username")).toLowerCase());
+        if (username != null) {
+            user.setLogin(username);
         } else if (user.getLogin() == null) {
             user.setLogin(user.getId());
         }
         if (details.get("given_name") != null) {
             user.setFirstName((String) details.get("given_name"));
+        } else if (details.get("name") != null) {
+            user.setFirstName((String) details.get("name"));
         }
         if (details.get("family_name") != null) {
             user.setLastName((String) details.get("family_name"));
@@ -250,8 +239,11 @@ public class UserService {
         }
         if (details.get("email") != null) {
             user.setEmail(((String) details.get("email")).toLowerCase());
+        } else if (sub.contains("|") && (username != null && username.contains("@"))) {
+            // special handling for Auth0
+            user.setEmail(username);
         } else {
-            user.setEmail((String) details.get("sub"));
+            user.setEmail(sub);
         }
         if (details.get("langKey") != null) {
             user.setLangKey((String) details.get("langKey"));

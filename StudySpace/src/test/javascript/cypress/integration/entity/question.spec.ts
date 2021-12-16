@@ -16,6 +16,9 @@ describe('Question e2e test', () => {
   const questionPageUrlPattern = new RegExp('/question(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
+  const questionSample = { content: 'Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=' };
+
+  let question: any;
 
   beforeEach(() => {
     cy.getOauth2Data();
@@ -27,11 +30,8 @@ describe('Question e2e test', () => {
     cy.get(entityItemSelector).should('exist');
   });
 
-  afterEach(() => {
-    cy.get('@oauth2Data').then(oauth2Data => {
-      cy.oauthLogout(oauth2Data);
-    });
-    cy.clearCache();
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('XSRF-TOKEN', 'JSESSIONID');
   });
 
   beforeEach(() => {
@@ -40,11 +40,27 @@ describe('Question e2e test', () => {
     cy.intercept('DELETE', '/services/examstore/api/questions/*').as('deleteEntityRequest');
   });
 
-  it('should load Questions', () => {
+  afterEach(() => {
+    if (question) {
+      cy.authenticatedRequest({
+        method: 'DELETE',
+        url: `/services/examstore/api/questions/${question.id}`,
+      }).then(() => {
+        question = undefined;
+      });
+    }
+  });
+
+  afterEach(() => {
+    cy.oauthLogout();
+    cy.clearCache();
+  });
+
+  it('Questions menu should load Questions page', () => {
     cy.visit('/');
     cy.clickOnEntityMenuItem('question');
     cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
+      if (response!.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');
       } else {
         cy.get(entityTableSelector).should('exist');
@@ -54,101 +70,121 @@ describe('Question e2e test', () => {
     cy.url().should('match', questionPageUrlPattern);
   });
 
-  it('should load details Question page', function () {
-    cy.visit(questionPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
+  describe('Question page', () => {
+    describe('create button click', () => {
+      beforeEach(() => {
+        cy.visit(questionPageUrl);
+        cy.wait('@entitiesRequest');
+      });
+
+      it('should load create Question page', () => {
+        cy.get(entityCreateButtonSelector).click({ force: true });
+        cy.url().should('match', new RegExp('/question/new$'));
+        cy.getEntityCreateUpdateHeading('Question');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', questionPageUrlPattern);
+      });
     });
-    cy.get(entityDetailsButtonSelector).first().click({ force: true });
-    cy.getEntityDetailsHeading('question');
-    cy.get(entityDetailsBackButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', questionPageUrlPattern);
-  });
 
-  it('should load create Question page', () => {
-    cy.visit(questionPageUrl);
-    cy.wait('@entitiesRequest');
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('Question');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', questionPageUrlPattern);
-  });
+    describe('with existing value', () => {
+      beforeEach(() => {
+        cy.authenticatedRequest({
+          method: 'POST',
+          url: '/services/examstore/api/questions',
+          body: questionSample,
+        }).then(({ body }) => {
+          question = body;
 
-  it('should load edit Question page', function () {
-    cy.visit(questionPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
-        this.skip();
-      }
-    });
-    cy.get(entityEditButtonSelector).first().click({ force: true });
-    cy.getEntityCreateUpdateHeading('Question');
-    cy.get(entityCreateSaveButtonSelector).should('exist');
-    cy.get(entityCreateCancelButtonSelector).click({ force: true });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', questionPageUrlPattern);
-  });
+          cy.intercept(
+            {
+              method: 'GET',
+              url: '/services/examstore/api/questions+(?*|)',
+              times: 1,
+            },
+            {
+              statusCode: 200,
+              body: [question],
+            }
+          ).as('entitiesRequestInternal');
+        });
 
-  it('should create an instance of Question', () => {
-    cy.visit(questionPageUrl);
-    cy.get(entityCreateButtonSelector).click({ force: true });
-    cy.getEntityCreateUpdateHeading('Question');
+        cy.visit(questionPageUrl);
 
-    cy.get(`[data-cy="content"]`)
-      .type('../fake-data/blob/hipster.txt')
-      .invoke('val')
-      .should('match', new RegExp('../fake-data/blob/hipster.txt'));
+        cy.wait('@entitiesRequestInternal');
+      });
 
-    cy.get(`[data-cy="note"]`)
-      .type('../fake-data/blob/hipster.txt')
-      .invoke('val')
-      .should('match', new RegExp('../fake-data/blob/hipster.txt'));
+      it('detail button click should load details Question page', () => {
+        cy.get(entityDetailsButtonSelector).first().click();
+        cy.getEntityDetailsHeading('question');
+        cy.get(entityDetailsBackButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', questionPageUrlPattern);
+      });
 
-    cy.setFieldSelectToLastOfEntity('repo');
+      it('edit button click should load edit Question page', () => {
+        cy.get(entityEditButtonSelector).first().click();
+        cy.getEntityCreateUpdateHeading('Question');
+        cy.get(entityCreateSaveButtonSelector).should('exist');
+        cy.get(entityCreateCancelButtonSelector).click({ force: true });
+        cy.wait('@entitiesRequest').then(({ response }) => {
+          expect(response!.statusCode).to.equal(200);
+        });
+        cy.url().should('match', questionPageUrlPattern);
+      });
 
-    cy.get(entityCreateSaveButtonSelector).click({ force: true });
-    cy.scrollTo('top', { ensureScrollable: false });
-    cy.get(entityCreateSaveButtonSelector).should('not.exist');
-    cy.wait('@postEntityRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(201);
-    });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', questionPageUrlPattern);
-  });
-
-  it('should delete last instance of Question', function () {
-    cy.intercept('GET', '/services/examstore/api/questions/*').as('dialogDeleteRequest');
-    cy.visit(questionPageUrl);
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length > 0) {
-        cy.get(entityTableSelector).should('have.lengthOf', response.body.length);
-        cy.get(entityDeleteButtonSelector).last().click({ force: true });
+      it('last delete button click should delete instance of Question', () => {
+        cy.intercept('GET', '/services/examstore/api/questions/*').as('dialogDeleteRequest');
+        cy.get(entityDeleteButtonSelector).last().click();
         cy.wait('@dialogDeleteRequest');
         cy.getEntityDeleteDialogHeading('question').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click({ force: true });
         cy.wait('@deleteEntityRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(204);
+          expect(response!.statusCode).to.equal(204);
         });
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response!.statusCode).to.equal(200);
         });
         cy.url().should('match', questionPageUrlPattern);
-      } else {
-        this.skip();
-      }
+
+        question = undefined;
+      });
+    });
+  });
+
+  describe('new Question page', () => {
+    beforeEach(() => {
+      cy.visit(`${questionPageUrl}`);
+      cy.get(entityCreateButtonSelector).click({ force: true });
+      cy.getEntityCreateUpdateHeading('Question');
+    });
+
+    it('should create an instance of Question', () => {
+      cy.get(`[data-cy="content"]`)
+        .type('../fake-data/blob/hipster.txt')
+        .invoke('val')
+        .should('match', new RegExp('../fake-data/blob/hipster.txt'));
+
+      cy.get(`[data-cy="note"]`)
+        .type('../fake-data/blob/hipster.txt')
+        .invoke('val')
+        .should('match', new RegExp('../fake-data/blob/hipster.txt'));
+
+      cy.get(entityCreateSaveButtonSelector).click();
+
+      cy.wait('@postEntityRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(201);
+        question = response!.body;
+      });
+      cy.wait('@entitiesRequest').then(({ response }) => {
+        expect(response!.statusCode).to.equal(200);
+      });
+      cy.url().should('match', questionPageUrlPattern);
     });
   });
 });

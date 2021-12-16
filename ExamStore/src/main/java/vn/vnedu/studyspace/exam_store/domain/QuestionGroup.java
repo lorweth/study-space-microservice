@@ -18,6 +18,7 @@ public class QuestionGroup implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @NotNull
@@ -36,17 +37,18 @@ public class QuestionGroup implements Serializable {
     private Topic topic;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public QuestionGroup id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public QuestionGroup id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getName() {
@@ -54,7 +56,7 @@ public class QuestionGroup implements Serializable {
     }
 
     public QuestionGroup name(String name) {
-        this.name = name;
+        this.setName(name);
         return this;
     }
 
@@ -67,7 +69,7 @@ public class QuestionGroup implements Serializable {
     }
 
     public QuestionGroup groupId(String groupId) {
-        this.groupId = groupId;
+        this.setGroupId(groupId);
         return this;
     }
 
@@ -80,7 +82,7 @@ public class QuestionGroup implements Serializable {
     }
 
     public QuestionGroup userLogin(String userLogin) {
-        this.userLogin = userLogin;
+        this.setUserLogin(userLogin);
         return this;
     }
 
@@ -92,13 +94,13 @@ public class QuestionGroup implements Serializable {
         return this.topic;
     }
 
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }
+
     public QuestionGroup topic(Topic topic) {
         this.setTopic(topic);
         return this;
-    }
-
-    public void setTopic(Topic topic) {
-        this.topic = topic;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

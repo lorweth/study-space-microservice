@@ -14,15 +14,16 @@
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
-# See https://github.com/Netflix/Hystrix/wiki/Configuration
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 10000
-
+reactive:
+  feign:
+    circuit:
+      breaker:
+        enabled: true
+  # client:
+  #   config:
+  #     default:
+  #       connectTimeout: 5000
+  #       readTimeout: 5000
 management:
   endpoints:
     web:
@@ -36,17 +37,17 @@ management:
       roles: 'ROLE_ADMIN'
       probes:
         enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
     jhimetrics:
       enabled: true
   info:
     git:
       mode: full
   health:
-    group:
-      liveness:
-        include: livenessState
-      readiness:
-        include: readinessState,datasource
     mail:
       enabled: false # When using the MailService, configure an SMTP server and set this to true
   metrics:
@@ -185,8 +186,8 @@ jhipster:
   api-docs:
     default-include-pattern: ${server.servlet.context-path:}/api/.*
     management-include-pattern: ${server.servlet.context-path:}/management/.*
-    title: StudySpace API
-    description: StudySpace API documentation
+    title: Study Space API
+    description: Study Space API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:

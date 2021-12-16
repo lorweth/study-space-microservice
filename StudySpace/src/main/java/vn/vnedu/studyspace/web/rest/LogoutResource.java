@@ -1,8 +1,8 @@
 package vn.vnedu.studyspace.web.rest;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
@@ -28,23 +28,38 @@ public class LogoutResource {
      * {@code POST  /api/logout} : logout the current user.
      *
      * @param idToken the ID token.
+     * @param request a {@link ServerHttpRequest} request.
      * @param session the current {@link WebSession}.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and a body with a global logout URL and ID token.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and a body with a global logout URL.
      */
     @PostMapping("/api/logout")
-    public Mono<Map<String, String>> logout(@AuthenticationPrincipal(expression = "idToken") OidcIdToken idToken, WebSession session) {
-        return session
-            .invalidate()
-            .then(
-                this.registration.map(oidc -> oidc.getProviderDetails().getConfigurationMetadata().get("end_session_endpoint").toString())
-                    .map(
-                        logoutUrl -> {
-                            Map<String, String> logoutDetails = new HashMap<>();
-                            logoutDetails.put("logoutUrl", logoutUrl);
-                            logoutDetails.put("idToken", idToken.getTokenValue());
-                            return logoutDetails;
-                        }
-                    )
-            );
+    public Mono<Map<String, String>> logout(
+        @AuthenticationPrincipal(expression = "idToken") OidcIdToken idToken,
+        ServerHttpRequest request,
+        WebSession session
+    ) {
+        return session.invalidate().then(this.registration.map(oidc -> prepareLogoutUri(request, oidc, idToken)));
+    }
+
+    private Map<String, String> prepareLogoutUri(ServerHttpRequest request, ClientRegistration clientRegistration, OidcIdToken idToken) {
+        StringBuilder logoutUrl = new StringBuilder();
+        String issuerUri = clientRegistration.getProviderDetails().getIssuerUri();
+        if (issuerUri.contains("auth0.com")) {
+            logoutUrl.append(issuerUri.endsWith("/") ? issuerUri + "v2/logout" : issuerUri + "/v2/logout");
+        } else {
+            logoutUrl.append(clientRegistration.getProviderDetails().getConfigurationMetadata().get("end_session_endpoint").toString());
+        }
+
+        String originUrl = request.getHeaders().getOrigin();
+        if (logoutUrl.indexOf("/protocol") > -1) {
+            logoutUrl.append("?redirect_uri=").append(originUrl);
+        } else if (logoutUrl.indexOf("auth0.com") > -1) {
+            // Auth0
+            logoutUrl.append("?client_id=").append(clientRegistration.getClientId()).append("&returnTo=").append(originUrl);
+        } else {
+            // Okta
+            logoutUrl.append("?id_token_hint=").append(idToken.getTokenValue()).append("&post_logout_redirect_uri=").append(originUrl);
+        }
+        return Map.of("logoutUrl", logoutUrl.toString());
     }
 }

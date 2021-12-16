@@ -54,13 +54,11 @@ public class QuestionGroupService {
 
         return questionGroupRepository
             .findById(questionGroupDTO.getId())
-            .map(
-                existingQuestionGroup -> {
-                    questionGroupMapper.partialUpdate(existingQuestionGroup, questionGroupDTO);
+            .map(existingQuestionGroup -> {
+                questionGroupMapper.partialUpdate(existingQuestionGroup, questionGroupDTO);
 
-                    return existingQuestionGroup;
-                }
-            )
+                return existingQuestionGroup;
+            })
             .map(questionGroupRepository::save)
             .map(questionGroupMapper::toDto);
     }

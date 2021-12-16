@@ -22,7 +22,6 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
   const loading = useAppSelector(state => state.answerSheet.loading);
   const updating = useAppSelector(state => state.answerSheet.updating);
   const updateSuccess = useAppSelector(state => state.answerSheet.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/answer-sheet');
   };
@@ -47,7 +46,7 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
     const entity = {
       ...answerSheetEntity,
       ...values,
-      groupTimeTable: groupTimeTables.find(it => it.id.toString() === values.groupTimeTableId.toString()),
+      groupTimeTable: groupTimeTables.find(it => it.id.toString() === values.groupTimeTable.toString()),
     };
 
     if (isNew) {
@@ -65,7 +64,7 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
       : {
           ...answerSheetEntity,
           time: convertDateTimeFromServer(answerSheetEntity.time),
-          groupTimeTableId: answerSheetEntity?.groupTimeTable?.id,
+          groupTimeTable: answerSheetEntity?.groupTimeTable?.id,
         };
 
   return (
@@ -116,7 +115,7 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
               />
               <ValidatedField
                 id="answer-sheet-groupTimeTable"
-                name="groupTimeTableId"
+                name="groupTimeTable"
                 data-cy="groupTimeTable"
                 label={translate('studySpaceApp.answerStoreAnswerSheet.groupTimeTable')}
                 type="select"

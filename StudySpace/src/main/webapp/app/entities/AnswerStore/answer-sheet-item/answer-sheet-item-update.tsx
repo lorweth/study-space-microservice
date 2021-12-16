@@ -22,7 +22,6 @@ export const AnswerSheetItemUpdate = (props: RouteComponentProps<{ id: string }>
   const loading = useAppSelector(state => state.answerSheetItem.loading);
   const updating = useAppSelector(state => state.answerSheetItem.updating);
   const updateSuccess = useAppSelector(state => state.answerSheetItem.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/answer-sheet-item');
   };
@@ -45,7 +44,7 @@ export const AnswerSheetItemUpdate = (props: RouteComponentProps<{ id: string }>
     const entity = {
       ...answerSheetItemEntity,
       ...values,
-      answerSheet: answerSheets.find(it => it.id.toString() === values.answerSheetId.toString()),
+      answerSheet: answerSheets.find(it => it.id.toString() === values.answerSheet.toString()),
     };
 
     if (isNew) {
@@ -60,7 +59,7 @@ export const AnswerSheetItemUpdate = (props: RouteComponentProps<{ id: string }>
       ? {}
       : {
           ...answerSheetItemEntity,
-          answerSheetId: answerSheetItemEntity?.answerSheet?.id,
+          answerSheet: answerSheetItemEntity?.answerSheet?.id,
         };
 
   return (
@@ -114,7 +113,7 @@ export const AnswerSheetItemUpdate = (props: RouteComponentProps<{ id: string }>
               />
               <ValidatedField
                 id="answer-sheet-item-answerSheet"
-                name="answerSheetId"
+                name="answerSheet"
                 data-cy="answerSheet"
                 label={translate('studySpaceApp.answerStoreAnswerSheetItem.answerSheet')}
                 type="select"

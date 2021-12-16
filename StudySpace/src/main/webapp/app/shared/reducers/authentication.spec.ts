@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import thunk from 'redux-thunk';
 import axios from 'axios';
 import sinon from 'sinon';
@@ -74,7 +71,7 @@ describe('Authentication reducer tests', () => {
 
   describe('Other cases', () => {
     it('should properly reset the current state when a logout is requested', () => {
-      const payload = { data: { idToken: 'xyz', logoutUrl: 'http://localhost:8080/logout' } };
+      const payload = { data: { logoutUrl: 'http://localhost:8080/logout' } };
       const toTest = authentication(undefined, { type: logoutServer.fulfilled.type, payload });
       expect(toTest).toMatchObject({
         loading: false,

@@ -19,12 +19,13 @@
       "relationshipType": "many-to-one",
       "otherEntityName": "group",
       "otherEntityRelationshipName": "groupMember",
-      "relationshipName": "group"
+      "relationshipName": "group",
+      "otherEntityField": "name"
     }
   ],
   "entityTableName": "group_member",
   "dto": "mapstruct",
-  "pagination": "infinite-scroll",
+  "pagination": "pagination",
   "service": "serviceClass",
   "jpaMetamodelFiltering": false,
   "fluentMethods": true,
@@ -34,5 +35,5 @@
   "microserviceName": "GroupStore",
   "clientRootFolder": "GroupStore",
   "databaseType": "sql",
-  "changelogDate": "20210901110841"
+  "changelogDate": "20211216151003"
 }

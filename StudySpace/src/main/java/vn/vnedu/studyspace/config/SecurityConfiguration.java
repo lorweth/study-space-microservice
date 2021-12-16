@@ -4,6 +4,7 @@ import static org.springframework.security.web.server.util.matcher.ServerWebExch
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -17,9 +18,13 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
+import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
@@ -52,9 +57,15 @@ public class SecurityConfiguration {
     @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
     private String issuerUri;
 
+    private final ReactiveClientRegistrationRepository clientRegistrationRepository;
     private final SecurityProblemSupport problemSupport;
 
-    public SecurityConfiguration(JHipsterProperties jHipsterProperties, SecurityProblemSupport problemSupport) {
+    public SecurityConfiguration(
+        ReactiveClientRegistrationRepository clientRegistrationRepository,
+        JHipsterProperties jHipsterProperties,
+        SecurityProblemSupport problemSupport
+    ) {
+        this.clientRegistrationRepository = clientRegistrationRepository;
         this.jHipsterProperties = jHipsterProperties;
         this.problemSupport = problemSupport;
     }
@@ -82,7 +93,7 @@ public class SecurityConfiguration {
             .and()
                 .referrerPolicy(ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
             .and()
-                .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; fullscreen 'self'; payment 'none'")
+                .permissionsPolicy().policy("camera=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), sync-xhr=()")
             .and()
                 .frameOptions().disable()
         .and()
@@ -93,6 +104,7 @@ public class SecurityConfiguration {
             .pathMatchers("/api/auth-info").permitAll()
             .pathMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
             .pathMatchers("/api/**").authenticated()
+            .pathMatchers("/services/*/v3/api-docs").hasAuthority(AuthoritiesConstants.ADMIN)
             .pathMatchers("/services/**").authenticated()
             .pathMatchers("/management/health").permitAll()
             .pathMatchers("/management/health/**").permitAll()
@@ -100,14 +112,32 @@ public class SecurityConfiguration {
             .pathMatchers("/management/prometheus").permitAll()
             .pathMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN);
 
-        http.oauth2Login()
-            .and()
+        http.oauth2Login(oauth2 -> oauth2.authorizationRequestResolver(authorizationRequestResolver(this.clientRegistrationRepository)))            
             .oauth2ResourceServer()
                 .jwt()
                 .jwtAuthenticationConverter(jwtAuthenticationConverter());
         http.oauth2Client();
         // @formatter:on
         return http.build();
+    }
+
+    private ServerOAuth2AuthorizationRequestResolver authorizationRequestResolver(
+        ReactiveClientRegistrationRepository clientRegistrationRepository
+    ) {
+        DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(
+            clientRegistrationRepository
+        );
+        if (this.issuerUri.contains("auth0.com")) {
+            authorizationRequestResolver.setAuthorizationRequestCustomizer(authorizationRequestCustomizer());
+        }
+        return authorizationRequestResolver;
+    }
+
+    private Consumer<OAuth2AuthorizationRequest.Builder> authorizationRequestCustomizer() {
+        return customizer ->
+            customizer.authorizationRequestUri(uriBuilder ->
+                uriBuilder.queryParam("audience", jHipsterProperties.getSecurity().getOauth2().getAudience()).build()
+            );
     }
 
     Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter() {
@@ -129,26 +159,22 @@ public class SecurityConfiguration {
             // Delegate to the default implementation for loading a user
             return delegate
                 .loadUser(userRequest)
-                .map(
-                    user -> {
-                        Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+                .map(user -> {
+                    Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
-                        user
-                            .getAuthorities()
-                            .forEach(
-                                authority -> {
-                                    if (authority instanceof OidcUserAuthority) {
-                                        OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-                                        mappedAuthorities.addAll(
-                                            SecurityUtils.extractAuthorityFromClaims(oidcUserAuthority.getUserInfo().getClaims())
-                                        );
-                                    }
-                                }
-                            );
+                    user
+                        .getAuthorities()
+                        .forEach(authority -> {
+                            if (authority instanceof OidcUserAuthority) {
+                                OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
+                                mappedAuthorities.addAll(
+                                    SecurityUtils.extractAuthorityFromClaims(oidcUserAuthority.getUserInfo().getClaims())
+                                );
+                            }
+                        });
 
-                        return new DefaultOidcUser(mappedAuthorities, user.getIdToken(), user.getUserInfo());
-                    }
-                );
+                    return new DefaultOidcUser(mappedAuthorities, user.getIdToken(), user.getUserInfo());
+                });
         };
     }
 

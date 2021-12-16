@@ -17,8 +17,9 @@
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "question",
-      "otherEntityRelationshipName": "option",
-      "relationshipName": "question"
+      "otherEntityRelationshipName": "options",
+      "relationshipName": "question",
+      "otherEntityField": "id"
     }
   ],
   "entityTableName": "jhi_option",
@@ -33,5 +34,5 @@
   "microserviceName": "ExamStore",
   "clientRootFolder": "ExamStore",
   "databaseType": "sql",
-  "changelogDate": "20210901110441"
+  "changelogDate": "20211216150603"
 }

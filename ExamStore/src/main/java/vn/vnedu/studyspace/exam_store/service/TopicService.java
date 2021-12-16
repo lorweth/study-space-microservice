@@ -54,13 +54,11 @@ public class TopicService {
 
         return topicRepository
             .findById(topicDTO.getId())
-            .map(
-                existingTopic -> {
-                    topicMapper.partialUpdate(existingTopic, topicDTO);
+            .map(existingTopic -> {
+                topicMapper.partialUpdate(existingTopic, topicDTO);
 
-                    return existingTopic;
-                }
-            )
+                return existingTopic;
+            })
             .map(topicRepository::save)
             .map(topicMapper::toDto);
     }

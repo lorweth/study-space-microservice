@@ -54,13 +54,11 @@ public class GroupService {
 
         return groupRepository
             .findById(groupDTO.getId())
-            .map(
-                existingGroup -> {
-                    groupMapper.partialUpdate(existingGroup, groupDTO);
+            .map(existingGroup -> {
+                groupMapper.partialUpdate(existingGroup, groupDTO);
 
-                    return existingGroup;
-                }
-            )
+                return existingGroup;
+            })
             .map(groupRepository::save)
             .map(groupMapper::toDto);
     }

@@ -15,10 +15,17 @@
   ],
   "relationships": [
     {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "option",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "options"
+    },
+    {
       "relationshipType": "many-to-one",
       "otherEntityName": "questionGroup",
       "otherEntityRelationshipName": "question",
-      "relationshipName": "repo"
+      "relationshipName": "questionGroup",
+      "otherEntityField": "id"
     }
   ],
   "entityTableName": "question",
@@ -33,5 +40,5 @@
   "microserviceName": "ExamStore",
   "clientRootFolder": "ExamStore",
   "databaseType": "sql",
-  "changelogDate": "20210901110241"
+  "changelogDate": "20211216150403"
 }

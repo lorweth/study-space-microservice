@@ -113,7 +113,7 @@ public class OptionResource {
      * or with status {@code 500 (Internal Server Error)} if the optionDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/options/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/options/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<OptionDTO> partialUpdateOption(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody OptionDTO optionDTO

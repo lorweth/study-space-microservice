@@ -17,6 +17,7 @@ public class TimeTable implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column("id")
     private Long id;
 
     @Size(min = 2, max = 255)
@@ -34,17 +35,18 @@ public class TimeTable implements Serializable {
     private String userLogin;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public TimeTable id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public TimeTable id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getTitle() {
@@ -52,7 +54,7 @@ public class TimeTable implements Serializable {
     }
 
     public TimeTable title(String title) {
-        this.title = title;
+        this.setTitle(title);
         return this;
     }
 
@@ -65,7 +67,7 @@ public class TimeTable implements Serializable {
     }
 
     public TimeTable time(Instant time) {
-        this.time = time;
+        this.setTime(time);
         return this;
     }
 
@@ -78,7 +80,7 @@ public class TimeTable implements Serializable {
     }
 
     public TimeTable note(String note) {
-        this.note = note;
+        this.setNote(note);
         return this;
     }
 
@@ -91,7 +93,7 @@ public class TimeTable implements Serializable {
     }
 
     public TimeTable userLogin(String userLogin) {
-        this.userLogin = userLogin;
+        this.setUserLogin(userLogin);
         return this;
     }
 

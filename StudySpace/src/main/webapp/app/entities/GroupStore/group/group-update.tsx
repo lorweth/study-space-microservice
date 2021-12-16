@@ -19,13 +19,14 @@ export const GroupUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.group.loading);
   const updating = useAppSelector(state => state.group.updating);
   const updateSuccess = useAppSelector(state => state.group.updateSuccess);
-
   const handleClose = () => {
-    props.history.push('/group');
+    props.history.push('/group' + props.location.search);
   };
 
   useEffect(() => {
-    if (!isNew) {
+    if (isNew) {
+      dispatch(reset());
+    } else {
       dispatch(getEntity(props.match.params.id));
     }
   }, []);

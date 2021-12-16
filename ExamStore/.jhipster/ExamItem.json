@@ -12,13 +12,15 @@
       "relationshipType": "many-to-one",
       "otherEntityName": "questionGroup",
       "otherEntityRelationshipName": "examItem",
-      "relationshipName": "repo"
+      "relationshipName": "questionGroup",
+      "otherEntityField": "id"
     },
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "exam",
-      "otherEntityRelationshipName": "examItem",
-      "relationshipName": "exam"
+      "otherEntityRelationshipName": "items",
+      "relationshipName": "exam",
+      "otherEntityField": "id"
     }
   ],
   "entityTableName": "exam_item",
@@ -33,5 +35,5 @@
   "microserviceName": "ExamStore",
   "clientRootFolder": "ExamStore",
   "databaseType": "sql",
-  "changelogDate": "20210901110641"
+  "changelogDate": "20211216150803"
 }

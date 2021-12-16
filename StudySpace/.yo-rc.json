@@ -19,16 +19,16 @@
     "messageBroker": "kafka",
     "prodDatabaseType": "mysql",
     "searchEngine": false,
-    "skipClient": false,
     "testFrameworks": ["cypress"],
     "websocket": false,
+    "enableGradleEnterprise": false,
+    "gradleEnterpriseHost": "",
     "applicationType": "gateway",
     "packageName": "vn.vnedu.studyspace",
     "packageFolder": "vn/vnedu/studyspace",
     "nativeLanguage": "vi",
     "clientTheme": "flatly",
-    "jhipsterVersion": "7.1.0",
-    "skipServer": false,
+    "jhipsterVersion": "7.4.1",
     "clientPackageManager": "npm",
     "dtoSuffix": "DTO",
     "entitySuffix": "",
@@ -54,7 +54,10 @@
     "blueprints": [],
     "otherModules": [],
     "pages": [],
-    "creationTimestamp": 1630494101655,
+    "creationTimestamp": 1639666983559,
+    "monorepository": true,
+    "skipCommitHook": true,
+    "jwtSecretKey": "MGI3NTI0OTI2NjAyNWMzZjllNGI4ZTdkZjVjMmYxYWI1YzhjZDg3Y2NlODg4ZGQzYTM5YjVjNWQ3MWNlYWM5YTY1MTQ0NmU2NzVhN2M5NDMyZjAxOWExMzA3YjI2ZDYwZDgyNDZjNDMwOTIwMDNjMzE5MzRmMTgzZGRhOGQ5YWQ=",
     "devServerPort": 9060,
     "entities": [
       "Question",
@@ -70,6 +73,6 @@
       "TimeTable",
       "Exam"
     ],
-    "lastLiquibaseTimestamp": 1630494821000
+    "lastLiquibaseTimestamp": 1639667703000
   }
 }

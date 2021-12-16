@@ -19,6 +19,7 @@ public class Option implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Lob
@@ -30,21 +31,22 @@ public class Option implements Serializable {
     private Boolean isCorrect;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "repo" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "options", "questionGroup" }, allowSetters = true)
     private Question question;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public Option id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Option id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getContent() {
@@ -52,7 +54,7 @@ public class Option implements Serializable {
     }
 
     public Option content(String content) {
-        this.content = content;
+        this.setContent(content);
         return this;
     }
 
@@ -65,7 +67,7 @@ public class Option implements Serializable {
     }
 
     public Option isCorrect(Boolean isCorrect) {
-        this.isCorrect = isCorrect;
+        this.setIsCorrect(isCorrect);
         return this;
     }
 
@@ -77,13 +79,13 @@ public class Option implements Serializable {
         return this.question;
     }
 
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
+
     public Option question(Question question) {
         this.setQuestion(question);
         return this;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

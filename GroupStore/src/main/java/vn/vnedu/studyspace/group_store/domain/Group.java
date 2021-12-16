@@ -18,6 +18,7 @@ public class Group implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @NotNull
@@ -26,17 +27,18 @@ public class Group implements Serializable {
     private String name;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public Group id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Group id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getName() {
@@ -44,7 +46,7 @@ public class Group implements Serializable {
     }
 
     public Group name(String name) {
-        this.name = name;
+        this.setName(name);
         return this;
     }
 

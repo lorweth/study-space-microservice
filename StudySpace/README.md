@@ -1,9 +1,24 @@
 # StudySpace
 
-This application was generated using JHipster 7.1.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.1.0](https://www.jhipster.tech/documentation-archive/v7.1.0).
+This application was generated using JHipster 7.4.1, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.4.1](https://www.jhipster.tech/documentation-archive/v7.4.1).
 
 This is a "gateway" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
 This application is configured for Service Discovery and Configuration with Consul. On launch, it will refuse to start if it is not able to connect to Consul at [http://localhost:8500](http://localhost:8500). For more information, read our documentation on [Service Discovery and Configuration with Consul][].
+
+## Project Structure
+
+Node is required for generation and recommended for development. `package.json` is always generated for a better development experience with prettier, commit hooks, scripts and so on.
+
+In the project root, JHipster generates configuration files for tools like git, prettier, eslint, husk, and others that are well known and you can find references in the web.
+
+`/src/*` structure follows default Java structure.
+
+- `.yo-rc.json` - Yeoman configuration file
+  JHipster configuration is stored in this file at `generator-jhipster` key. You may find `generator-jhipster-*` for specific blueprints configuration.
+- `.yo-resolve` (optional) - Yeoman conflict resolver
+  Allows to use a specific action when conflicts are found skipping prompts for files that matches a pattern. Each line should match `[pattern] [action]` with pattern been a [Minimatch](https://github.com/isaacs/minimatch#minimatch) pattern and action been one of skip (default if ommited) or force. Lines starting with `#` are considered comments and are ignored.
+- `.jhipster/*.json` - JHipster entity configuration files
+- `/src/main/docker` - Docker configurations for the application and services that the application depends on
 
 ## Development
 
@@ -35,7 +50,52 @@ Add the `help` flag on any command to see how you can use it. For example, `npm 
 
 The `npm run` command will list all of the scripts available to run for this project.
 
-## OAuth 2.0 / OpenID Connect
+### PWA Support
+
+JHipster ships with PWA (Progressive Web App) support, and it's turned off by default. One of the main components of a PWA is a service worker.
+
+The service worker initialization code is commented out by default. To enable it, uncomment the following code in `src/main/webapp/index.html`:
+
+```html
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js').then(function () {
+      console.log('Service Worker Registered');
+    });
+  }
+</script>
+```
+
+Note: [Workbox](https://developers.google.com/web/tools/workbox/) powers JHipster's service worker. It dynamically generates the `service-worker.js` file.
+
+### Managing dependencies
+
+For example, to add [Leaflet][] library as a runtime dependency of your application, you would run following command:
+
+```
+npm install --save --save-exact leaflet
+```
+
+To benefit from TypeScript type definitions from [DefinitelyTyped][] repository in development, you would run following command:
+
+```
+npm install --save-dev --save-exact @types/leaflet
+```
+
+Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
+Note: There are still a few other things remaining to do for Leaflet that we won't detail here.
+
+For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
+
+### JHipster Control Center
+
+JHipster Control Center can help you manage and control your application(s). You can start a local control center server (accessible on http://localhost:7419) with:
+
+```
+docker-compose -f src/main/docker/jhipster-control-center.yml up
+```
+
+### OAuth 2.0 / OpenID Connect
 
 Congratulations! You've selected an excellent way to secure your JHipster application. If you're not sure what OAuth and OpenID Connect (OIDC) are, please see [What the Heck is OAuth?](https://developer.okta.com/blog/2017/06/21/what-the-heck-is-oauth)
 
@@ -60,14 +120,7 @@ spring:
           oidc:
             client-id: web_app
             client-secret: web_app
-```
-
-### JHipster Control Center
-
-JHipster Control Center can help you to manage and control your application(s). You can start a local control center server (accessible on http://localhost:7419) with:
-
-```
-docker-compose -f src/main/docker/jhipster-control-center.yml up
+            scope: openid,profile,email
 ```
 
 ### Okta
@@ -114,42 +167,76 @@ Navigate to **API** > **Authorization Servers**, click the **Authorization Serve
 
 After making these changes, you should be good to go! If you have any issues, please post them to [Stack Overflow](https://stackoverflow.com/questions/tagged/jhipster). Make sure to tag your question with "jhipster" and "okta".
 
-### PWA Support
+### Auth0
 
-JHipster ships with PWA (Progressive Web App) support, and it's turned off by default. One of the main components of a PWA is a service worker.
+If you'd like to use [Auth0](https://auth0.com/) instead of Keycloak, follow the configuration steps below:
 
-The service worker initialization code is commented out by default. To enable it, uncomment the following code in `src/main/webapp/index.html`:
+- Create a free developer account at <https://auth0.com/signup>. After successful sign-up, your account will be associated with a unique domain like `dev-xxx.us.auth0.com`
+- Create a new application of type `Regular Web Applications`. Switch to the `Settings` tab, and configure your application settings like:
+  - Allowed Callback URLs: `http://localhost:8080/login/oauth2/code/oidc`
+  - Allowed Logout URLs: `http://localhost:8080/`
+- Navigate to **User Management** > **Roles** and create new roles named `ROLE_ADMIN`, and `ROLE_USER`.
+- Navigate to **User Management** > **Users** and create a new user account. Click on the **Role** tab to assign roles to the newly created user account.
+- Navigate to **Auth Pipeline** > **Rules** and create a new Rule. Choose `Empty rule` template. Provide a meaningful name like `JHipster claims` and replace `Script` content with the following and Save.
 
-```html
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').then(function () {
-      console.log('Service Worker Registered');
-    });
+```javascript
+function (user, context, callback) {
+  user.preferred_username = user.email;
+  const roles = (context.authorization || {}).roles;
+
+  function prepareCustomClaimKey(claim) {
+    return `https://www.jhipster.tech/${claim}`;
   }
-</script>
+
+  const rolesClaim = prepareCustomClaimKey('roles');
+
+  if (context.idToken) {
+    context.idToken[rolesClaim] = roles;
+  }
+
+  if (context.accessToken) {
+    context.accessToken[rolesClaim] = roles;
+  }
+
+  callback(null, user, context);
+}
 ```
 
-Note: [Workbox](https://developers.google.com/web/tools/workbox/) powers JHipster's service worker. It dynamically generates the `service-worker.js` file.
+- In your `JHipster` application, modify `src/main/resources/config/application.yml` to use your Auth0 application settings:
 
-### Managing dependencies
+```yaml
+spring:
+  ...
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            # make sure to include the ending slash!
+            issuer-uri: https://{your-auth0-domain}/
+        registration:
+          oidc:
+            client-id: {clientId}
+            client-secret: {clientSecret}
+            scope: openid,profile,email
+jhipster:
+  ...
+  security:
+    oauth2:
+      audience:
+        - https://{your-auth0-domain}/api/v2/
+```
 
-For example, to add [Leaflet][] library as a runtime dependency of your application, you would run following command:
+Before running Cypress tests, specify Auth0 user credentials by overriding the `CYPRESS_E2E_USERNAME` and `CYPRESS_E2E_PASSWORD` environment variables.
 
 ```
-npm install --save --save-exact leaflet
+export CYPRESS_E2E_USERNAME="<your-username>"
+export CYPRESS_E2E_PASSWORD="<your-password>"
 ```
 
-To benefit from TypeScript type definitions from [DefinitelyTyped][] repository in development, you would run following command:
+See Cypress' documentation for setting OS [environment variables](https://docs.cypress.io/guides/guides/environment-variables#Setting) to learn more.
 
-```
-npm install --save-dev --save-exact @types/leaflet
-```
-
-Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
-Note: There are still a few other things remaining to do for Leaflet that we won't detail here.
-
-For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
+**Auth0 requires a user to provide authorization consent on the first login.** Consent flow is currently not handled in the Cypress test suite. To mitigate the issue, you can use a user account that has already granted consent to authorize application access via interactive login.
 
 ## Building for production
 
@@ -263,20 +350,20 @@ For more information refer to [Using Docker and Docker-Compose][], this page als
 To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
 
 [jhipster homepage and latest documentation]: https://www.jhipster.tech
-[jhipster 7.1.0 archive]: https://www.jhipster.tech/documentation-archive/v7.1.0
-[doing microservices with jhipster]: https://www.jhipster.tech/documentation-archive/v7.1.0/microservices-architecture/
-[using jhipster in development]: https://www.jhipster.tech/documentation-archive/v7.1.0/development/
-[service discovery and configuration with consul]: https://www.jhipster.tech/documentation-archive/v7.1.0/microservices-architecture/#consul
-[using docker and docker-compose]: https://www.jhipster.tech/documentation-archive/v7.1.0/docker-compose
-[using jhipster in production]: https://www.jhipster.tech/documentation-archive/v7.1.0/production/
-[running tests page]: https://www.jhipster.tech/documentation-archive/v7.1.0/running-tests/
-[code quality page]: https://www.jhipster.tech/documentation-archive/v7.1.0/code-quality/
-[setting up continuous integration]: https://www.jhipster.tech/documentation-archive/v7.1.0/setting-up-ci/
+[jhipster 7.4.1 archive]: https://www.jhipster.tech/documentation-archive/v7.4.1
+[doing microservices with jhipster]: https://www.jhipster.tech/documentation-archive/v7.4.1/microservices-architecture/
+[using jhipster in development]: https://www.jhipster.tech/documentation-archive/v7.4.1/development/
+[service discovery and configuration with consul]: https://www.jhipster.tech/documentation-archive/v7.4.1/microservices-architecture/#consul
+[using docker and docker-compose]: https://www.jhipster.tech/documentation-archive/v7.4.1/docker-compose
+[using jhipster in production]: https://www.jhipster.tech/documentation-archive/v7.4.1/production/
+[running tests page]: https://www.jhipster.tech/documentation-archive/v7.4.1/running-tests/
+[code quality page]: https://www.jhipster.tech/documentation-archive/v7.4.1/code-quality/
+[setting up continuous integration]: https://www.jhipster.tech/documentation-archive/v7.4.1/setting-up-ci/
 [node.js]: https://nodejs.org/
+[npm]: https://www.npmjs.com/
 [webpack]: https://webpack.github.io/
 [browsersync]: https://www.browsersync.io/
 [jest]: https://facebook.github.io/jest/
-[jasmine]: https://jasmine.github.io/2.0/introduction.html
 [cypress]: https://www.cypress.io/
 [leaflet]: https://leafletjs.com/
 [definitelytyped]: https://definitelytyped.org/

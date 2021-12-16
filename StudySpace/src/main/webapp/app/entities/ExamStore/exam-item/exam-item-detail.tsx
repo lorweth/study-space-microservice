@@ -36,9 +36,9 @@ export const ExamItemDetail = (props: RouteComponentProps<{ id: string }>) => {
           </dt>
           <dd>{examItemEntity.numOfQuestion}</dd>
           <dt>
-            <Translate contentKey="studySpaceApp.examStoreExamItem.repo">Repo</Translate>
+            <Translate contentKey="studySpaceApp.examStoreExamItem.questionGroup">Question Group</Translate>
           </dt>
-          <dd>{examItemEntity.repo ? examItemEntity.repo.id : ''}</dd>
+          <dd>{examItemEntity.questionGroup ? examItemEntity.questionGroup.id : ''}</dd>
           <dt>
             <Translate contentKey="studySpaceApp.examStoreExamItem.exam">Exam</Translate>
           </dt>

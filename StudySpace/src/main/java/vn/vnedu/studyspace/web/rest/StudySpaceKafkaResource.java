@@ -44,9 +44,8 @@ public class StudySpaceKafkaResource {
             .as(sender::send)
             .next()
             .map(SenderResult::recordMetadata)
-            .map(
-                metadata ->
-                    new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(), Instant.ofEpochMilli(metadata.timestamp()))
+            .map(metadata ->
+                new PublishResult(metadata.topic(), metadata.partition(), metadata.offset(), Instant.ofEpochMilli(metadata.timestamp()))
             );
     }
 

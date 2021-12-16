@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { Translate, getSortState } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -98,7 +98,7 @@ export const AnswerSheetItem = (props: RouteComponentProps<{ url: string }>) => 
       <h2 id="answer-sheet-item-heading" data-cy="AnswerSheetItemHeading">
         <Translate contentKey="studySpaceApp.answerStoreAnswerSheetItem.home.title">Answer Sheet Items</Translate>
         <div className="d-flex justify-content-end">
-          <Button className="mr-2" color="info" onClick={handleSyncList} disabled={loading}>
+          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
             <FontAwesomeIcon icon="sync" spin={loading} />{' '}
             <Translate contentKey="studySpaceApp.answerStoreAnswerSheetItem.home.refreshListLabel">Refresh List</Translate>
           </Button>
@@ -111,12 +111,10 @@ export const AnswerSheetItem = (props: RouteComponentProps<{ url: string }>) => 
       </h2>
       <div className="table-responsive">
         <InfiniteScroll
-          pageStart={paginationState.activePage}
-          loadMore={handleLoadMore}
+          dataLength={answerSheetItemList ? answerSheetItemList.length : 0}
+          next={handleLoadMore}
           hasMore={paginationState.activePage - 1 < links.next}
           loader={<div className="loader">Loading ...</div>}
-          threshold={0}
-          initialLoad={false}
         >
           {answerSheetItemList && answerSheetItemList.length > 0 ? (
             <Table responsive>
@@ -157,7 +155,7 @@ export const AnswerSheetItem = (props: RouteComponentProps<{ url: string }>) => 
                         ''
                       )}
                     </td>
-                    <td className="text-right">
+                    <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
                         <Button tag={Link} to={`${match.url}/${answerSheetItem.id}`} color="info" size="sm" data-cy="entityDetailsButton">
                           <FontAwesomeIcon icon="eye" />{' '}

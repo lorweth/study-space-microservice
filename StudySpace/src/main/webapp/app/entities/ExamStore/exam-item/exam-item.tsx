@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { Translate, getSortState } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -98,7 +98,7 @@ export const ExamItem = (props: RouteComponentProps<{ url: string }>) => {
       <h2 id="exam-item-heading" data-cy="ExamItemHeading">
         <Translate contentKey="studySpaceApp.examStoreExamItem.home.title">Exam Items</Translate>
         <div className="d-flex justify-content-end">
-          <Button className="mr-2" color="info" onClick={handleSyncList} disabled={loading}>
+          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
             <FontAwesomeIcon icon="sync" spin={loading} />{' '}
             <Translate contentKey="studySpaceApp.examStoreExamItem.home.refreshListLabel">Refresh List</Translate>
           </Button>
@@ -111,12 +111,10 @@ export const ExamItem = (props: RouteComponentProps<{ url: string }>) => {
       </h2>
       <div className="table-responsive">
         <InfiniteScroll
-          pageStart={paginationState.activePage}
-          loadMore={handleLoadMore}
+          dataLength={examItemList ? examItemList.length : 0}
+          next={handleLoadMore}
           hasMore={paginationState.activePage - 1 < links.next}
           loader={<div className="loader">Loading ...</div>}
-          threshold={0}
-          initialLoad={false}
         >
           {examItemList && examItemList.length > 0 ? (
             <Table responsive>
@@ -130,7 +128,8 @@ export const ExamItem = (props: RouteComponentProps<{ url: string }>) => {
                     <FontAwesomeIcon icon="sort" />
                   </th>
                   <th>
-                    <Translate contentKey="studySpaceApp.examStoreExamItem.repo">Repo</Translate> <FontAwesomeIcon icon="sort" />
+                    <Translate contentKey="studySpaceApp.examStoreExamItem.questionGroup">Question Group</Translate>{' '}
+                    <FontAwesomeIcon icon="sort" />
                   </th>
                   <th>
                     <Translate contentKey="studySpaceApp.examStoreExamItem.exam">Exam</Translate> <FontAwesomeIcon icon="sort" />
@@ -147,9 +146,15 @@ export const ExamItem = (props: RouteComponentProps<{ url: string }>) => {
                       </Button>
                     </td>
                     <td>{examItem.numOfQuestion}</td>
-                    <td>{examItem.repo ? <Link to={`question-group/${examItem.repo.id}`}>{examItem.repo.id}</Link> : ''}</td>
+                    <td>
+                      {examItem.questionGroup ? (
+                        <Link to={`question-group/${examItem.questionGroup.id}`}>{examItem.questionGroup.id}</Link>
+                      ) : (
+                        ''
+                      )}
+                    </td>
                     <td>{examItem.exam ? <Link to={`exam/${examItem.exam.id}`}>{examItem.exam.id}</Link> : ''}</td>
-                    <td className="text-right">
+                    <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
                         <Button tag={Link} to={`${match.url}/${examItem.id}`} color="info" size="sm" data-cy="entityDetailsButton">
                           <FontAwesomeIcon icon="eye" />{' '}

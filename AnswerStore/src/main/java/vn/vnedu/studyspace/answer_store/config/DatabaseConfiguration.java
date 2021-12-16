@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tech.jhipster.config.JHipsterConstants;
 
 @Configuration
-@EnableR2dbcRepositories("vn.vnedu.studyspace.answer_store.repository")
+@EnableR2dbcRepositories({ "vn.vnedu.studyspace.answer_store.repository" })
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 

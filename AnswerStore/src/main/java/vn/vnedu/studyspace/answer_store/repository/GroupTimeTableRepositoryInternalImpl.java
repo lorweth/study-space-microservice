@@ -71,16 +71,15 @@ class GroupTimeTableRepositoryInternalImpl implements GroupTimeTableRepositoryIn
         String alias = entityTable.getReferenceName().getReference();
         String selectWhere = Optional
             .ofNullable(criteria)
-            .map(
-                crit ->
-                    new StringBuilder(select)
-                        .append(" ")
-                        .append("WHERE")
-                        .append(" ")
-                        .append(alias)
-                        .append(".")
-                        .append(crit.toString())
-                        .toString()
+            .map(crit ->
+                new StringBuilder(select)
+                    .append(" ")
+                    .append("WHERE")
+                    .append(" ")
+                    .append(alias)
+                    .append(".")
+                    .append(crit.toString())
+                    .toString()
             )
             .orElse(select); // TODO remove once https://github.com/spring-projects/spring-data-jdbc/issues/907 will be fixed
         return db.sql(selectWhere).map(this::process);
@@ -112,14 +111,12 @@ class GroupTimeTableRepositoryInternalImpl implements GroupTimeTableRepositoryIn
             return insert(entity);
         } else {
             return update(entity)
-                .map(
-                    numberOfUpdates -> {
-                        if (numberOfUpdates.intValue() <= 0) {
-                            throw new IllegalStateException("Unable to update GroupTimeTable with id = " + entity.getId());
-                        }
-                        return entity;
+                .map(numberOfUpdates -> {
+                    if (numberOfUpdates.intValue() <= 0) {
+                        throw new IllegalStateException("Unable to update GroupTimeTable with id = " + entity.getId());
                     }
-                );
+                    return entity;
+                });
         }
     }
 
@@ -127,20 +124,5 @@ class GroupTimeTableRepositoryInternalImpl implements GroupTimeTableRepositoryIn
     public Mono<Integer> update(GroupTimeTable entity) {
         //fixme is this the proper way?
         return r2dbcEntityTemplate.update(entity).thenReturn(1);
-    }
-}
-
-class GroupTimeTableSqlHelper {
-
-    static List<Expression> getColumns(Table table, String columnPrefix) {
-        List<Expression> columns = new ArrayList<>();
-        columns.add(Column.aliased("id", table, columnPrefix + "_id"));
-        columns.add(Column.aliased("exam_id", table, columnPrefix + "_exam_id"));
-        columns.add(Column.aliased("start_at", table, columnPrefix + "_start_at"));
-        columns.add(Column.aliased("end_at", table, columnPrefix + "_end_at"));
-        columns.add(Column.aliased("group_id", table, columnPrefix + "_group_id"));
-        columns.add(Column.aliased("note", table, columnPrefix + "_note"));
-
-        return columns;
     }
 }

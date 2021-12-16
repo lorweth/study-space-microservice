@@ -28,7 +28,14 @@
       "fieldValidateRules": ["required"]
     }
   ],
-  "relationships": [],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "examItem",
+      "otherEntityRelationshipName": "exam",
+      "relationshipName": "items"
+    }
+  ],
   "entityTableName": "exam",
   "dto": "mapstruct",
   "pagination": "infinite-scroll",
@@ -41,5 +48,5 @@
   "microserviceName": "ExamStore",
   "clientRootFolder": "ExamStore",
   "databaseType": "sql",
-  "changelogDate": "20210901111341"
+  "changelogDate": "20211216151503"
 }

@@ -18,7 +18,7 @@ public class QuestionDTO implements Serializable {
     @Lob
     private String note;
 
-    private QuestionGroupDTO repo;
+    private QuestionGroupDTO questionGroup;
 
     public Long getId() {
         return id;
@@ -44,12 +44,12 @@ public class QuestionDTO implements Serializable {
         this.note = note;
     }
 
-    public QuestionGroupDTO getRepo() {
-        return repo;
+    public QuestionGroupDTO getQuestionGroup() {
+        return questionGroup;
     }
 
-    public void setRepo(QuestionGroupDTO repo) {
-        this.repo = repo;
+    public void setQuestionGroup(QuestionGroupDTO questionGroup) {
+        this.questionGroup = questionGroup;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class QuestionDTO implements Serializable {
             "id=" + getId() +
             ", content='" + getContent() + "'" +
             ", note='" + getNote() + "'" +
-            ", repo=" + getRepo() +
+            ", questionGroup=" + getQuestionGroup() +
             "}";
     }
 }

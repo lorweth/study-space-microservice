@@ -1,10 +1,10 @@
 package vn.vnedu.studyspace.web.rest;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.*;
-import static vn.vnedu.studyspace.web.rest.TestUtil.ID_TOKEN;
-import static vn.vnedu.studyspace.web.rest.TestUtil.authenticationToken;
+import static vn.vnedu.studyspace.test.util.OAuth2TestUtil.ID_TOKEN;
+import static vn.vnedu.studyspace.test.util.OAuth2TestUtil.authenticationToken;
+import static vn.vnedu.studyspace.test.util.OAuth2TestUtil.registerAuthenticationToken;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import vn.vnedu.studyspace.IntegrationTest;
-import vn.vnedu.studyspace.config.TestSecurityConfiguration;
 import vn.vnedu.studyspace.security.AuthoritiesConstants;
 
 /**
@@ -33,31 +33,40 @@ class LogoutResourceIT {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private ReactiveOAuth2AuthorizedClientService authorizedClientService;
+
+    @Autowired
+    private ClientRegistration clientRegistration;
+
     private WebTestClient webTestClient;
 
-    private OidcIdToken idToken;
+    private Map<String, Object> claims;
 
     @BeforeEach
     public void before() {
-        Map<String, Object> claims = new HashMap<>();
+        claims = new HashMap<>();
         claims.put("groups", Collections.singletonList(AuthoritiesConstants.USER));
         claims.put("sub", 123);
-        this.idToken = new OidcIdToken(ID_TOKEN, Instant.now(), Instant.now().plusSeconds(60), claims);
 
         this.webTestClient = WebTestClient.bindToApplicationContext(this.context).apply(springSecurity()).configureClient().build();
     }
 
     @Test
     void getLogoutInformation() {
+        final String ORIGIN_URL = "http://localhost:8080";
         String logoutUrl =
             this.registrations.findByRegistrationId("oidc")
                 .map(oidc -> oidc.getProviderDetails().getConfigurationMetadata().get("end_session_endpoint").toString())
                 .block();
-
+        logoutUrl = logoutUrl + "?id_token_hint=" + ID_TOKEN + "&post_logout_redirect_uri=" + ORIGIN_URL;
         this.webTestClient.mutateWith(csrf())
-            .mutateWith(mockAuthentication(TestUtil.authenticationToken(idToken)))
+            .mutateWith(
+                mockAuthentication(registerAuthenticationToken(authorizedClientService, clientRegistration, authenticationToken(claims)))
+            )
             .post()
-            .uri("/api/logout")
+            .uri("http://localhost:8080/api/logout")
+            .header(HttpHeaders.ORIGIN, ORIGIN_URL)
             .exchange()
             .expectStatus()
             .isOk()
@@ -65,8 +74,6 @@ class LogoutResourceIT {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .expectBody()
             .jsonPath("$.logoutUrl")
-            .isEqualTo(logoutUrl.toString())
-            .jsonPath("$.idToken")
-            .isEqualTo(ID_TOKEN);
+            .isEqualTo(logoutUrl);
     }
 }

@@ -76,16 +76,17 @@ class UserRepositoryInternalImpl implements UserRepositoryInternal {
 
     @Override
     public Flux<User> findAllWithAuthorities(Pageable pageable) {
-        String property = pageable.getSort().stream().map(Sort.Order::getProperty).findFirst().get();
-        String direction = String.valueOf(pageable.getSort().stream().map(Sort.Order::getDirection).findFirst().get());
+        String property = pageable.getSort().stream().map(Sort.Order::getProperty).findFirst().orElse("id");
+        String direction = String.valueOf(
+            pageable.getSort().stream().map(Sort.Order::getDirection).findFirst().orElse(Sort.DEFAULT_DIRECTION)
+        );
         long page = pageable.getPageNumber();
         long size = pageable.getPageSize();
 
         return db
             .sql("SELECT * FROM jhi_user u LEFT JOIN jhi_user_authority ua ON u.id=ua.user_id")
-            .map(
-                (row, metadata) ->
-                    Tuples.of(r2dbcConverter.read(User.class, row, metadata), Optional.ofNullable(row.get("authority_name", String.class)))
+            .map((row, metadata) ->
+                Tuples.of(r2dbcConverter.read(User.class, row, metadata), Optional.ofNullable(row.get("authority_name", String.class)))
             )
             .all()
             .groupBy(t -> t.getT1().getLogin())
@@ -108,9 +109,8 @@ class UserRepositoryInternalImpl implements UserRepositoryInternal {
         return db
             .sql("SELECT * FROM jhi_user u LEFT JOIN jhi_user_authority ua ON u.id=ua.user_id WHERE u." + fieldName + " = :" + fieldName)
             .bind(fieldName, fieldValue)
-            .map(
-                (row, metadata) ->
-                    Tuples.of(r2dbcConverter.read(User.class, row, metadata), Optional.ofNullable(row.get("authority_name", String.class)))
+            .map((row, metadata) ->
+                Tuples.of(r2dbcConverter.read(User.class, row, metadata), Optional.ofNullable(row.get("authority_name", String.class)))
             )
             .all()
             .collectList()
@@ -123,32 +123,14 @@ class UserRepositoryInternalImpl implements UserRepositoryInternal {
             tuples
                 .stream()
                 .filter(t -> t.getT2().isPresent())
-                .map(
-                    t -> {
-                        Authority authority = new Authority();
-                        authority.setName(t.getT2().get());
-                        return authority;
-                    }
-                )
+                .map(t -> {
+                    Authority authority = new Authority();
+                    authority.setName(t.getT2().get());
+                    return authority;
+                })
                 .collect(Collectors.toSet())
         );
 
         return user;
-    }
-}
-
-class UserSqlHelper {
-
-    static List<Expression> getColumns(Table table, String columnPrefix) {
-        List<Expression> columns = new ArrayList<>();
-        columns.add(Column.aliased("id", table, columnPrefix + "_id"));
-        columns.add(Column.aliased("login", table, columnPrefix + "_login"));
-        columns.add(Column.aliased("first_name", table, columnPrefix + "_first_name"));
-        columns.add(Column.aliased("last_name", table, columnPrefix + "_last_name"));
-        columns.add(Column.aliased("email", table, columnPrefix + "_email"));
-        columns.add(Column.aliased("activated", table, columnPrefix + "_activated"));
-        columns.add(Column.aliased("lang_key", table, columnPrefix + "_lang_key"));
-        columns.add(Column.aliased("image_url", table, columnPrefix + "_image_url"));
-        return columns;
     }
 }

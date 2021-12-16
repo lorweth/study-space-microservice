@@ -54,13 +54,11 @@ public class OptionService {
 
         return optionRepository
             .findById(optionDTO.getId())
-            .map(
-                existingOption -> {
-                    optionMapper.partialUpdate(existingOption, optionDTO);
+            .map(existingOption -> {
+                optionMapper.partialUpdate(existingOption, optionDTO);
 
-                    return existingOption;
-                }
-            )
+                return existingOption;
+            })
             .map(optionRepository::save)
             .map(optionMapper::toDto);
     }

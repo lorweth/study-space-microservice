@@ -33,9 +33,9 @@ export const ConfigurationPage = () => {
       .map((v: any) => v.beans)
       .reduce((acc, e) => ({ ...acc, ...e }));
 
-  const configProps = configuration && configuration.configProps ? configuration.configProps : {};
+  const configProps = configuration?.configProps ?? {};
 
-  const env = configuration && configuration.env ? configuration.env : {};
+  const env = configuration?.env ?? {};
 
   return (
     <div>
@@ -70,7 +70,7 @@ export const ConfigurationPage = () => {
                         <Row key={index}>
                           <Col md="4">{propKey}</Col>
                           <Col md="8">
-                            <Badge className="float-right badge-secondary break">{JSON.stringify(property['properties'][propKey])}</Badge>
+                            <Badge className="float-end bg-secondary break">{JSON.stringify(property['properties'][propKey])}</Badge>
                           </Col>
                         </Row>
                       ))}
@@ -100,7 +100,7 @@ export const ConfigurationPage = () => {
                       <tr key={propIndex}>
                         <td className="break">{propKey}</td>
                         <td className="break">
-                          <span className="float-right badge badge-secondary break">{envKey.properties[propKey].value}</span>
+                          <span className="float-end badge bg-secondary break">{envKey.properties[propKey].value}</span>
                         </td>
                       </tr>
                     ))}

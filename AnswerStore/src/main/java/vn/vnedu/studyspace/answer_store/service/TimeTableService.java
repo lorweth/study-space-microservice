@@ -52,13 +52,11 @@ public class TimeTableService {
 
         return timeTableRepository
             .findById(timeTableDTO.getId())
-            .map(
-                existingTimeTable -> {
-                    timeTableMapper.partialUpdate(existingTimeTable, timeTableDTO);
+            .map(existingTimeTable -> {
+                timeTableMapper.partialUpdate(existingTimeTable, timeTableDTO);
 
-                    return existingTimeTable;
-                }
-            )
+                return existingTimeTable;
+            })
             .flatMap(timeTableRepository::save)
             .map(timeTableMapper::toDto);
     }

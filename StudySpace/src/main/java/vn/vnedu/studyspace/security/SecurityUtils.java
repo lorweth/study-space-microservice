@@ -17,6 +17,8 @@ import reactor.core.publisher.Mono;
  */
 public final class SecurityUtils {
 
+    public static final String CLAIMS_NAMESPACE = "https://www.jhipster.tech/";
+
     private SecurityUtils() {}
 
     /**
@@ -64,17 +66,42 @@ public final class SecurityUtils {
     }
 
     /**
+     * Checks if the current user has any of the authorities.
+     *
+     * @param authorities the authorities to check.
+     * @return true if the current user has any of the authorities, false otherwise.
+     */
+    public static Mono<Boolean> hasCurrentUserAnyOfAuthorities(String... authorities) {
+        return ReactiveSecurityContextHolder
+            .getContext()
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getAuthorities)
+            .map(authorityList ->
+                authorityList
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .anyMatch(authority -> Arrays.asList(authorities).contains(authority))
+            );
+    }
+
+    /**
+     * Checks if the current user has none of the authorities.
+     *
+     * @param authorities the authorities to check.
+     * @return true if the current user has none of the authorities, false otherwise.
+     */
+    public static Mono<Boolean> hasCurrentUserNoneOfAuthorities(String... authorities) {
+        return hasCurrentUserAnyOfAuthorities(authorities).map(result -> !result);
+    }
+
+    /**
      * Checks if the current user has a specific authority.
      *
      * @param authority the authority to check.
      * @return true if the current user has the authority, false otherwise.
      */
     public static Mono<Boolean> hasCurrentUserThisAuthority(String authority) {
-        return ReactiveSecurityContextHolder
-            .getContext()
-            .map(SecurityContext::getAuthentication)
-            .map(Authentication::getAuthorities)
-            .map(authorities -> authorities.stream().map(GrantedAuthority::getAuthority).anyMatch(authority::equals));
+        return hasCurrentUserAnyOfAuthorities(authority);
     }
 
     public static List<GrantedAuthority> extractAuthorityFromClaims(Map<String, Object> claims) {
@@ -83,7 +110,10 @@ public final class SecurityUtils {
 
     @SuppressWarnings("unchecked")
     private static Collection<String> getRolesFromClaims(Map<String, Object> claims) {
-        return (Collection<String>) claims.getOrDefault("groups", claims.getOrDefault("roles", new ArrayList<>()));
+        return (Collection<String>) claims.getOrDefault(
+            "groups",
+            claims.getOrDefault("roles", claims.getOrDefault(CLAIMS_NAMESPACE + "roles", new ArrayList<>()))
+        );
     }
 
     private static List<GrantedAuthority> mapRolesToGrantedAuthorities(Collection<String> roles) {

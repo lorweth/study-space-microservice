@@ -1,10 +1,12 @@
+import { IOption } from 'app/shared/model/ExamStore/option.model';
 import { IQuestionGroup } from 'app/shared/model/ExamStore/question-group.model';
 
 export interface IQuestion {
   id?: number;
   content?: string;
   note?: string | null;
-  repo?: IQuestionGroup | null;
+  options?: IOption[] | null;
+  questionGroup?: IQuestionGroup | null;
 }
 
 export const defaultValue: Readonly<IQuestion> = {};

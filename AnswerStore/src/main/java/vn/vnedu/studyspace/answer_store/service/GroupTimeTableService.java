@@ -52,13 +52,11 @@ public class GroupTimeTableService {
 
         return groupTimeTableRepository
             .findById(groupTimeTableDTO.getId())
-            .map(
-                existingGroupTimeTable -> {
-                    groupTimeTableMapper.partialUpdate(existingGroupTimeTable, groupTimeTableDTO);
+            .map(existingGroupTimeTable -> {
+                groupTimeTableMapper.partialUpdate(existingGroupTimeTable, groupTimeTableDTO);
 
-                    return existingGroupTimeTable;
-                }
-            )
+                return existingGroupTimeTable;
+            })
             .flatMap(groupTimeTableRepository::save)
             .map(groupTimeTableMapper::toDto);
     }

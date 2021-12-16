@@ -25,7 +25,6 @@ export const ExamItemUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.examItem.loading);
   const updating = useAppSelector(state => state.examItem.updating);
   const updateSuccess = useAppSelector(state => state.examItem.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/exam-item');
   };
@@ -49,8 +48,8 @@ export const ExamItemUpdate = (props: RouteComponentProps<{ id: string }>) => {
     const entity = {
       ...examItemEntity,
       ...values,
-      repo: questionGroups.find(it => it.id.toString() === values.repoId.toString()),
-      exam: exams.find(it => it.id.toString() === values.examId.toString()),
+      questionGroup: questionGroups.find(it => it.id.toString() === values.questionGroup.toString()),
+      exam: exams.find(it => it.id.toString() === values.exam.toString()),
     };
 
     if (isNew) {
@@ -65,8 +64,8 @@ export const ExamItemUpdate = (props: RouteComponentProps<{ id: string }>) => {
       ? {}
       : {
           ...examItemEntity,
-          repoId: examItemEntity?.repo?.id,
-          examId: examItemEntity?.exam?.id,
+          questionGroup: examItemEntity?.questionGroup?.id,
+          exam: examItemEntity?.exam?.id,
         };
 
   return (
@@ -106,10 +105,10 @@ export const ExamItemUpdate = (props: RouteComponentProps<{ id: string }>) => {
                 }}
               />
               <ValidatedField
-                id="exam-item-repo"
-                name="repoId"
-                data-cy="repo"
-                label={translate('studySpaceApp.examStoreExamItem.repo')}
+                id="exam-item-questionGroup"
+                name="questionGroup"
+                data-cy="questionGroup"
+                label={translate('studySpaceApp.examStoreExamItem.questionGroup')}
                 type="select"
               >
                 <option value="" key="0" />
@@ -123,7 +122,7 @@ export const ExamItemUpdate = (props: RouteComponentProps<{ id: string }>) => {
               </ValidatedField>
               <ValidatedField
                 id="exam-item-exam"
-                name="examId"
+                name="exam"
                 data-cy="exam"
                 label={translate('studySpaceApp.examStoreExamItem.exam')}
                 type="select"

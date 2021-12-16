@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 import vn.vnedu.studyspace.config.KafkaProperties;
 
 class StudySpaceKafkaResourceIT {
@@ -37,7 +38,7 @@ class StudySpaceKafkaResourceIT {
     private static void startTestcontainer() {
         // TODO: withNetwork will need to be removed soon
         // See discussion at https://github.com/jhipster/generator-jhipster/issues/11544#issuecomment-609065206
-        kafkaContainer = new KafkaContainer("5.5.4").withNetwork(null);
+        kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.5")).withNetwork(null);
         kafkaContainer.start();
     }
 

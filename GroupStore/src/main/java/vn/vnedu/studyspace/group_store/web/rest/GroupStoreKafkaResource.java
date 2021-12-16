@@ -50,29 +50,27 @@ public class GroupStoreKafkaResource {
         consumerProps.remove("topic");
 
         SseEmitter emitter = new SseEmitter(0L);
-        sseExecutorService.execute(
-            () -> {
-                KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProps);
-                emitter.onCompletion(consumer::close);
-                consumer.subscribe(topics);
-                boolean exitLoop = false;
-                while (!exitLoop) {
-                    try {
-                        ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
-                        for (ConsumerRecord<String, String> record : records) {
-                            emitter.send(record.value());
-                        }
-                        emitter.send(SseEmitter.event().comment(""));
-                    } catch (Exception ex) {
-                        log.trace("Complete with error {}", ex.getMessage(), ex);
-                        emitter.completeWithError(ex);
-                        exitLoop = true;
+        sseExecutorService.execute(() -> {
+            KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerProps);
+            emitter.onCompletion(consumer::close);
+            consumer.subscribe(topics);
+            boolean exitLoop = false;
+            while (!exitLoop) {
+                try {
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(5));
+                    for (ConsumerRecord<String, String> record : records) {
+                        emitter.send(record.value());
                     }
+                    emitter.send(SseEmitter.event().comment(""));
+                } catch (Exception ex) {
+                    log.trace("Complete with error {}", ex.getMessage(), ex);
+                    emitter.completeWithError(ex);
+                    exitLoop = true;
                 }
-                consumer.close();
-                emitter.complete();
             }
-        );
+            consumer.close();
+            emitter.complete();
+        });
         return emitter;
     }
 

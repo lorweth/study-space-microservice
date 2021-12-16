@@ -1,11 +1,11 @@
 import { loadingBarReducer as loadingBar } from 'react-redux-loading-bar';
 
-import locale, { LocaleState } from './locale';
-import authentication, { AuthenticationState } from './authentication';
-import applicationProfile, { ApplicationProfileState } from './application-profile';
+import locale from './locale';
+import authentication from './authentication';
+import applicationProfile from './application-profile';
 
-import administration, { AdministrationState } from 'app/modules/administration/administration.reducer';
-import userManagement, { UserManagementState } from './user-management';
+import administration from 'app/modules/administration/administration.reducer';
+import userManagement from './user-management';
 // prettier-ignore
 import question from 'app/entities/ExamStore/question/question.reducer';
 // prettier-ignore

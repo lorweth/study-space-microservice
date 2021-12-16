@@ -44,7 +44,7 @@ export const GroupMemberDetail = (props: RouteComponentProps<{ id: string }>) =>
           <dt>
             <Translate contentKey="studySpaceApp.groupStoreGroupMember.group">Group</Translate>
           </dt>
-          <dd>{groupMemberEntity.group ? groupMemberEntity.group.id : ''}</dd>
+          <dd>{groupMemberEntity.group ? groupMemberEntity.group.name : ''}</dd>
         </dl>
         <Button tag={Link} to="/group-member" replace color="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}

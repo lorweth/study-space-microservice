@@ -52,13 +52,11 @@ public class AnswerSheetItemService {
 
         return answerSheetItemRepository
             .findById(answerSheetItemDTO.getId())
-            .map(
-                existingAnswerSheetItem -> {
-                    answerSheetItemMapper.partialUpdate(existingAnswerSheetItem, answerSheetItemDTO);
+            .map(existingAnswerSheetItem -> {
+                answerSheetItemMapper.partialUpdate(existingAnswerSheetItem, answerSheetItemDTO);
 
-                    return existingAnswerSheetItem;
-                }
-            )
+                return existingAnswerSheetItem;
+            })
             .flatMap(answerSheetItemRepository::save)
             .map(answerSheetItemMapper::toDto);
     }

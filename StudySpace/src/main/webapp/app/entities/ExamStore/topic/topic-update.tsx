@@ -19,7 +19,6 @@ export const TopicUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.topic.loading);
   const updating = useAppSelector(state => state.topic.updating);
   const updateSuccess = useAppSelector(state => state.topic.updateSuccess);
-
   const handleClose = () => {
     props.history.push('/topic');
   };

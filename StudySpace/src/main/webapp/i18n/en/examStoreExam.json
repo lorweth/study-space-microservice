@@ -18,7 +18,8 @@
       "name": "Name",
       "duration": "Duration",
       "mix": "Mix",
-      "groupId": "Group Id"
+      "groupId": "Group Id",
+      "items": "Items"
     }
   },
   "examStoreApp": {

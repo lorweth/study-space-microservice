@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { Translate, getSortState } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -98,7 +98,7 @@ export const QuestionGroup = (props: RouteComponentProps<{ url: string }>) => {
       <h2 id="question-group-heading" data-cy="QuestionGroupHeading">
         <Translate contentKey="studySpaceApp.examStoreQuestionGroup.home.title">Question Groups</Translate>
         <div className="d-flex justify-content-end">
-          <Button className="mr-2" color="info" onClick={handleSyncList} disabled={loading}>
+          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
             <FontAwesomeIcon icon="sync" spin={loading} />{' '}
             <Translate contentKey="studySpaceApp.examStoreQuestionGroup.home.refreshListLabel">Refresh List</Translate>
           </Button>
@@ -111,12 +111,10 @@ export const QuestionGroup = (props: RouteComponentProps<{ url: string }>) => {
       </h2>
       <div className="table-responsive">
         <InfiniteScroll
-          pageStart={paginationState.activePage}
-          loadMore={handleLoadMore}
+          dataLength={questionGroupList ? questionGroupList.length : 0}
+          next={handleLoadMore}
           hasMore={paginationState.activePage - 1 < links.next}
           loader={<div className="loader">Loading ...</div>}
-          threshold={0}
-          initialLoad={false}
         >
           {questionGroupList && questionGroupList.length > 0 ? (
             <Table responsive>
@@ -154,7 +152,7 @@ export const QuestionGroup = (props: RouteComponentProps<{ url: string }>) => {
                     <td>{questionGroup.groupId}</td>
                     <td>{questionGroup.userLogin}</td>
                     <td>{questionGroup.topic ? <Link to={`topic/${questionGroup.topic.id}`}>{questionGroup.topic.id}</Link> : ''}</td>
-                    <td className="text-right">
+                    <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
                         <Button tag={Link} to={`${match.url}/${questionGroup.id}`} color="info" size="sm" data-cy="entityDetailsButton">
                           <FontAwesomeIcon icon="eye" />{' '}

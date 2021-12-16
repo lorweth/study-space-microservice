@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
-import { Translate, getSortState } from 'react-jhipster';
+import { Button, Table } from 'reactstrap';
+import { Translate, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { getEntities, reset } from './group-member.reducer';
+import { getEntities } from './group-member.reducer';
 import { IGroupMember } from 'app/shared/model/GroupStore/group-member.model';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
@@ -18,14 +17,10 @@ export const GroupMember = (props: RouteComponentProps<{ url: string }>) => {
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(props.location, ITEMS_PER_PAGE, 'id'), props.location.search)
   );
-  const [sorting, setSorting] = useState(false);
 
   const groupMemberList = useAppSelector(state => state.groupMember.entities);
   const loading = useAppSelector(state => state.groupMember.loading);
   const totalItems = useAppSelector(state => state.groupMember.totalItems);
-  const links = useAppSelector(state => state.groupMember.links);
-  const entity = useAppSelector(state => state.groupMember.entity);
-  const updateSuccess = useAppSelector(state => state.groupMember.updateSuccess);
 
   const getAllEntities = () => {
     dispatch(
@@ -37,58 +32,49 @@ export const GroupMember = (props: RouteComponentProps<{ url: string }>) => {
     );
   };
 
-  const resetAll = () => {
-    dispatch(reset());
-    setPaginationState({
-      ...paginationState,
-      activePage: 1,
-    });
-    dispatch(getEntities({}));
+  const sortEntities = () => {
+    getAllEntities();
+    const endURL = `?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`;
+    if (props.location.search !== endURL) {
+      props.history.push(`${props.location.pathname}${endURL}`);
+    }
   };
 
   useEffect(() => {
-    resetAll();
-  }, []);
+    sortEntities();
+  }, [paginationState.activePage, paginationState.order, paginationState.sort]);
 
   useEffect(() => {
-    if (updateSuccess) {
-      resetAll();
-    }
-  }, [updateSuccess]);
-
-  useEffect(() => {
-    getAllEntities();
-  }, [paginationState.activePage]);
-
-  const handleLoadMore = () => {
-    if ((window as any).pageYOffset > 0) {
+    const params = new URLSearchParams(props.location.search);
+    const page = params.get('page');
+    const sort = params.get(SORT);
+    if (page && sort) {
+      const sortSplit = sort.split(',');
       setPaginationState({
         ...paginationState,
-        activePage: paginationState.activePage + 1,
+        activePage: +page,
+        sort: sortSplit[0],
+        order: sortSplit[1],
       });
     }
-  };
-
-  useEffect(() => {
-    if (sorting) {
-      getAllEntities();
-      setSorting(false);
-    }
-  }, [sorting]);
+  }, [props.location.search]);
 
   const sort = p => () => {
-    dispatch(reset());
     setPaginationState({
       ...paginationState,
-      activePage: 1,
       order: paginationState.order === ASC ? DESC : ASC,
       sort: p,
     });
-    setSorting(true);
   };
 
+  const handlePagination = currentPage =>
+    setPaginationState({
+      ...paginationState,
+      activePage: currentPage,
+    });
+
   const handleSyncList = () => {
-    resetAll();
+    sortEntities();
   };
 
   const { match } = props;
@@ -98,7 +84,7 @@ export const GroupMember = (props: RouteComponentProps<{ url: string }>) => {
       <h2 id="group-member-heading" data-cy="GroupMemberHeading">
         <Translate contentKey="studySpaceApp.groupStoreGroupMember.home.title">Group Members</Translate>
         <div className="d-flex justify-content-end">
-          <Button className="mr-2" color="info" onClick={handleSyncList} disabled={loading}>
+          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
             <FontAwesomeIcon icon="sync" spin={loading} />{' '}
             <Translate contentKey="studySpaceApp.groupStoreGroupMember.home.refreshListLabel">Refresh List</Translate>
           </Button>
@@ -110,86 +96,101 @@ export const GroupMember = (props: RouteComponentProps<{ url: string }>) => {
         </div>
       </h2>
       <div className="table-responsive">
-        <InfiniteScroll
-          pageStart={paginationState.activePage}
-          loadMore={handleLoadMore}
-          hasMore={paginationState.activePage - 1 < links.next}
-          loader={<div className="loader">Loading ...</div>}
-          threshold={0}
-          initialLoad={false}
-        >
-          {groupMemberList && groupMemberList.length > 0 ? (
-            <Table responsive>
-              <thead>
-                <tr>
-                  <th className="hand" onClick={sort('id')}>
-                    <Translate contentKey="studySpaceApp.groupStoreGroupMember.id">ID</Translate> <FontAwesomeIcon icon="sort" />
-                  </th>
-                  <th className="hand" onClick={sort('userLogin')}>
-                    <Translate contentKey="studySpaceApp.groupStoreGroupMember.userLogin">User Login</Translate>{' '}
-                    <FontAwesomeIcon icon="sort" />
-                  </th>
-                  <th className="hand" onClick={sort('role')}>
-                    <Translate contentKey="studySpaceApp.groupStoreGroupMember.role">Role</Translate> <FontAwesomeIcon icon="sort" />
-                  </th>
-                  <th>
-                    <Translate contentKey="studySpaceApp.groupStoreGroupMember.group">Group</Translate> <FontAwesomeIcon icon="sort" />
-                  </th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {groupMemberList.map((groupMember, i) => (
-                  <tr key={`entity-${i}`} data-cy="entityTable">
-                    <td>
-                      <Button tag={Link} to={`${match.url}/${groupMember.id}`} color="link" size="sm">
-                        {groupMember.id}
+        {groupMemberList && groupMemberList.length > 0 ? (
+          <Table responsive>
+            <thead>
+              <tr>
+                <th className="hand" onClick={sort('id')}>
+                  <Translate contentKey="studySpaceApp.groupStoreGroupMember.id">ID</Translate> <FontAwesomeIcon icon="sort" />
+                </th>
+                <th className="hand" onClick={sort('userLogin')}>
+                  <Translate contentKey="studySpaceApp.groupStoreGroupMember.userLogin">User Login</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
+                </th>
+                <th className="hand" onClick={sort('role')}>
+                  <Translate contentKey="studySpaceApp.groupStoreGroupMember.role">Role</Translate> <FontAwesomeIcon icon="sort" />
+                </th>
+                <th>
+                  <Translate contentKey="studySpaceApp.groupStoreGroupMember.group">Group</Translate> <FontAwesomeIcon icon="sort" />
+                </th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {groupMemberList.map((groupMember, i) => (
+                <tr key={`entity-${i}`} data-cy="entityTable">
+                  <td>
+                    <Button tag={Link} to={`${match.url}/${groupMember.id}`} color="link" size="sm">
+                      {groupMember.id}
+                    </Button>
+                  </td>
+                  <td>{groupMember.userLogin}</td>
+                  <td>{groupMember.role}</td>
+                  <td>{groupMember.group ? <Link to={`group/${groupMember.group.id}`}>{groupMember.group.name}</Link> : ''}</td>
+                  <td className="text-end">
+                    <div className="btn-group flex-btn-group-container">
+                      <Button tag={Link} to={`${match.url}/${groupMember.id}`} color="info" size="sm" data-cy="entityDetailsButton">
+                        <FontAwesomeIcon icon="eye" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.view">View</Translate>
+                        </span>
                       </Button>
-                    </td>
-                    <td>{groupMember.userLogin}</td>
-                    <td>{groupMember.role}</td>
-                    <td>{groupMember.group ? <Link to={`group/${groupMember.group.id}`}>{groupMember.group.id}</Link> : ''}</td>
-                    <td className="text-right">
-                      <div className="btn-group flex-btn-group-container">
-                        <Button tag={Link} to={`${match.url}/${groupMember.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                          <FontAwesomeIcon icon="eye" />{' '}
-                          <span className="d-none d-md-inline">
-                            <Translate contentKey="entity.action.view">View</Translate>
-                          </span>
-                        </Button>
-                        <Button tag={Link} to={`${match.url}/${groupMember.id}/edit`} color="primary" size="sm" data-cy="entityEditButton">
-                          <FontAwesomeIcon icon="pencil-alt" />{' '}
-                          <span className="d-none d-md-inline">
-                            <Translate contentKey="entity.action.edit">Edit</Translate>
-                          </span>
-                        </Button>
-                        <Button
-                          tag={Link}
-                          to={`${match.url}/${groupMember.id}/delete`}
-                          color="danger"
-                          size="sm"
-                          data-cy="entityDeleteButton"
-                        >
-                          <FontAwesomeIcon icon="trash" />{' '}
-                          <span className="d-none d-md-inline">
-                            <Translate contentKey="entity.action.delete">Delete</Translate>
-                          </span>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            !loading && (
-              <div className="alert alert-warning">
-                <Translate contentKey="studySpaceApp.groupStoreGroupMember.home.notFound">No Group Members found</Translate>
-              </div>
-            )
-          )}
-        </InfiniteScroll>
+                      <Button
+                        tag={Link}
+                        to={`${match.url}/${groupMember.id}/edit?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
+                        color="primary"
+                        size="sm"
+                        data-cy="entityEditButton"
+                      >
+                        <FontAwesomeIcon icon="pencil-alt" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.edit">Edit</Translate>
+                        </span>
+                      </Button>
+                      <Button
+                        tag={Link}
+                        to={`${match.url}/${groupMember.id}/delete?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
+                        color="danger"
+                        size="sm"
+                        data-cy="entityDeleteButton"
+                      >
+                        <FontAwesomeIcon icon="trash" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.delete">Delete</Translate>
+                        </span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          !loading && (
+            <div className="alert alert-warning">
+              <Translate contentKey="studySpaceApp.groupStoreGroupMember.home.notFound">No Group Members found</Translate>
+            </div>
+          )
+        )}
       </div>
+      {totalItems ? (
+        <div className={groupMemberList && groupMemberList.length > 0 ? '' : 'd-none'}>
+          <div className="justify-content-center d-flex">
+            <JhiItemCount page={paginationState.activePage} total={totalItems} itemsPerPage={paginationState.itemsPerPage} i18nEnabled />
+          </div>
+          <div className="justify-content-center d-flex">
+            <JhiPagination
+              activePage={paginationState.activePage}
+              onSelect={handlePagination}
+              maxButtons={5}
+              itemsPerPage={paginationState.itemsPerPage}
+              totalItems={totalItems}
+            />
+          </div>
+        </div>
+      ) : (
+        ''
+      )}
     </div>
   );
 };

@@ -20,14 +20,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
-import vn.vnedu.studyspace.group_store.domain.GroupMember;
 import vn.vnedu.studyspace.group_store.repository.GroupRepository;
-import vn.vnedu.studyspace.group_store.security.SecurityUtils;
-import vn.vnedu.studyspace.group_store.service.GroupMemberService;
 import vn.vnedu.studyspace.group_store.service.GroupService;
-import vn.vnedu.studyspace.group_store.service.KafkaService;
 import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
-import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -48,15 +43,9 @@ public class GroupResource {
 
     private final GroupRepository groupRepository;
 
-    private final GroupMemberService groupMemberService;
-
-    private final KafkaService kafkaService;
-
-    public GroupResource(GroupService groupService, GroupRepository groupRepository, GroupMemberService groupMemberService, KafkaService kafkaService) {
+    public GroupResource(GroupService groupService, GroupRepository groupRepository) {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
-        this.groupMemberService = groupMemberService;
-        this.kafkaService = kafkaService;
     }
 
     /**
@@ -69,18 +58,10 @@ public class GroupResource {
     @PostMapping("/groups")
     public ResponseEntity<GroupDTO> createGroup(@Valid @RequestBody GroupDTO groupDTO) throws URISyntaxException {
         log.debug("REST request to save Group : {}", groupDTO);
-        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElse(null);
-        if(currentUserLogin == null) {
-            throw new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn");
-        }
         if (groupDTO.getId() != null) {
             throw new BadRequestAlertException("A new group cannot already have an ID", ENTITY_NAME, "idexists");
         }
-
         GroupDTO result = groupService.save(groupDTO);
-        GroupMemberDTO groupMemberDTO = groupMemberService.saveAdmin(result, currentUserLogin);
-        kafkaService.storeGroupMember(groupMemberDTO); // Save current user as admin of group in all microservice.
-
         return ResponseEntity
             .created(new URI("/api/groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -114,15 +95,6 @@ public class GroupResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
-        if(currentUserLogin.isEmpty()){
-            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
-        }
-
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)){
-            throw new BadRequestAlertException("Full authentication for this action", ENTITY_NAME, "fullAuthenticationForThisAction");
-        }
-
         GroupDTO result = groupService.save(groupDTO);
         return ResponseEntity
             .ok()
@@ -141,30 +113,30 @@ public class GroupResource {
      * or with status {@code 500 (Internal Server Error)} if the groupDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-//    @PatchMapping(value = "/groups/{id}", consumes = "application/merge-patch+json")
-//    public ResponseEntity<GroupDTO> partialUpdateGroup(
-//        @PathVariable(value = "id", required = false) final Long id,
-//        @NotNull @RequestBody GroupDTO groupDTO
-//    ) throws URISyntaxException {
-//        log.debug("REST request to partial update Group partially : {}, {}", id, groupDTO);
-//        if (groupDTO.getId() == null) {
-//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-//        }
-//        if (!Objects.equals(id, groupDTO.getId())) {
-//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-//        }
-//
-//        if (!groupRepository.existsById(id)) {
-//            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-//        }
-//
-//        Optional<GroupDTO> result = groupService.partialUpdate(groupDTO);
-//
-//        return ResponseUtil.wrapOrNotFound(
-//            result,
-//            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupDTO.getId().toString())
-//        );
-//    }
+    @PatchMapping(value = "/groups/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    public ResponseEntity<GroupDTO> partialUpdateGroup(
+        @PathVariable(value = "id", required = false) final Long id,
+        @NotNull @RequestBody GroupDTO groupDTO
+    ) throws URISyntaxException {
+        log.debug("REST request to partial update Group partially : {}, {}", id, groupDTO);
+        if (groupDTO.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, groupDTO.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!groupRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        Optional<GroupDTO> result = groupService.partialUpdate(groupDTO);
+
+        return ResponseUtil.wrapOrNotFound(
+            result,
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, groupDTO.getId().toString())
+        );
+    }
 
     /**
      * {@code GET  /groups} : get all the groups.
@@ -202,13 +174,7 @@ public class GroupResource {
     @DeleteMapping("/groups/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
         log.debug("REST request to delete Group : {}", id);
-        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
-        if(currentUserLogin.isEmpty()) {
-            throw new BadRequestAlertException("User is not logged in", ENTITY_NAME, "userIsNotLoggedIn");
-        }
-        if(!groupMemberService.isAdmin(currentUserLogin.get(), id)) {
-            groupService.delete(id);
-        }
+        groupService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

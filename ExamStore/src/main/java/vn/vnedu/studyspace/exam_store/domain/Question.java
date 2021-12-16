@@ -2,6 +2,8 @@ package vn.vnedu.studyspace.exam_store.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
@@ -19,6 +21,7 @@ public class Question implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Lob
@@ -29,22 +32,28 @@ public class Question implements Serializable {
     @Column(name = "note")
     private String note;
 
+    @OneToMany(mappedBy = "question")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
+    private Set<Option> options = new HashSet<>();
+
     @ManyToOne
     @JsonIgnoreProperties(value = { "topic" }, allowSetters = true)
-    private QuestionGroup repo;
+    private QuestionGroup questionGroup;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
+
     public Long getId() {
-        return id;
+        return this.id;
+    }
+
+    public Question id(Long id) {
+        this.setId(id);
+        return this;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Question id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public String getContent() {
@@ -52,7 +61,7 @@ public class Question implements Serializable {
     }
 
     public Question content(String content) {
-        this.content = content;
+        this.setContent(content);
         return this;
     }
 
@@ -65,7 +74,7 @@ public class Question implements Serializable {
     }
 
     public Question note(String note) {
-        this.note = note;
+        this.setNote(note);
         return this;
     }
 
@@ -73,17 +82,48 @@ public class Question implements Serializable {
         this.note = note;
     }
 
-    public QuestionGroup getRepo() {
-        return this.repo;
+    public Set<Option> getOptions() {
+        return this.options;
     }
 
-    public Question repo(QuestionGroup questionGroup) {
-        this.setRepo(questionGroup);
+    public void setOptions(Set<Option> options) {
+        if (this.options != null) {
+            this.options.forEach(i -> i.setQuestion(null));
+        }
+        if (options != null) {
+            options.forEach(i -> i.setQuestion(this));
+        }
+        this.options = options;
+    }
+
+    public Question options(Set<Option> options) {
+        this.setOptions(options);
         return this;
     }
 
-    public void setRepo(QuestionGroup questionGroup) {
-        this.repo = questionGroup;
+    public Question addOptions(Option option) {
+        this.options.add(option);
+        option.setQuestion(this);
+        return this;
+    }
+
+    public Question removeOptions(Option option) {
+        this.options.remove(option);
+        option.setQuestion(null);
+        return this;
+    }
+
+    public QuestionGroup getQuestionGroup() {
+        return this.questionGroup;
+    }
+
+    public void setQuestionGroup(QuestionGroup questionGroup) {
+        this.questionGroup = questionGroup;
+    }
+
+    public Question questionGroup(QuestionGroup questionGroup) {
+        this.setQuestionGroup(questionGroup);
+        return this;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
