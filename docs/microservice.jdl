@@ -1,0 +1,193 @@
+// =========================== Gateway Application ===========================
+application {
+  config {
+   	baseName StudySpace
+    applicationType gateway
+    packageName vn.vnedu.studyspace
+    serverPort 8080
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    cacheProvider hazelcast
+    clientFramework react
+    buildTool gradle
+    languages [vi, en]
+    nativeLanguage vi
+    clientTheme flatly
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities *
+}
+
+// =========================== GroupStore Application ===========================
+application {
+  config {
+   	baseName GroupStore
+    applicationType microservice
+    packageName vn.vnedu.studyspace.group_store
+    serverPort 8081
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities Group, GroupMember
+
+  dto * with mapstruct
+  paginate * with pagination
+}
+
+entity GroupMember {
+	userLogin String required
+  role Integer min(0) max(2) required // 0: chờ vào, 1: mem, 2: admin
+}
+
+entity Group {
+  name String minlength(5) maxlength(255) required
+}
+
+relationship ManyToOne {
+  GroupMember{group(name)} to Group
+}
+
+microservice Group, GroupMember with GroupStore
+
+// =========================== ExamStore Application ===========================
+application {
+  config {
+   	baseName ExamStore
+    applicationType microservice
+    packageName vn.vnedu.studyspace.exam_store
+    serverPort 8082
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  
+  entities Topic, Exam, ExamItem, Question, Option, QuestionGroup
+
+  service * with serviceClass
+  dto * with mapstruct
+  paginate * with infinite-scroll
+}
+
+entity Topic {
+  name String minlength(5) maxlength(255) required
+}
+
+entity QuestionGroup {
+  name String minlength(5) maxlength(255) required
+  groupId String
+  userLogin String required
+}
+
+entity Question {
+	content TextBlob required
+	note TextBlob
+}
+
+entity Option {
+	content TextBlob required
+	isCorrect Boolean required
+}
+
+entity Exam {
+  name String minlength(3) maxlength(155) required
+  duration Integer min(5) max(180) required
+  mix Integer min(0) max(2) required // 0: không trộn, 1: trộn theo nhóm, 2: trộn hết
+  groupId Long required
+}
+
+entity ExamItem {
+	numOfQuestion Integer required // số câu hỏi cần lấy trong danh mục câu hỏi
+}
+
+relationship OneToMany {
+  Question{options} to Option{question(id)}
+  Exam{items} to ExamItem{exam(id)}
+}
+
+relationship ManyToOne {
+  QuestionGroup{topic(id)} to Topic
+  Question{questionGroup(id)} to QuestionGroup
+  ExamItem{questionGroup(id)} to QuestionGroup
+}
+
+microservice Topic, Exam, ExamItem, Question, Option, QuestionGroup with ExamStore
+
+// =========================== AnswerStore Application ===========================
+application {
+  config {
+    baseName AnswerStore
+    reactive true
+    applicationType microservice
+    packageName vn.vnedu.studyspace.answer_store
+    serverPort 8083
+    authenticationType oauth2
+    databaseType sql
+    devDatabaseType mysql
+    prodDatabaseType mysql
+    buildTool gradle
+    languages [en, vi]
+    cacheProvider hazelcast
+    serviceDiscoveryType consul
+    testFrameworks [cypress]
+    messageBroker kafka
+  }
+  entities GroupTimeTable, TimeTable, AnswerSheet, AnswerSheetItem
+
+  dto * with mapstruct
+  service * with serviceClass
+  paginate * with infinite-scroll
+}
+
+entity GroupTimeTable {
+	examId Long required
+  startAt Instant required
+  endAt Instant required
+  groupId String required
+  note String
+}
+
+entity TimeTable {
+	title String minlength(2) maxlength(255)
+  time Instant
+  note TextBlob required
+  userLogin String required
+}
+
+entity AnswerSheet {
+	time Instant required   // thơi gian nộp bài
+  userLogin String required
+}
+
+entity AnswerSheetItem {
+	questionId Long required
+  answerId Long required
+}
+
+relationship OneToMany {
+  AnswerSheet to AnswerSheetItem{answerSheet}
+}
+
+relationship ManyToOne {
+  AnswerSheet{groupTimeTable(id)} to GroupTimeTable
+}
+
+microservice GroupTimeTable, TimeTable, AnswerSheet, AnswerSheetItem with AnswerStore
