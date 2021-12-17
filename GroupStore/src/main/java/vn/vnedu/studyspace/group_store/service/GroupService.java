@@ -76,6 +76,19 @@ public class GroupService {
     }
 
     /**
+     * Get all groups has name containing "name"
+     *
+     * @param name the name to find.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<GroupDTO> findAllByNameContaining(String name, Pageable pageable) {
+        log.debug("Request to get all Groups has name containing {}", name);
+        return groupRepository.findAllByNameContaining(name, pageable).map(groupMapper::toDto);
+    }
+
+    /**
      * Get one group by id.
      *
      * @param id the id of the entity.

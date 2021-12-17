@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.vnedu.studyspace.group_store.domain.GroupMember;
 import vn.vnedu.studyspace.group_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
+import vn.vnedu.studyspace.group_store.service.factory.GroupFactory;
 import vn.vnedu.studyspace.group_store.service.mapper.GroupMemberMapper;
 
 /**
@@ -41,6 +42,35 @@ public class GroupMemberService {
         GroupMember groupMember = groupMemberMapper.toEntity(groupMemberDTO);
         groupMember = groupMemberRepository.save(groupMember);
         return groupMemberMapper.toDto(groupMember);
+    }
+
+    /**
+     * Save a new groupMember.
+     *
+     * @param groupId id of the group.
+     * @param userLogin current username logged in.
+     * @return the persisted entity.
+     */
+    private GroupMemberDTO saveAs(Long groupId, String userLogin, Integer role) {
+        log.debug("Request to save A member name {} with role {} in group {}", userLogin, role, groupId);
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroup(GroupFactory.getGroup(groupId));
+        groupMember.setUserLogin(userLogin);
+        groupMember.setRole(role);
+        groupMember = groupMemberRepository.save(groupMember);
+        return groupMemberMapper.toDto(groupMember);
+    }
+
+    public GroupMemberDTO saveAsWaiting(Long groupId, String userLogin) {
+        return saveAs(groupId, userLogin, 0);
+    }
+
+    public GroupMemberDTO saveAsMember(Long groupId, String userLogin) {
+        return saveAs(groupId, userLogin, 1);
+    }
+
+    public GroupMemberDTO saveAsAdmin(Long groupId, String userLogin) {
+        return saveAs(groupId, userLogin, 2);
     }
 
     /**
@@ -76,6 +106,32 @@ public class GroupMemberService {
     }
 
     /**
+     * Get all the groupMembers in the group
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the list of groupMembers.
+     */
+    @Transactional(readOnly = true)
+    public Page<GroupMemberDTO> findAllByGroupId(Long groupId, Pageable pageable) {
+        log.debug("Request to get all GroupMembers in Group {}", groupId);
+        return groupMemberRepository.findAllByGroupId(groupId, pageable).map(groupMemberMapper::toDto);
+    }
+
+    /**
+     * Get member in groupMember.
+     *
+     * @param userLogin member name.
+     * @param groupId id of the group.
+     * @return the persisted entity.
+     */
+    @Transactional(readOnly = true)
+    public Optional<GroupMemberDTO> findByUserLoginAndGroupId(String userLogin, Long groupId){
+        log.debug("Request to get GroupMember {} in Group {}", userLogin, groupId);
+        return groupMemberRepository.findByUserLoginAndGroupId(userLogin, groupId).map(groupMemberMapper::toDto);
+    }
+
+    /**
      * Get one groupMember by id.
      *
      * @param id the id of the entity.
@@ -85,6 +141,17 @@ public class GroupMemberService {
     public Optional<GroupMemberDTO> findOne(Long id) {
         log.debug("Request to get GroupMember : {}", id);
         return groupMemberRepository.findById(id).map(groupMemberMapper::toDto);
+    }
+
+    /**
+     * Count member of group "id".
+     *
+     * @param groupId the id of the group.
+     * @return the number of member.
+     */
+    public Optional<Long> countByGroupId(Long groupId) {
+        log.debug("Request to count member in group {}", groupId);
+        return groupMemberRepository.countByGroupId(groupId);
     }
 
     /**

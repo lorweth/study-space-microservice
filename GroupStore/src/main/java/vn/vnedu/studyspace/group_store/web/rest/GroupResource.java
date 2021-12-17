@@ -15,14 +15,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.group_store.repository.GroupRepository;
+import vn.vnedu.studyspace.group_store.security.SecurityUtils;
+import vn.vnedu.studyspace.group_store.service.GroupMemberService;
 import vn.vnedu.studyspace.group_store.service.GroupService;
+import vn.vnedu.studyspace.group_store.service.KafkaService;
 import vn.vnedu.studyspace.group_store.service.dto.GroupDTO;
+import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
 import vn.vnedu.studyspace.group_store.web.rest.errors.BadRequestAlertException;
 
 /**
@@ -43,9 +48,15 @@ public class GroupResource {
 
     private final GroupRepository groupRepository;
 
-    public GroupResource(GroupService groupService, GroupRepository groupRepository) {
+    private final GroupMemberService groupMemberService;
+
+    private final KafkaService kafkaService;
+
+    public GroupResource(GroupService groupService, GroupRepository groupRepository, GroupMemberService groupMemberService, KafkaService kafkaService) {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
+        this.groupMemberService = groupMemberService;
+        this.kafkaService = kafkaService;
     }
 
     /**
@@ -61,7 +72,15 @@ public class GroupResource {
         if (groupDTO.getId() != null) {
             throw new BadRequestAlertException("A new group cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        Optional<String> userLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if(userLoginOptional.isEmpty()){
+            throw new BadRequestAlertException(ENTITY_NAME, "User not logged in", "userNotLoggedIn");
+        }
         GroupDTO result = groupService.save(groupDTO);
+        // Create new member as Admin
+        GroupMemberDTO groupMemberDTO = groupMemberService.saveAsAdmin(result.getId(), userLoginOptional.get());
+        // Sync with kafka
+        kafkaService.storeGroupMember(groupMemberDTO);
         return ResponseEntity
             .created(new URI("/api/groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -78,6 +97,7 @@ public class GroupResource {
      * or with status {@code 500 (Internal Server Error)} if the groupDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#id, 'ADMIN')")
     @PutMapping("/groups/{id}")
     public ResponseEntity<GroupDTO> updateGroup(
         @PathVariable(value = "id", required = false) final Long id,
@@ -113,6 +133,7 @@ public class GroupResource {
      * or with status {@code 500 (Internal Server Error)} if the groupDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#id, 'ADMIN')")
     @PatchMapping(value = "/groups/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<GroupDTO> partialUpdateGroup(
         @PathVariable(value = "id", required = false) final Long id,
@@ -153,6 +174,21 @@ public class GroupResource {
     }
 
     /**
+     * {@code GET /groups/name/:name} : get all the groups which name containing "name".
+     *
+     * @param name the name to retrieve.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
+     */
+    @GetMapping("/groups/name/{name}")
+    public ResponseEntity<List<GroupDTO>> getAllGroupByName(@PathVariable String name, Pageable pageable) {
+        log.debug("REST request to get a page of Groups which name containing {}", name);
+        Page<GroupDTO> page = groupService.findAllByNameContaining(name, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
      * {@code GET  /groups/:id} : get the "id" group.
      *
      * @param id the id of the groupDTO to retrieve.
@@ -171,9 +207,14 @@ public class GroupResource {
      * @param id the id of the groupDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#id, 'ADMIN')")
     @DeleteMapping("/groups/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
         log.debug("REST request to delete Group : {}", id);
+        Optional<Long> numOfMember = groupMemberService.countByGroupId(id);
+        if (numOfMember.isPresent() && numOfMember.get() > 1){
+            throw new BadRequestAlertException(ENTITY_NAME, "Cannot delete the Group", "cannotDeleteGroup");
+        }
         groupService.delete(id);
         return ResponseEntity
             .noContent()
