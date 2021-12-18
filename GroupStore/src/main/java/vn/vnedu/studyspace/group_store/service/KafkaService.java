@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import vn.vnedu.studyspace.group_store.config.KafkaProperties;
 import vn.vnedu.studyspace.group_store.service.dto.GroupMemberDTO;
+import vn.vnedu.studyspace.group_store.service.dto.MemberDTO;
 import vn.vnedu.studyspace.group_store.service.exceptions.KafkaServiceException;
+import vn.vnedu.studyspace.group_store.service.factory.GroupMemberFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,7 +45,8 @@ public class KafkaService {
 
     public void storeGroupMember(GroupMemberDTO groupMemberDTO) {
         try {
-            String message = objectMapper.writeValueAsString(groupMemberDTO);
+            MemberDTO memberDTO = GroupMemberFactory.getMemberDTO(groupMemberDTO);
+            String message = objectMapper.writeValueAsString(memberDTO);
             ProducerRecord<String, String> producerRecord = new ProducerRecord<>(CREATE_TOPIC, message);
             kafkaProducer.send(producerRecord);
         }
