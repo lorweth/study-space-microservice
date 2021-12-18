@@ -132,6 +132,31 @@ public class GroupMemberService {
     }
 
     /**
+     * Find all GroupMember in "groupId" with permission "role".
+     *
+     * @param groupId the "id" group.
+     * @param role the permission.
+     * @param pageable the pagination infomation.
+     * @return the list of entity.
+     */
+    private Page<GroupMemberDTO> findAllByGroupIdAndRole(Long groupId, Integer role, Pageable pageable) {
+        log.debug("Request to get GroupMembers in Group {} with Role {}", groupId, role);
+        return groupMemberRepository.findAllByGroupIdAndRole(groupId, role, pageable).map(groupMemberMapper::toDto);
+    }
+
+    public Page<GroupMemberDTO> findAllAdminInGroup(Long groupId, Pageable pageable) {
+        return findAllByGroupIdAndRole(groupId, 2, pageable);
+    }
+
+    public Page<GroupMemberDTO> findAllMemberInGroup(Long groupId, Pageable pageable) {
+        return findAllByGroupIdAndRole(groupId, 1, pageable);
+    }
+
+    public Page<GroupMemberDTO> findAllWaitingInGroup(Long groupId, Pageable pageable) {
+        return findAllByGroupIdAndRole(groupId, 0, pageable);
+    }
+
+    /**
      * Get one groupMember by id.
      *
      * @param id the id of the entity.
@@ -143,16 +168,6 @@ public class GroupMemberService {
         return groupMemberRepository.findById(id).map(groupMemberMapper::toDto);
     }
 
-    /**
-     * Count member of group "id".
-     *
-     * @param groupId the id of the group.
-     * @return the number of member.
-     */
-    public Optional<Long> countByGroupId(Long groupId) {
-        log.debug("Request to count member in group {}", groupId);
-        return groupMemberRepository.countByGroupId(groupId);
-    }
 
     /**
      * Delete the groupMember by id.

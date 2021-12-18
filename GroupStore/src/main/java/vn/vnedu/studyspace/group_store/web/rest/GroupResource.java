@@ -165,13 +165,13 @@ public class GroupResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
      */
-    @GetMapping("/groups")
-    public ResponseEntity<List<GroupDTO>> getAllGroups(Pageable pageable) {
-        log.debug("REST request to get a page of Groups");
-        Page<GroupDTO> page = groupService.findAll(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
-    }
+//    @GetMapping("/groups")
+//    public ResponseEntity<List<GroupDTO>> getAllGroups(Pageable pageable) {
+//        log.debug("REST request to get a page of Groups");
+//        Page<GroupDTO> page = groupService.findAll(pageable);
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+//        return ResponseEntity.ok().headers(headers).body(page.getContent());
+//    }
 
     /**
      * {@code GET /groups/name/:name} : get all the groups which name containing "name".
@@ -207,18 +207,18 @@ public class GroupResource {
      * @param id the id of the groupDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @PreAuthorize("@groupMemberSecurity.hasPermission(#id, 'ADMIN')")
-    @DeleteMapping("/groups/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
-        log.debug("REST request to delete Group : {}", id);
-        Optional<Long> numOfMember = groupMemberService.countByGroupId(id);
-        if (numOfMember.isPresent() && numOfMember.get() > 1){
-            throw new BadRequestAlertException(ENTITY_NAME, "Cannot delete the Group", "cannotDeleteGroup");
-        }
-        groupService.delete(id);
-        return ResponseEntity
-            .noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
-    }
+//    @PreAuthorize("@groupMemberSecurity.hasPermission(#id, 'ADMIN')")
+//    @DeleteMapping("/groups/{id}")
+//    public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
+//        log.debug("REST request to delete Group : {}", id);
+//        Optional<Long> numOfMember = groupMemberService.countByGroupId(id);
+//        if (numOfMember.isPresent() && numOfMember.get() > 1){
+//            throw new BadRequestAlertException(ENTITY_NAME, "Cannot delete the Group", "cannotDeleteGroup");
+//        }
+//        groupService.delete(id);
+//        return ResponseEntity
+//            .noContent()
+//            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+//            .build();
+//    }
 }
