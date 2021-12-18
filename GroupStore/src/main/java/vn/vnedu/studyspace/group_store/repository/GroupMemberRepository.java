@@ -17,6 +17,6 @@ import java.util.Optional;
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
     Optional<GroupMember> findByUserLoginAndGroupId(String userLogin, Long groupId);
     Page<GroupMember> findAllByGroupId(Long groupId, Pageable pageable);
+    Page<GroupMember> findAllByGroupIdAndRole(Long groupId, Integer role, Pageable pageable);
     Optional<Long> countByGroupId(Long groupId);
-    Void deleteByGroupId(Long groupId);
 }

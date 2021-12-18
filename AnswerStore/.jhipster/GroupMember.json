@@ -1,0 +1,30 @@
+{
+  "microserviceName": "AnswerStore",
+  "clientRootFolder": "AnswerStore",
+  "databaseType": "sql",
+  "fields": [
+    {
+      "fieldName": "userLogin",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "role",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min", "max"],
+      "fieldValidateRulesMin": 0,
+      "fieldValidateRulesMax": "2"
+    },
+    {
+      "fieldName": "groupId",
+      "fieldType": "Long"
+    }
+  ],
+  "relationships": [],
+  "service": "serviceClass",
+  "dto": "mapstruct",
+  "jpaMetamodelFiltering": false,
+  "readOnly": true,
+  "pagination": "no",
+  "name": "GroupMember",
+  "changelogDate": "20211218195455"
+}

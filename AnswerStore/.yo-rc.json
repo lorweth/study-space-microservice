@@ -43,7 +43,7 @@
     "monorepository": true,
     "skipCommitHook": true,
     "jwtSecretKey": "OTJkYTlkNzVjZjI5NTI4YjZmOTdmZDI1MjRiNTRjOTA0MGVkMWQ0MWJkZDJlNDc0Zjg5OTE0YjEwMGNmYjQwNzZhMGJkNDgzMTIwN2E2ZDJkZTA2NmM2ZDc2MWRiZTg2YTA1NzA0NTExYTJjYTJlZmY0MTEyZDQ5ZDliOGZlNjk=",
-    "entities": ["AnswerSheetItem", "GroupTimeTable", "AnswerSheet", "TimeTable"],
-    "lastLiquibaseTimestamp": 1639667223000
+    "entities": ["AnswerSheetItem", "GroupTimeTable", "AnswerSheet", "TimeTable", "GroupMember"],
+    "lastLiquibaseTimestamp": 1639857295000
   }
 }
