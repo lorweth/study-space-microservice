@@ -23,7 +23,7 @@ public class GroupMemberService {
     }
 
     public GroupMemberDTO save(GroupMemberDTO groupMemberDTO) {
-        log.debug("Request to save groupMember");
+        log.debug("Request to save groupMember {}", groupMemberDTO);
         GroupMember groupMember = groupMemberMapper.toEntity(groupMemberDTO);
         groupMember = groupMemberRepository.save(groupMember);
         return groupMemberMapper.toDto(groupMember);
