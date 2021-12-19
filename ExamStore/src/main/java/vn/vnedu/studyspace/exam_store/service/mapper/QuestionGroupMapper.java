@@ -10,6 +10,7 @@ import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 @Mapper(componentModel = "spring", uses = { TopicMapper.class })
 public interface QuestionGroupMapper extends EntityMapper<QuestionGroupDTO, QuestionGroup> {
     @Mapping(target = "topic", source = "topic", qualifiedByName = "id")
+    @Mapping(target = "questions", ignore = true)
     QuestionGroupDTO toDto(QuestionGroup s);
 
     @Named("id")

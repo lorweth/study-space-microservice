@@ -1,16 +1,23 @@
 package vn.vnedu.studyspace.exam_store.service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.exam_store.domain.Question;
 import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
+import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionGroupMapper;
+import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
 
 /**
  * Service Implementation for managing {@link QuestionGroup}.
@@ -23,11 +30,22 @@ public class QuestionGroupService {
 
     private final QuestionGroupRepository questionGroupRepository;
 
+    private final QuestionRepository questionRepository;
+
     private final QuestionGroupMapper questionGroupMapper;
 
-    public QuestionGroupService(QuestionGroupRepository questionGroupRepository, QuestionGroupMapper questionGroupMapper) {
+    private final QuestionMapper questionMapper;
+
+    public QuestionGroupService(
+        QuestionGroupRepository questionGroupRepository,
+        QuestionGroupMapper questionGroupMapper,
+        QuestionRepository questionRepository,
+        QuestionMapper questionMapper
+    ) {
         this.questionGroupRepository = questionGroupRepository;
         this.questionGroupMapper = questionGroupMapper;
+        this.questionRepository = questionRepository;
+        this.questionMapper = questionMapper;
     }
 
     /**
@@ -41,6 +59,48 @@ public class QuestionGroupService {
         QuestionGroup questionGroup = questionGroupMapper.toEntity(questionGroupDTO);
         questionGroup = questionGroupRepository.save(questionGroup);
         return questionGroupMapper.toDto(questionGroup);
+    }
+
+    public QuestionGroupDTO saveWithUserLogin(QuestionGroupDTO dto, String userLogin){
+        dto.setUserLogin(userLogin);
+        dto.setGroupId(null);
+        return save(dto);
+    }
+
+    public QuestionGroupDTO saveWithGroupId(QuestionGroupDTO dto, Long groupId){
+        dto.setUserLogin(null);
+        dto.setGroupId(groupId);
+        return save(dto);
+    }
+
+    /**
+     * Save exam to new questionGroup of current user.
+     *
+     * @param dto the questionGroup DTO.
+     * @param userLogin the username.
+     * @return the questionGroup with list of question.
+     */
+    public QuestionGroupDTO saveWithQuestions(QuestionGroupDTO dto, String userLogin) {
+        // store question list
+        Set<QuestionDTO> questions = dto.getQuestions();
+
+        dto.setGroupId(null);
+        dto.setUserLogin(userLogin);
+        // save new question group
+        dto = save(dto);
+
+        // foreach question in list save new it with group "dto.getId()" and store it in "newQuestions"
+        Set<QuestionDTO> newQuestions = new HashSet<>();
+        for(QuestionDTO questionDTO: questions){
+            questionDTO.setQuestionGroup(dto);
+            Question question = questionMapper.toEntity(questionDTO);
+            question = questionRepository.save(question);
+            newQuestions.add(questionMapper.toDto(question));
+        }
+
+        // add "newQuestions" to "dto"
+        dto.setQuestions(newQuestions);
+        return dto;
     }
 
     /**

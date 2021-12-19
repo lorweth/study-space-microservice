@@ -15,15 +15,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
+import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.QuestionGroupService;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionGroupDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
+import vn.vnedu.studyspace.exam_store.web.rest.handle_exception.HandleExceptionUser;
 
 /**
  * REST controller for managing {@link vn.vnedu.studyspace.exam_store.domain.QuestionGroup}.
@@ -49,22 +52,75 @@ public class QuestionGroupResource {
     }
 
     /**
-     * {@code POST  /question-groups} : Create a new questionGroup.
+     * {@code POST  /question-groups} : Create a new questionGroup for current user.
      *
      * @param questionGroupDTO the questionGroupDTO to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/question-groups")
-    public ResponseEntity<QuestionGroupDTO> createQuestionGroup(@Valid @RequestBody QuestionGroupDTO questionGroupDTO)
+    public ResponseEntity<QuestionGroupDTO> createQuestionGroupForUser(@Valid @RequestBody QuestionGroupDTO questionGroupDTO)
         throws URISyntaxException {
-        log.debug("REST request to save QuestionGroup : {}", questionGroupDTO);
+        log.debug("REST request to save QuestionGroup for user : {}", questionGroupDTO);
         if (questionGroupDTO.getId() != null) {
             throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        QuestionGroupDTO result = questionGroupService.save(questionGroupDTO);
+        // Get userLogin from principal and throw bad exception if not found.
+        String userLogin = HandleExceptionUser.getCurrentUserLogin(SecurityUtils.getCurrentUserLogin(), ENTITY_NAME);
+        // save new questionGroup with userLogin.
+        QuestionGroupDTO result = questionGroupService.saveWithUserLogin(questionGroupDTO, userLogin);
         return ResponseEntity
             .created(new URI("/api/question-groups/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * {@code POST  /question-groups/save-exam} : Create a new questionGroup by exam for current user.
+     *
+     * @param questionGroupDTO the questionGroupDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/question-groups/save-exam")
+    public ResponseEntity<QuestionGroupDTO> createQuestionGroupByExamForUser(@Valid @RequestBody QuestionGroupDTO questionGroupDTO)
+        throws URISyntaxException {
+        log.debug("REST request to save QuestionGroup from Exam : {}", questionGroupDTO);
+        if (questionGroupDTO.getId() != null) {
+            throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        // Get userLogin from principal and throw bad exception if not found.
+        String userLogin = HandleExceptionUser.getCurrentUserLogin(SecurityUtils.getCurrentUserLogin(), ENTITY_NAME);
+        // save new questionGroup with userLogin.
+        QuestionGroupDTO result = questionGroupService.saveWithQuestions(questionGroupDTO, userLogin);
+        return ResponseEntity
+            .created(new URI("/api/question-groups/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * {@code POST  /question-groups/group/:groupId} : Create a new questionGroup for group "groupId".
+     *
+     * @param questionGroupDTO the questionGroupDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new questionGroupDTO, or with status {@code 400 (Bad Request)} if the questionGroup has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'ADMIN')")
+    @PostMapping("/question-groups/group/{groupId}")
+    public ResponseEntity<QuestionGroupDTO> createQuestionGroupForGroup(
+        @PathVariable Long groupId,
+        @Valid @RequestBody QuestionGroupDTO questionGroupDTO
+    )
+        throws URISyntaxException {
+        log.debug("REST request to save QuestionGroup for group {} : {}", groupId, questionGroupDTO);
+        if (questionGroupDTO.getId() != null) {
+            throw new BadRequestAlertException("A new questionGroup cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        // save new questionGroup for group.
+        QuestionGroupDTO result = questionGroupService.saveWithGroupId(questionGroupDTO, groupId);
+        return ResponseEntity
+            .created(new URI("/question-groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
