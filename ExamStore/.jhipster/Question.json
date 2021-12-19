@@ -24,6 +24,7 @@
       "relationshipType": "many-to-one",
       "otherEntityName": "questionGroup",
       "otherEntityRelationshipName": "question",
+      "relationshipValidateRules": "required",
       "relationshipName": "questionGroup",
       "otherEntityField": "id"
     }

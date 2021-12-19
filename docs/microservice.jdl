@@ -94,7 +94,7 @@ entity Topic {
 entity QuestionGroup {
   name String minlength(5) maxlength(255) required
   groupId Long
-  userLogin String required
+  userLogin String 
 }
 
 entity Question {
@@ -125,7 +125,7 @@ relationship OneToMany {
 
 relationship ManyToOne {
   QuestionGroup{topic(id)} to Topic
-  Question{questionGroup(id)} to QuestionGroup
+  Question{questionGroup(id) required} to QuestionGroup
   ExamItem{questionGroup(id)} to QuestionGroup
 }
 

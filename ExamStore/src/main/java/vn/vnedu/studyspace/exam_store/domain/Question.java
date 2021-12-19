@@ -37,7 +37,8 @@ public class Question implements Serializable {
     @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
     private Set<Option> options = new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @NotNull
     @JsonIgnoreProperties(value = { "topic" }, allowSetters = true)
     private QuestionGroup questionGroup;
 

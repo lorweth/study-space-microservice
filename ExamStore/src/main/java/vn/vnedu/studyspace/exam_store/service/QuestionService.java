@@ -1,15 +1,20 @@
 package vn.vnedu.studyspace.exam_store.service;
 
 import java.util.Optional;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.exam_store.domain.Option;
 import vn.vnedu.studyspace.exam_store.domain.Question;
+import vn.vnedu.studyspace.exam_store.repository.OptionRepository;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
+import vn.vnedu.studyspace.exam_store.service.mapper.OptionMapper;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
 
 /**
@@ -23,11 +28,22 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
+    private final OptionRepository optionRepository;
+
     private final QuestionMapper questionMapper;
 
-    public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper) {
+    private final OptionMapper optionMapper;
+
+    public QuestionService(
+        QuestionRepository questionRepository,
+        QuestionMapper questionMapper,
+        OptionRepository optionRepository,
+        OptionMapper optionMapper
+    ) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
+        this.optionRepository = optionRepository;
+        this.optionMapper = optionMapper;
     }
 
     /**

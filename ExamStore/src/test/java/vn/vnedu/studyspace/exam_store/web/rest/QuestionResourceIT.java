@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 import vn.vnedu.studyspace.exam_store.IntegrationTest;
 import vn.vnedu.studyspace.exam_store.domain.Question;
+import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
@@ -67,6 +68,16 @@ class QuestionResourceIT {
      */
     public static Question createEntity(EntityManager em) {
         Question question = new Question().content(DEFAULT_CONTENT).note(DEFAULT_NOTE);
+        // Add required entity
+        QuestionGroup questionGroup;
+        if (TestUtil.findAll(em, QuestionGroup.class).isEmpty()) {
+            questionGroup = QuestionGroupResourceIT.createEntity(em);
+            em.persist(questionGroup);
+            em.flush();
+        } else {
+            questionGroup = TestUtil.findAll(em, QuestionGroup.class).get(0);
+        }
+        question.setQuestionGroup(questionGroup);
         return question;
     }
 
@@ -78,6 +89,16 @@ class QuestionResourceIT {
      */
     public static Question createUpdatedEntity(EntityManager em) {
         Question question = new Question().content(UPDATED_CONTENT).note(UPDATED_NOTE);
+        // Add required entity
+        QuestionGroup questionGroup;
+        if (TestUtil.findAll(em, QuestionGroup.class).isEmpty()) {
+            questionGroup = QuestionGroupResourceIT.createUpdatedEntity(em);
+            em.persist(questionGroup);
+            em.flush();
+        } else {
+            questionGroup = TestUtil.findAll(em, QuestionGroup.class).get(0);
+        }
+        question.setQuestionGroup(questionGroup);
         return question;
     }
 
