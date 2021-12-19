@@ -32,6 +32,7 @@ interface GroupMemberRepositoryInternal {
     Mono<Integer> update(GroupMember entity);
 
     Flux<GroupMember> findAll();
+    Mono<GroupMember> findByUserLoginAndGroupId(String userLogin, Long groupId);
     Mono<GroupMember> findById(Long id);
     Flux<GroupMember> findAllBy(Pageable pageable);
     Flux<GroupMember> findAllBy(Pageable pageable, Criteria criteria);

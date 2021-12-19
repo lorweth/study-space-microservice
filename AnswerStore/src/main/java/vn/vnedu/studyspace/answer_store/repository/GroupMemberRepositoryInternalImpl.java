@@ -94,6 +94,11 @@ class GroupMemberRepositoryInternalImpl implements GroupMemberRepositoryInternal
         return createQuery(null, where("id").is(id)).one();
     }
 
+    @Override
+    public Mono<GroupMember> findByUserLoginAndGroupId(String userLogin, Long groupId) {
+        return createQuery(null, where("userLogin").is(userLogin).and("groupId").is(groupId)).one();
+    }
+
     private GroupMember process(Row row, RowMetadata metadata) {
         GroupMember entity = groupmemberMapper.apply(row, "e");
         return entity;
