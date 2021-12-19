@@ -29,8 +29,7 @@ public class QuestionGroup implements Serializable {
     @Column(name = "group_id")
     private Long groupId;
 
-    @NotNull
-    @Column(name = "user_login", nullable = false)
+    @Column(name = "user_login")
     private String userLogin;
 
     @ManyToOne

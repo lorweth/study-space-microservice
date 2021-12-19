@@ -17,7 +17,6 @@ public class QuestionGroupDTO implements Serializable {
 
     private Long groupId;
 
-    @NotNull
     private String userLogin;
 
     private TopicDTO topic;

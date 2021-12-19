@@ -21,7 +21,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="user_login" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="true" />
             </column>
             <column name="topic_id" type="bigint">
                 <constraints nullable="true" />

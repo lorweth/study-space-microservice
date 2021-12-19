@@ -161,29 +161,6 @@ class QuestionGroupResourceIT {
 
     @Test
     @Transactional
-    void checkUserLoginIsRequired() throws Exception {
-        int databaseSizeBeforeTest = questionGroupRepository.findAll().size();
-        // set the field null
-        questionGroup.setUserLogin(null);
-
-        // Create the QuestionGroup, which fails.
-        QuestionGroupDTO questionGroupDTO = questionGroupMapper.toDto(questionGroup);
-
-        restQuestionGroupMockMvc
-            .perform(
-                post(ENTITY_API_URL)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(questionGroupDTO))
-            )
-            .andExpect(status().isBadRequest());
-
-        List<QuestionGroup> questionGroupList = questionGroupRepository.findAll();
-        assertThat(questionGroupList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void getAllQuestionGroups() throws Exception {
         // Initialize the database
         questionGroupRepository.saveAndFlush(questionGroup);
