@@ -10,7 +10,7 @@
     },
     {
       "fieldName": "groupId",
-      "fieldType": "String"
+      "fieldType": "Long"
     },
     {
       "fieldName": "userLogin",

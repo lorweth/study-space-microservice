@@ -27,7 +27,7 @@ public class QuestionGroup implements Serializable {
     private String name;
 
     @Column(name = "group_id")
-    private String groupId;
+    private Long groupId;
 
     @NotNull
     @Column(name = "user_login", nullable = false)
@@ -64,16 +64,16 @@ public class QuestionGroup implements Serializable {
         this.name = name;
     }
 
-    public String getGroupId() {
+    public Long getGroupId() {
         return this.groupId;
     }
 
-    public QuestionGroup groupId(String groupId) {
+    public QuestionGroup groupId(Long groupId) {
         this.setGroupId(groupId);
         return this;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
 
@@ -128,7 +128,7 @@ public class QuestionGroup implements Serializable {
         return "QuestionGroup{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", groupId='" + getGroupId() + "'" +
+            ", groupId=" + getGroupId() +
             ", userLogin='" + getUserLogin() + "'" +
             "}";
     }

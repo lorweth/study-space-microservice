@@ -93,7 +93,7 @@ entity Topic {
 
 entity QuestionGroup {
   name String minlength(5) maxlength(255) required
-  groupId String
+  groupId Long
   userLogin String required
 }
 
