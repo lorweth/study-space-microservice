@@ -52,7 +52,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8081/api/group-members/group/15",
+									"raw": "http://localhost:8081/api/group-members/group/1/waiting",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -62,7 +62,31 @@
 										"api",
 										"group-members",
 										"group",
-										"15"
+										"1",
+										"waiting"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all waiting member",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8081/api/group-members/group/15/waiting",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"api",
+										"group-members",
+										"group",
+										"15",
+										"waiting"
 									]
 								}
 							},
@@ -74,7 +98,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8081/api/group-members/username/user/group/15",
+									"raw": "http://localhost:8081/api/group-members/username/admin/group/15",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -84,7 +108,7 @@
 										"api",
 										"group-members",
 										"username",
-										"user",
+										"admin",
 										"group",
 										"15"
 									]
@@ -102,7 +126,7 @@
 									"urlencoded": []
 								},
 								"url": {
-									"raw": "http://localhost:8081/api/group-members/group/15",
+									"raw": "http://localhost:8081/api/group-members/group/2",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -112,7 +136,7 @@
 										"api",
 										"group-members",
 										"group",
-										"15"
+										"2"
 									]
 								}
 							},
@@ -131,10 +155,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 18,\n    \"userLogin\": \"user\",\n    \"role\": 1,\n    \"group\": {\n        \"id\": 15,\n        \"name\": \"Đây là nhóm của ADMIN APP\"\n    }\n}"
+									"raw": "{\n    \"id\": 13,\n    \"userLogin\": \"user\",\n    \"role\": 1,\n    \"group\": {\n        \"id\": 11\n    }\n}"
 								},
 								"url": {
-									"raw": "http://localhost:8081/api/group-members/18",
+									"raw": "http://localhost:8081/api/group-members/13",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -143,7 +167,7 @@
 									"path": [
 										"api",
 										"group-members",
-										"18"
+										"13"
 									]
 								}
 							},
@@ -186,7 +210,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8081/api/group-members/18",
+									"raw": "http://localhost:8081/api/group-members/14",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -195,7 +219,7 @@
 									"path": [
 										"api",
 										"group-members",
-										"18"
+										"14"
 									]
 								}
 							},
@@ -219,7 +243,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Đây là nhóm của ADMIN APP\"\n}"
+									"raw": "{\n    \"name\": \"Đây là nhóm 2 của admin\"\n}"
 								},
 								"url": {
 									"raw": "http://localhost:8081/api/groups",
@@ -262,6 +286,138 @@
 			]
 		},
 		{
+			"name": "AnswerService",
+			"item": [
+				{
+					"name": "Get all Group time table",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/group-time-tables",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"group-time-tables"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ExamService",
+			"item": [
+				{
+					"name": "QuestionGroup",
+					"item": [
+						{
+							"name": "New question group for user",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Kho câu hỏi của admin\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/question-groups",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8082",
+									"path": [
+										"api",
+										"question-groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "New question for group",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Kho câu hỏi của admin\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/question-groups/group/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8082",
+									"path": [
+										"api",
+										"question-groups",
+										"group",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Question",
+					"item": [
+						{
+							"name": "New Question",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"content\": \"Hỏi thế gian tình là gì?\",\n    \"note\": \"Đi mà hỏi thế gian\",\n    \"questionGroup\": {\n        \"id\": 1\n    },\n    \"options\": [\n        {\n            \"content\": \"tình là 1 loài động vật\",\n            \"isCorrect\": false\n        },\n        {\n            \"content\": \"tình là ... méo biết\",\n            \"isCorrect\": false\n        },\n        {\n            \"content\": \"tình là tình nhiều khi không mà có\",\n            \"isCorrect\": false\n        },\n        {\n            \"content\": \"tình là... đi mà hỏi luật dân sự ấy\",\n            \"isCorrect\": true\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/questions",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8082",
+									"path": [
+										"api",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Authorization",
 			"event": [
 				{
@@ -270,7 +426,7 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
-							"    pm.globals.set(\"access_token\", pm.response.json().access_token);",
+							"    pm.environment.set(\"access_token\", pm.response.json().access_token);",
 							"});",
 							"pm.test(\"Response time is less than 200ms\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(200);",
@@ -294,12 +450,12 @@
 						},
 						{
 							"key": "username",
-							"value": "admin",
+							"value": "{{username}}",
 							"type": "text"
 						},
 						{
 							"key": "password",
-							"value": "admin",
+							"value": "{{password}}",
 							"type": "text"
 						},
 						{
