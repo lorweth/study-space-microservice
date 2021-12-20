@@ -1,5 +1,6 @@
 package vn.vnedu.studyspace.exam_store.service;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import vn.vnedu.studyspace.exam_store.domain.Option;
 import vn.vnedu.studyspace.exam_store.domain.Question;
 import vn.vnedu.studyspace.exam_store.repository.OptionRepository;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.OptionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.OptionMapper;
 import vn.vnedu.studyspace.exam_store.service.mapper.QuestionMapper;
@@ -54,9 +56,24 @@ public class QuestionService {
      */
     public QuestionDTO save(QuestionDTO questionDTO) {
         log.debug("Request to save Question : {}", questionDTO);
+        Set<OptionDTO> optionDTOSet = questionDTO.getOptions();
+
+        // save question
         Question question = questionMapper.toEntity(questionDTO);
         question = questionRepository.save(question);
-        return questionMapper.toDto(question);
+
+        // foreach option in "optionDTOSet" save it with question id into "newOptions"
+        Set<OptionDTO> newOptions = new HashSet<>();
+        for(OptionDTO optionDTO: optionDTOSet){
+            Option option = optionMapper.toEntity(optionDTO);
+            option.setQuestion(question);
+            option = optionRepository.save(option);
+            newOptions.add(optionMapper.toDto(option));
+        }
+
+        QuestionDTO dto = questionMapper.toDto(question);
+        dto.setOptions(newOptions);
+        return dto;
     }
 
     /**

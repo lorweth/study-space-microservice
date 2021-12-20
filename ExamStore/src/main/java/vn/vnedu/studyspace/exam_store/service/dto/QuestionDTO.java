@@ -1,7 +1,9 @@
 package vn.vnedu.studyspace.exam_store.service.dto;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.Lob;
 import javax.validation.constraints.*;
 
@@ -18,7 +20,10 @@ public class QuestionDTO implements Serializable {
     @Lob
     private String note;
 
+    @NotNull
     private QuestionGroupDTO questionGroup;
+
+    private Set<OptionDTO> options;
 
     public Long getId() {
         return id;
@@ -50,6 +55,14 @@ public class QuestionDTO implements Serializable {
 
     public void setQuestionGroup(QuestionGroupDTO questionGroup) {
         this.questionGroup = questionGroup;
+    }
+
+    public Set<OptionDTO> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Set<OptionDTO> options) {
+        this.options = options;
     }
 
     @Override
