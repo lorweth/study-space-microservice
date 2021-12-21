@@ -136,6 +136,32 @@ public class QuestionGroupService {
     }
 
     /**
+     * Get all questionGroups by userLogin.
+     *
+     * @param userLogin the username.
+     * @param pageable the pagination information.
+     * @return the list of entity.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionGroupDTO> findAllWithUserLogin(String userLogin, Pageable pageable){
+        log.debug("Request to get all QuestionGroups of User {}", userLogin);
+        return questionGroupRepository.findAllByUserLogin(userLogin, pageable).map(questionGroupMapper::toDto);
+    }
+
+    /**
+     * Get all questionGroups by groupId.
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the list of entity.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionGroupDTO> findAllWithGroupId(Long groupId, Pageable pageable){
+        log.debug("Request to get all QuestionGroups of Group {}", groupId);
+        return questionGroupRepository.findAllByGroupId(groupId, pageable).map(questionGroupMapper::toDto);
+    }
+
+    /**
      * Get one questionGroup by id.
      *
      * @param id the id of the entity.

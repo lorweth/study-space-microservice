@@ -109,6 +109,8 @@ entity Option {
 
 entity Exam {
   name String minlength(3) maxlength(155) required
+  startAt Instant
+  endAt Instant
   duration Integer min(5) max(180) required
   mix Integer min(0) max(2) required // 0: không trộn, 1: trộn theo nhóm, 2: trộn hết
   groupId Long required

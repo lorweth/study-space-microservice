@@ -80,6 +80,7 @@ public class QuestionResource {
      * or with status {@code 500 (Internal Server Error)} if the questionDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@questionGroupSecurity.hasPermission(#questionDTO.getQuestionGroup().getId(), 'ADMIN')")
     @PutMapping("/questions/{id}")
     public ResponseEntity<QuestionDTO> updateQuestion(
         @PathVariable(value = "id", required = false) final Long id,
@@ -115,30 +116,30 @@ public class QuestionResource {
      * or with status {@code 500 (Internal Server Error)} if the questionDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/questions/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<QuestionDTO> partialUpdateQuestion(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody QuestionDTO questionDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update Question partially : {}, {}", id, questionDTO);
-        if (questionDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, questionDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!questionRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
-
-        Optional<QuestionDTO> result = questionService.partialUpdate(questionDTO);
-
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, questionDTO.getId().toString())
-        );
-    }
+//    @PatchMapping(value = "/questions/{id}", consumes = { "application/json", "application/merge-patch+json" })
+//    public ResponseEntity<QuestionDTO> partialUpdateQuestion(
+//        @PathVariable(value = "id", required = false) final Long id,
+//        @NotNull @RequestBody QuestionDTO questionDTO
+//    ) throws URISyntaxException {
+//        log.debug("REST request to partial update Question partially : {}, {}", id, questionDTO);
+//        if (questionDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        if (!Objects.equals(id, questionDTO.getId())) {
+//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+//        }
+//
+//        if (!questionRepository.existsById(id)) {
+//            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+//        }
+//
+//        Optional<QuestionDTO> result = questionService.partialUpdate(questionDTO);
+//
+//        return ResponseUtil.wrapOrNotFound(
+//            result,
+//            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, questionDTO.getId().toString())
+//        );
+//    }
 
     /**
      * {@code GET  /questions} : get all the questions.
@@ -146,10 +147,26 @@ public class QuestionResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questions in body.
      */
-    @GetMapping("/questions")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestions(Pageable pageable) {
-        log.debug("REST request to get a page of Questions");
-        Page<QuestionDTO> page = questionService.findAll(pageable);
+//    @GetMapping("/questions")
+//    public ResponseEntity<List<QuestionDTO>> getAllQuestions(Pageable pageable) {
+//        log.debug("REST request to get a page of Questions");
+//        Page<QuestionDTO> page = questionService.findAll(pageable);
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+//        return ResponseEntity.ok().headers(headers).body(page.getContent());
+//    }
+
+    /**
+     * {@code GET /questions/repo/:repoId} : get all question in repo "repoId".
+     *
+     * @param repoId the id of question group.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questions in body.
+     */
+    @PreAuthorize("@questionGroupSecurity.hasPermission(#repoId, 'MEMBER')")
+    @GetMapping("/questions/repo/{repoId}")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestionsInRepo(@PathVariable Long repoId, Pageable pageable){
+        log.debug("REST request to get all questions of questionGroup {}", repoId);
+        Page<QuestionDTO> page = questionService.findAllByRepoId(repoId, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -173,10 +190,11 @@ public class QuestionResource {
      * @param id the id of the questionDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @PreAuthorize("@questionSecurity.hasPermission(#id, 'ADMIN')")
     @DeleteMapping("/questions/{id}")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
         log.debug("REST request to delete Question : {}", id);
-        questionService.delete(id);
+        questionService.deleteWithOption(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

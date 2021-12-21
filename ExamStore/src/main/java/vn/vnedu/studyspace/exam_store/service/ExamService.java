@@ -31,7 +31,7 @@ public class ExamService {
     }
 
     /**
-     * Save a exam.
+     * Save an exam.
      *
      * @param examDTO the entity to save.
      * @return the persisted entity.
@@ -44,7 +44,7 @@ public class ExamService {
     }
 
     /**
-     * Partially update a exam.
+     * Partially update an exam.
      *
      * @param examDTO the entity to update partially.
      * @return the persisted entity.
@@ -73,6 +73,19 @@ public class ExamService {
     public Page<ExamDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Exams");
         return examRepository.findAll(pageable).map(examMapper::toDto);
+    }
+
+    /**
+     * Get all the exams by GroupId.
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<ExamDTO> findAllByGroupId(Long groupId, Pageable pageable){
+        log.debug("Request to get all Exams in Group {}", groupId);
+        return examRepository.findAllByGroupId(groupId, pageable).map(examMapper::toDto);
     }
 
     /**

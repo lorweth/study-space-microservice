@@ -1,6 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -109,6 +110,21 @@ public class QuestionService {
     }
 
     /**
+     * Get all questions in questionGroup "repoId".
+     *
+     * @param repoId the id of the questionGroup.
+     * @param pageable the pagination information.
+     * @return the list of entity.
+     */
+    @Transactional(readOnly = true)
+    public Page<QuestionDTO> findAllByRepoId(Long repoId, Pageable pageable) {
+        log.debug("Request to get all QuestionGroup {}", repoId);
+        return questionRepository
+            .findAllByQuestionGroupId(repoId, pageable)
+            .map(questionMapper::toDto);
+    }
+
+    /**
      * Get one question by id.
      *
      * @param id the id of the entity.
@@ -127,6 +143,12 @@ public class QuestionService {
      */
     public void delete(Long id) {
         log.debug("Request to delete Question : {}", id);
+        questionRepository.deleteById(id);
+    }
+
+    public void deleteWithOption(Long id){
+        log.debug("Request to delete Question : {} and all option in it", id);
+        optionRepository.deleteAllByQuestionId(id);
         questionRepository.deleteById(id);
     }
 }

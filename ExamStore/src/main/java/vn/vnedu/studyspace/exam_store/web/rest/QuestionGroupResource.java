@@ -135,6 +135,7 @@ public class QuestionGroupResource {
      * or with status {@code 500 (Internal Server Error)} if the questionGroupDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@questionGroupSecurity.hasPermission(#id, 'ADMIN')")
     @PutMapping("/question-groups/{id}")
     public ResponseEntity<QuestionGroupDTO> updateQuestionGroup(
         @PathVariable(value = "id", required = false) final Long id,
@@ -196,7 +197,7 @@ public class QuestionGroupResource {
     }
 
     /**
-     * {@code GET  /question-groups} : get all the questionGroups.
+     * {@code GET  /question-groups} : get all the questionGroups by current user login name.
      *
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questionGroups in body.
@@ -204,7 +205,26 @@ public class QuestionGroupResource {
     @GetMapping("/question-groups")
     public ResponseEntity<List<QuestionGroupDTO>> getAllQuestionGroups(Pageable pageable) {
         log.debug("REST request to get a page of QuestionGroups");
-        Page<QuestionGroupDTO> page = questionGroupService.findAll(pageable);
+        // Get username
+        String userLogin = HandleExceptionUser.getCurrentUserLogin(SecurityUtils.getCurrentUserLogin(), ENTITY_NAME);
+        // Get all questionGroup by current user login
+        Page<QuestionGroupDTO> page = questionGroupService.findAllWithUserLogin(userLogin, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code GET /question-groups/group/:groupId} : get all the questionGroups by "groupId".
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questionGroups in body.
+     */
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'ADMIN')")
+    @GetMapping("/question-groups/group/{groupId}")
+    public ResponseEntity<List<QuestionGroupDTO>> getAllQuestionGroupsOfGroup(@PathVariable Long groupId, Pageable pageable){
+        log.debug("Rest request to get a page of QuestionGroups of Group {}", groupId);
+        Page<QuestionGroupDTO> page = questionGroupService.findAllWithGroupId(groupId, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -215,6 +235,7 @@ public class QuestionGroupResource {
      * @param id the id of the questionGroupDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionGroupDTO, or with status {@code 404 (Not Found)}.
      */
+    @PreAuthorize("@questionGroupSecurity.hasPermission(#id, 'MEMBER')")
     @GetMapping("/question-groups/{id}")
     public ResponseEntity<QuestionGroupDTO> getQuestionGroup(@PathVariable Long id) {
         log.debug("REST request to get QuestionGroup : {}", id);
@@ -228,6 +249,7 @@ public class QuestionGroupResource {
      * @param id the id of the questionGroupDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @PreAuthorize("@questionGroupSecurity.hasPermission(#id, 'ADMIN')")
     @DeleteMapping("/question-groups/{id}")
     public ResponseEntity<Void> deleteQuestionGroup(@PathVariable Long id) {
         log.debug("REST request to delete QuestionGroup : {}", id);

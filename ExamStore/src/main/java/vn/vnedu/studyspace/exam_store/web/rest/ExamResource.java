@@ -80,6 +80,7 @@ public class ExamResource {
      * or with status {@code 500 (Internal Server Error)} if the examDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@examSecurity.hasPermission(#id, 'ADMIN')")
     @PutMapping("/exams/{id}")
     public ResponseEntity<ExamDTO> updateExam(
         @PathVariable(value = "id", required = false) final Long id,
