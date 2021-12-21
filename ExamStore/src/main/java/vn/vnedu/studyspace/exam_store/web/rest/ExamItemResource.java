@@ -80,6 +80,7 @@ public class ExamItemResource {
      * or with status {@code 500 (Internal Server Error)} if the examItemDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@examItemSecurity.hasPermission(#id, 'ADMIN')")
     @PutMapping("/exam-items/{id}")
     public ResponseEntity<ExamItemDTO> updateExamItem(
         @PathVariable(value = "id", required = false) final Long id,
@@ -155,11 +156,26 @@ public class ExamItemResource {
     }
 
     /**
+     * {@code GET  /exam-items/exam/:examId} : get all the examItems in the exam "examId".
+     *
+     * @param examId the id of the exam.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of examItems in body.
+     */
+    @PreAuthorize("@examSecurity.hasPermission(#examId, 'ADMIN')")
+    @GetMapping("/exam-items/exam/{examId}")
+    public ResponseEntity<List<ExamItemDTO>> getAllExamItems(@PathVariable Long examId) {
+        log.debug("REST request to get a page of ExamItems");
+        List<ExamItemDTO> items = examItemService.findAllByExamId(examId);
+        return ResponseEntity.ok().body(items);
+    }
+
+    /**
      * {@code GET  /exam-items/:id} : get the "id" examItem.
      *
      * @param id the id of the examItemDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the examItemDTO, or with status {@code 404 (Not Found)}.
      */
+    @PreAuthorize("@examItemSecurity.hasPermission(#id, 'ADMIN')")
     @GetMapping("/exam-items/{id}")
     public ResponseEntity<ExamItemDTO> getExamItem(@PathVariable Long id) {
         log.debug("REST request to get ExamItem : {}", id);
@@ -173,6 +189,7 @@ public class ExamItemResource {
      * @param id the id of the examItemDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @PreAuthorize("@examItemSecurity.hasPermission(#id, 'ADMIN')")
     @DeleteMapping("/exam-items/{id}")
     public ResponseEntity<Void> deleteExamItem(@PathVariable Long id) {
         log.debug("REST request to delete ExamItem : {}", id);

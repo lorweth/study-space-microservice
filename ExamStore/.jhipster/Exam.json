@@ -9,6 +9,14 @@
       "fieldValidateRulesMaxlength": "155"
     },
     {
+      "fieldName": "startAt",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "endAt",
+      "fieldType": "Instant"
+    },
+    {
       "fieldName": "duration",
       "fieldType": "Integer",
       "fieldValidateRules": ["min", "max", "required"],

@@ -141,16 +141,32 @@ public class ExamResource {
         );
     }
 
+//    /**
+//     * {@code GET  /exams} : get all the exams.
+//     *
+//     * @param pageable the pagination information.
+//     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of exams in body.
+//     */
+//    @GetMapping("/exams")
+//    public ResponseEntity<List<ExamDTO>> getAllExams(Pageable pageable) {
+//        log.debug("REST request to get a page of Exams");
+//        Page<ExamDTO> page = examService.findAll(pageable);
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+//        return ResponseEntity.ok().headers(headers).body(page.getContent());
+//    }
+
     /**
-     * {@code GET  /exams} : get all the exams.
+     * {@code GET  /exams/group/:groupId} : get all the exams of the group "groupId".
      *
+     * @param groupId the id of the group.
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of exams in body.
      */
-    @GetMapping("/exams")
-    public ResponseEntity<List<ExamDTO>> getAllExams(Pageable pageable) {
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'MEMBER')")
+    @GetMapping("/exams/group/{groupId}")
+    public ResponseEntity<List<ExamDTO>> getAllExamsInGroup(@PathVariable Long groupId, Pageable pageable) {
         log.debug("REST request to get a page of Exams");
-        Page<ExamDTO> page = examService.findAll(pageable);
+        Page<ExamDTO> page = examService.findAllByGroupId(groupId, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -161,6 +177,7 @@ public class ExamResource {
      * @param id the id of the examDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the examDTO, or with status {@code 404 (Not Found)}.
      */
+    @PreAuthorize("@examSecurity.hasPermission(#id, 'MEMBER')")
     @GetMapping("/exams/{id}")
     public ResponseEntity<ExamDTO> getExam(@PathVariable Long id) {
         log.debug("REST request to get Exam : {}", id);
@@ -174,10 +191,11 @@ public class ExamResource {
      * @param id the id of the examDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
+    @PreAuthorize("@examSecurity.hasPermission(#id, 'ADMIN')")
     @DeleteMapping("/exams/{id}")
     public ResponseEntity<Void> deleteExam(@PathVariable Long id) {
         log.debug("REST request to delete Exam : {}", id);
-        examService.delete(id);
+        examService.deleteWithItems(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

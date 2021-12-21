@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.vnedu.studyspace.exam_store.domain.Exam;
+import vn.vnedu.studyspace.exam_store.repository.ExamItemRepository;
 import vn.vnedu.studyspace.exam_store.repository.ExamRepository;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.ExamMapper;
@@ -25,9 +26,12 @@ public class ExamService {
 
     private final ExamMapper examMapper;
 
-    public ExamService(ExamRepository examRepository, ExamMapper examMapper) {
+    private final ExamItemRepository examItemRepository;
+
+    public ExamService(ExamRepository examRepository, ExamItemRepository examItemRepository, ExamMapper examMapper) {
         this.examRepository = examRepository;
         this.examMapper = examMapper;
+        this.examItemRepository = examItemRepository;
     }
 
     /**
@@ -76,7 +80,7 @@ public class ExamService {
     }
 
     /**
-     * Get all the exams by GroupId.
+     * Get all the exams in Group "groupId".
      *
      * @param groupId the id of the group.
      * @param pageable the pagination information.
@@ -85,7 +89,7 @@ public class ExamService {
     @Transactional(readOnly = true)
     public Page<ExamDTO> findAllByGroupId(Long groupId, Pageable pageable){
         log.debug("Request to get all Exams in Group {}", groupId);
-        return examRepository.findAllByGroupId(groupId, pageable).map(examMapper::toDto);
+        return examRepository.findAllByGroupIdOrderByStartAtDesc(groupId, pageable).map(examMapper::toDto);
     }
 
     /**
@@ -107,6 +111,16 @@ public class ExamService {
      */
     public void delete(Long id) {
         log.debug("Request to delete Exam : {}", id);
+        examRepository.deleteById(id);
+    }
+
+    /**
+     * Delete the exam by id.
+     * @param id the id of the exam.
+     */
+    public void deleteWithItems(Long id) {
+        log.debug("Request to delete Exam {} with all Items", id);
+        examItemRepository.deleteByExamId(id);
         examRepository.deleteById(id);
     }
 }

@@ -1,6 +1,7 @@
 package vn.vnedu.studyspace.exam_store.service.dto;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 import javax.validation.constraints.*;
 
@@ -14,6 +15,10 @@ public class ExamDTO implements Serializable {
     @NotNull
     @Size(min = 3, max = 155)
     private String name;
+
+    private Instant startAt;
+
+    private Instant endAt;
 
     @NotNull
     @Min(value = 5)
@@ -42,6 +47,22 @@ public class ExamDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Instant getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(Instant startAt) {
+        this.startAt = startAt;
+    }
+
+    public Instant getEndAt() {
+        return endAt;
+    }
+
+    public void setEndAt(Instant endAt) {
+        this.endAt = endAt;
     }
 
     public Integer getDuration() {
@@ -95,6 +116,8 @@ public class ExamDTO implements Serializable {
         return "ExamDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
+            ", startAt='" + getStartAt() + "'" +
+            ", endAt='" + getEndAt() + "'" +
             ", duration=" + getDuration() +
             ", mix=" + getMix() +
             ", groupId=" + getGroupId() +

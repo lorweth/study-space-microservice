@@ -177,6 +177,7 @@ public class QuestionResource {
      * @param id the id of the questionDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
      */
+    @PreAuthorize("@questionSecurity.hasPermission(#id, 'MEMBER')")
     @GetMapping("/questions/{id}")
     public ResponseEntity<QuestionDTO> getQuestion(@PathVariable Long id) {
         log.debug("REST request to get Question : {}", id);

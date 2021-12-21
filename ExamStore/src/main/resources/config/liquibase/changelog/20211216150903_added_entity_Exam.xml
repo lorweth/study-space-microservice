@@ -17,6 +17,12 @@
             <column name="name" type="varchar(155)">
                 <constraints nullable="false" />
             </column>
+            <column name="start_at" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="end_at" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
             <column name="duration" type="integer">
                 <constraints nullable="false" />
             </column>
@@ -28,6 +34,8 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
+        <dropDefaultValue tableName="exam" columnName="start_at" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="exam" columnName="end_at" columnDataType="${datetimeType}"/>
     </changeSet>
 
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
@@ -48,6 +56,8 @@
                   usePreparedStatements="true">
             <column name="id" type="numeric"/>
             <column name="name" type="string"/>
+            <column name="start_at" type="date"/>
+            <column name="end_at" type="date"/>
             <column name="duration" type="numeric"/>
             <column name="mix" type="numeric"/>
             <column name="group_id" type="numeric"/>

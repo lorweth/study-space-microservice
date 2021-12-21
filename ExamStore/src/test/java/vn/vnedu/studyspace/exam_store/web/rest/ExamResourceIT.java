@@ -6,6 +6,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,6 +36,12 @@ class ExamResourceIT {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
+
+    private static final Instant DEFAULT_START_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_START_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final Instant DEFAULT_END_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_END_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final Integer DEFAULT_DURATION = 5;
     private static final Integer UPDATED_DURATION = 6;
@@ -71,7 +79,13 @@ class ExamResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Exam createEntity(EntityManager em) {
-        Exam exam = new Exam().name(DEFAULT_NAME).duration(DEFAULT_DURATION).mix(DEFAULT_MIX).groupId(DEFAULT_GROUP_ID);
+        Exam exam = new Exam()
+            .name(DEFAULT_NAME)
+            .startAt(DEFAULT_START_AT)
+            .endAt(DEFAULT_END_AT)
+            .duration(DEFAULT_DURATION)
+            .mix(DEFAULT_MIX)
+            .groupId(DEFAULT_GROUP_ID);
         return exam;
     }
 
@@ -82,7 +96,13 @@ class ExamResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Exam createUpdatedEntity(EntityManager em) {
-        Exam exam = new Exam().name(UPDATED_NAME).duration(UPDATED_DURATION).mix(UPDATED_MIX).groupId(UPDATED_GROUP_ID);
+        Exam exam = new Exam()
+            .name(UPDATED_NAME)
+            .startAt(UPDATED_START_AT)
+            .endAt(UPDATED_END_AT)
+            .duration(UPDATED_DURATION)
+            .mix(UPDATED_MIX)
+            .groupId(UPDATED_GROUP_ID);
         return exam;
     }
 
@@ -111,6 +131,8 @@ class ExamResourceIT {
         assertThat(examList).hasSize(databaseSizeBeforeCreate + 1);
         Exam testExam = examList.get(examList.size() - 1);
         assertThat(testExam.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testExam.getStartAt()).isEqualTo(DEFAULT_START_AT);
+        assertThat(testExam.getEndAt()).isEqualTo(DEFAULT_END_AT);
         assertThat(testExam.getDuration()).isEqualTo(DEFAULT_DURATION);
         assertThat(testExam.getMix()).isEqualTo(DEFAULT_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(DEFAULT_GROUP_ID);
@@ -245,6 +267,8 @@ class ExamResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(exam.getId().intValue())))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+            .andExpect(jsonPath("$.[*].startAt").value(hasItem(DEFAULT_START_AT.toString())))
+            .andExpect(jsonPath("$.[*].endAt").value(hasItem(DEFAULT_END_AT.toString())))
             .andExpect(jsonPath("$.[*].duration").value(hasItem(DEFAULT_DURATION)))
             .andExpect(jsonPath("$.[*].mix").value(hasItem(DEFAULT_MIX)))
             .andExpect(jsonPath("$.[*].groupId").value(hasItem(DEFAULT_GROUP_ID.intValue())));
@@ -263,6 +287,8 @@ class ExamResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(exam.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
+            .andExpect(jsonPath("$.startAt").value(DEFAULT_START_AT.toString()))
+            .andExpect(jsonPath("$.endAt").value(DEFAULT_END_AT.toString()))
             .andExpect(jsonPath("$.duration").value(DEFAULT_DURATION))
             .andExpect(jsonPath("$.mix").value(DEFAULT_MIX))
             .andExpect(jsonPath("$.groupId").value(DEFAULT_GROUP_ID.intValue()));
@@ -287,7 +313,13 @@ class ExamResourceIT {
         Exam updatedExam = examRepository.findById(exam.getId()).get();
         // Disconnect from session so that the updates on updatedExam are not directly saved in db
         em.detach(updatedExam);
-        updatedExam.name(UPDATED_NAME).duration(UPDATED_DURATION).mix(UPDATED_MIX).groupId(UPDATED_GROUP_ID);
+        updatedExam
+            .name(UPDATED_NAME)
+            .startAt(UPDATED_START_AT)
+            .endAt(UPDATED_END_AT)
+            .duration(UPDATED_DURATION)
+            .mix(UPDATED_MIX)
+            .groupId(UPDATED_GROUP_ID);
         ExamDTO examDTO = examMapper.toDto(updatedExam);
 
         restExamMockMvc
@@ -304,6 +336,8 @@ class ExamResourceIT {
         assertThat(examList).hasSize(databaseSizeBeforeUpdate);
         Exam testExam = examList.get(examList.size() - 1);
         assertThat(testExam.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testExam.getStartAt()).isEqualTo(UPDATED_START_AT);
+        assertThat(testExam.getEndAt()).isEqualTo(UPDATED_END_AT);
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);
@@ -390,7 +424,13 @@ class ExamResourceIT {
         Exam partialUpdatedExam = new Exam();
         partialUpdatedExam.setId(exam.getId());
 
-        partialUpdatedExam.name(UPDATED_NAME).duration(UPDATED_DURATION).mix(UPDATED_MIX).groupId(UPDATED_GROUP_ID);
+        partialUpdatedExam
+            .name(UPDATED_NAME)
+            .startAt(UPDATED_START_AT)
+            .endAt(UPDATED_END_AT)
+            .duration(UPDATED_DURATION)
+            .mix(UPDATED_MIX)
+            .groupId(UPDATED_GROUP_ID);
 
         restExamMockMvc
             .perform(
@@ -406,6 +446,8 @@ class ExamResourceIT {
         assertThat(examList).hasSize(databaseSizeBeforeUpdate);
         Exam testExam = examList.get(examList.size() - 1);
         assertThat(testExam.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testExam.getStartAt()).isEqualTo(UPDATED_START_AT);
+        assertThat(testExam.getEndAt()).isEqualTo(UPDATED_END_AT);
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);
@@ -423,7 +465,13 @@ class ExamResourceIT {
         Exam partialUpdatedExam = new Exam();
         partialUpdatedExam.setId(exam.getId());
 
-        partialUpdatedExam.name(UPDATED_NAME).duration(UPDATED_DURATION).mix(UPDATED_MIX).groupId(UPDATED_GROUP_ID);
+        partialUpdatedExam
+            .name(UPDATED_NAME)
+            .startAt(UPDATED_START_AT)
+            .endAt(UPDATED_END_AT)
+            .duration(UPDATED_DURATION)
+            .mix(UPDATED_MIX)
+            .groupId(UPDATED_GROUP_ID);
 
         restExamMockMvc
             .perform(
@@ -439,6 +487,8 @@ class ExamResourceIT {
         assertThat(examList).hasSize(databaseSizeBeforeUpdate);
         Exam testExam = examList.get(examList.size() - 1);
         assertThat(testExam.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testExam.getStartAt()).isEqualTo(UPDATED_START_AT);
+        assertThat(testExam.getEndAt()).isEqualTo(UPDATED_END_AT);
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);

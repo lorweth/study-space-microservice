@@ -2,6 +2,7 @@ package vn.vnedu.studyspace.exam_store.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -28,6 +29,12 @@ public class Exam implements Serializable {
     @Size(min = 3, max = 155)
     @Column(name = "name", length = 155, nullable = false)
     private String name;
+
+    @Column(name = "start_at")
+    private Instant startAt;
+
+    @Column(name = "end_at")
+    private Instant endAt;
 
     @NotNull
     @Min(value = 5)
@@ -76,6 +83,32 @@ public class Exam implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Instant getStartAt() {
+        return this.startAt;
+    }
+
+    public Exam startAt(Instant startAt) {
+        this.setStartAt(startAt);
+        return this;
+    }
+
+    public void setStartAt(Instant startAt) {
+        this.startAt = startAt;
+    }
+
+    public Instant getEndAt() {
+        return this.endAt;
+    }
+
+    public Exam endAt(Instant endAt) {
+        this.setEndAt(endAt);
+        return this;
+    }
+
+    public void setEndAt(Instant endAt) {
+        this.endAt = endAt;
     }
 
     public Integer getDuration() {
@@ -173,6 +206,8 @@ public class Exam implements Serializable {
         return "Exam{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
+            ", startAt='" + getStartAt() + "'" +
+            ", endAt='" + getEndAt() + "'" +
             ", duration=" + getDuration() +
             ", mix=" + getMix() +
             ", groupId=" + getGroupId() +

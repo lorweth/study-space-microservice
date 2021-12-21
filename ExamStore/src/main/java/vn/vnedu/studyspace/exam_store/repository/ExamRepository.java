@@ -13,4 +13,6 @@ import vn.vnedu.studyspace.exam_store.domain.Exam;
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, Long> {
     Page<Exam> findAllByGroupId(Long groupId, Pageable pageable);
+
+    Page<Exam> findAllByGroupIdOrderByStartAtDesc(Long groupId, Pageable pageable);
 }
