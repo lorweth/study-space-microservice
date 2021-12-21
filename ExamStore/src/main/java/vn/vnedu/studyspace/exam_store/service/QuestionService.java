@@ -1,9 +1,8 @@
 package vn.vnedu.studyspace.exam_store.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.vnedu.studyspace.exam_store.domain.ExamItem;
 import vn.vnedu.studyspace.exam_store.domain.Option;
 import vn.vnedu.studyspace.exam_store.domain.Question;
+import vn.vnedu.studyspace.exam_store.repository.ExamItemRepository;
 import vn.vnedu.studyspace.exam_store.repository.OptionRepository;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.OptionDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.service.mapper.OptionMapper;
@@ -37,16 +40,23 @@ public class QuestionService {
 
     private final OptionMapper optionMapper;
 
+    private final ExamItemRepository examItemRepository;
+
+    // Random object.
+    private final Random generator = new Random();
+
     public QuestionService(
         QuestionRepository questionRepository,
         QuestionMapper questionMapper,
         OptionRepository optionRepository,
-        OptionMapper optionMapper
+        OptionMapper optionMapper,
+        ExamItemRepository examItemRepository
     ) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.optionRepository = optionRepository;
         this.optionMapper = optionMapper;
+        this.examItemRepository = examItemRepository;
     }
 
     /**
@@ -118,10 +128,65 @@ public class QuestionService {
      */
     @Transactional(readOnly = true)
     public Page<QuestionDTO> findAllByRepoId(Long repoId, Pageable pageable) {
-        log.debug("Request to get all QuestionGroup {}", repoId);
+        log.debug("Request to get all Question in QuestionGroup {}", repoId);
         return questionRepository
             .findAllByQuestionGroupId(repoId, pageable)
             .map(questionMapper::toDto);
+    }
+
+    /**
+     * Get some random question in exam "examId".
+     *
+     * @param examId the id of the exam.
+     * @return the list of entity.
+     */
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> findAllByExamId(Long examId) {
+        log.debug("Request to get all Question in Exam {}", examId);
+
+        // Get all items in exam.
+        List<ExamItem> items = examItemRepository.findAllByExamId(examId);
+        // A collection to store question.
+        List<Question> result = new LinkedList<>();
+
+        for (ExamItem item : items) {
+            // Get all question in QuestionGroup
+            List<Question> questionList = questionRepository.findByQuestionGroupId(item.getQuestionGroup().getId());
+
+            // Remove some question random
+            while (item.getNumOfQuestion() < questionList.size()){
+                int removeIndex = generator.nextInt(questionList.size() - 1);
+                questionList.remove(removeIndex);
+            }
+
+            // Concat new questionList into result list
+            result = Stream.concat(result.stream(), questionList.stream()).collect(Collectors.toList());
+        }
+
+        return result.stream().map(questionMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> findQuestions(List<ExamItemDTO> items) {
+        log.debug("Request to get all Question for Tu hoc ");
+
+        // A collection to store question.
+        List<Question> result = new LinkedList<>();
+        for (ExamItemDTO item : items) {
+            // Get all question in QuestionGroup
+            List<Question> questionList = questionRepository.findByQuestionGroupId(item.getQuestionGroup().getId());
+
+            // Remove some question random
+            while (item.getNumOfQuestion() < questionList.size()){
+                int removeIndex = generator.nextInt(questionList.size() - 1);
+                questionList.remove(removeIndex);
+            }
+
+            // Concat new questionList into result list
+            result = Stream.concat(result.stream(), questionList.stream()).collect(Collectors.toList());
+        }
+
+        return result.stream().map(questionMapper::toDto).collect(Collectors.toList());
     }
 
     /**

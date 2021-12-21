@@ -23,6 +23,7 @@ import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.service.QuestionService;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
 import vn.vnedu.studyspace.exam_store.service.dto.QuestionDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
@@ -142,18 +143,32 @@ public class QuestionResource {
 //    }
 
     /**
-     * {@code GET  /questions} : get all the questions.
+     * {@code GET  /questions/exam/:examId} : get all the questions in Exam.
      *
-     * @param pageable the pagination information.
+     * @param examId the id of the exam.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questions in body.
      */
-//    @GetMapping("/questions")
-//    public ResponseEntity<List<QuestionDTO>> getAllQuestions(Pageable pageable) {
-//        log.debug("REST request to get a page of Questions");
-//        Page<QuestionDTO> page = questionService.findAll(pageable);
-//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-//        return ResponseEntity.ok().headers(headers).body(page.getContent());
-//    }
+    @PreAuthorize("@examSecurity.hasPermission(#examId, 'MEMBER')")
+    @GetMapping("/questions/exam/{examId}")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestions(@PathVariable Long examId) {
+        log.debug("REST request to get a list of Questions in the Exam {}", examId);
+        List<QuestionDTO> questions = questionService.findAllByExamId(examId);
+        return ResponseEntity.ok().body(questions);
+    }
+
+    /**
+     * {@code GET  /questions/self-training} : get all the questions to self-training.
+     *
+     * @param items the list of ExamItems not Save.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questions in body.
+     */
+    @PreAuthorize("@questionGroupSecurity.hasPermissionWithAllItems(#items, 'MEMBER')")
+    @GetMapping("/questions/self-training")
+    public ResponseEntity<List<QuestionDTO>> getAllQuestionsToSelfTraining(@RequestBody List<ExamItemDTO> items) {
+        log.debug("REST request to get a list of Questions for Self-Training");
+        List<QuestionDTO> questions = questionService.findQuestions(items);
+        return ResponseEntity.ok().body(questions);
+    }
 
     /**
      * {@code GET /questions/repo/:repoId} : get all question in repo "repoId".

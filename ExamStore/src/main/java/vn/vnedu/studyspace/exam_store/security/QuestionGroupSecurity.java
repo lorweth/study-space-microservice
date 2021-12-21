@@ -5,9 +5,11 @@ import vn.vnedu.studyspace.exam_store.domain.GroupMember;
 import vn.vnedu.studyspace.exam_store.domain.QuestionGroup;
 import vn.vnedu.studyspace.exam_store.repository.GroupMemberRepository;
 import vn.vnedu.studyspace.exam_store.repository.QuestionGroupRepository;
+import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.QuestionGroupResource;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -54,6 +56,14 @@ public class QuestionGroupSecurity {
 
         // check permission of user in questionGroup
         return Objects.equals(questionGroup.get().getUserLogin(), userLogin.get());
+    }
+
+    public Boolean hasPermissionWithAllItems(List<ExamItemDTO> items, String authority) {
+        for (ExamItemDTO item: items) {
+            if (!hasPermission(item.getQuestionGroup().getId(), authority))
+                return false;
+        }
+        return true;
     }
 
 }
