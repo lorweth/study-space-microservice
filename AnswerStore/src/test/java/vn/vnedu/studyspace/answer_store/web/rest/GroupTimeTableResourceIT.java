@@ -46,8 +46,8 @@ class GroupTimeTableResourceIT {
     private static final Instant DEFAULT_END_AT = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_END_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
-    private static final String DEFAULT_GROUP_ID = "AAAAAAAAAA";
-    private static final String UPDATED_GROUP_ID = "BBBBBBBBBB";
+    private static final Long DEFAULT_GROUP_ID = 1L;
+    private static final Long UPDATED_GROUP_ID = 2L;
 
     private static final String DEFAULT_NOTE = "AAAAAAAAAA";
     private static final String UPDATED_NOTE = "BBBBBBBBBB";
@@ -289,7 +289,7 @@ class GroupTimeTableResourceIT {
             .jsonPath("$.[*].endAt")
             .value(hasItem(DEFAULT_END_AT.toString()))
             .jsonPath("$.[*].groupId")
-            .value(hasItem(DEFAULT_GROUP_ID))
+            .value(hasItem(DEFAULT_GROUP_ID.intValue()))
             .jsonPath("$.[*].note")
             .value(hasItem(DEFAULT_NOTE));
     }
@@ -319,7 +319,7 @@ class GroupTimeTableResourceIT {
             .jsonPath("$.endAt")
             .value(is(DEFAULT_END_AT.toString()))
             .jsonPath("$.groupId")
-            .value(is(DEFAULT_GROUP_ID))
+            .value(is(DEFAULT_GROUP_ID.intValue()))
             .jsonPath("$.note")
             .value(is(DEFAULT_NOTE));
     }

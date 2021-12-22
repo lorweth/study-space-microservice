@@ -30,7 +30,7 @@ public class GroupTimeTableRowMapper implements BiFunction<Row, String, GroupTim
         entity.setExamId(converter.fromRow(row, prefix + "_exam_id", Long.class));
         entity.setStartAt(converter.fromRow(row, prefix + "_start_at", Instant.class));
         entity.setEndAt(converter.fromRow(row, prefix + "_end_at", Instant.class));
-        entity.setGroupId(converter.fromRow(row, prefix + "_group_id", String.class));
+        entity.setGroupId(converter.fromRow(row, prefix + "_group_id", Long.class));
         entity.setNote(converter.fromRow(row, prefix + "_note", String.class));
         return entity;
     }

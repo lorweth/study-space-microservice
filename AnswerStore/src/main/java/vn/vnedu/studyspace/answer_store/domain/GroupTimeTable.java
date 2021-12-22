@@ -34,7 +34,7 @@ public class GroupTimeTable implements Serializable {
 
     @NotNull(message = "must not be null")
     @Column("group_id")
-    private String groupId;
+    private Long groupId;
 
     @Column("note")
     private String note;
@@ -93,16 +93,16 @@ public class GroupTimeTable implements Serializable {
         this.endAt = endAt;
     }
 
-    public String getGroupId() {
+    public Long getGroupId() {
         return this.groupId;
     }
 
-    public GroupTimeTable groupId(String groupId) {
+    public GroupTimeTable groupId(Long groupId) {
         this.setGroupId(groupId);
         return this;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
 
@@ -146,7 +146,7 @@ public class GroupTimeTable implements Serializable {
             ", examId=" + getExamId() +
             ", startAt='" + getStartAt() + "'" +
             ", endAt='" + getEndAt() + "'" +
-            ", groupId='" + getGroupId() + "'" +
+            ", groupId=" + getGroupId() +
             ", note='" + getNote() + "'" +
             "}";
     }

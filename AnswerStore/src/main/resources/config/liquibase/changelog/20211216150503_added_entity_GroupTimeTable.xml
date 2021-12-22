@@ -23,7 +23,7 @@
             <column name="end_at" type="${datetimeType}">
                 <constraints nullable="false" />
             </column>
-            <column name="group_id" type="varchar(255)">
+            <column name="group_id" type="bigint">
                 <constraints nullable="false" />
             </column>
             <column name="note" type="varchar(255)">
@@ -55,7 +55,7 @@
             <column name="exam_id" type="numeric"/>
             <column name="start_at" type="date"/>
             <column name="end_at" type="date"/>
-            <column name="group_id" type="string"/>
+            <column name="group_id" type="numeric"/>
             <column name="note" type="string"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
