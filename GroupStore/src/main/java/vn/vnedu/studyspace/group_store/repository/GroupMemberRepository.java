@@ -4,9 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
-import vn.vnedu.studyspace.group_store.domain.Group;
 import vn.vnedu.studyspace.group_store.domain.GroupMember;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,4 +19,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     Page<GroupMember> findAllByGroupId(Long groupId, Pageable pageable);
     Page<GroupMember> findAllByGroupIdAndRole(Long groupId, Integer role, Pageable pageable);
     Optional<Long> countByGroupId(Long groupId);
+    Page<GroupMember> findAllByUserLogin(String userLogin, Pageable pageable);
 }

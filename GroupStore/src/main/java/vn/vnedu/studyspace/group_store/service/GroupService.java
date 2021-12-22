@@ -94,8 +94,8 @@ public class GroupService {
     @Transactional(readOnly = true)
     public Page<GroupDTO> findAll(String userLogin, Pageable pageable) {
         log.debug("Request to get all Groups of User {}", userLogin);
-        Page<GroupMember> memberList = groupMemberRepository.findAllByUserLogin(userLogin, pageable);
-        List<GroupDTO> groupList = memberList
+        List<GroupDTO> groupList = groupMemberRepository
+            .findAllByUserLogin(userLogin, pageable)
             .stream()
             .map(groupMember -> groupRepository.findById(groupMember.getGroup().getId()))
             .filter(Optional::isPresent) // filter optionals is present
