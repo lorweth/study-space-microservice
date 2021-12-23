@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -62,12 +63,16 @@ public class GroupTimeTableResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new groupTimeTableDTO, or with status {@code 400 (Bad Request)} if the groupTimeTable has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/group-time-tables")
-    public Mono<ResponseEntity<GroupTimeTableDTO>> createGroupTimeTable(@Valid @RequestBody GroupTimeTableDTO groupTimeTableDTO)
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'ADMIN')")
+    @PostMapping("/group-time-tables/group/{groupId}")
+    public Mono<ResponseEntity<GroupTimeTableDTO>> createGroupTimeTable(@PathVariable Long groupId, @Valid @RequestBody GroupTimeTableDTO groupTimeTableDTO)
         throws URISyntaxException {
         log.debug("REST request to save GroupTimeTable : {}", groupTimeTableDTO);
         if (groupTimeTableDTO.getId() != null) {
             throw new BadRequestAlertException("A new groupTimeTable cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        if(!Objects.equals(groupTimeTableDTO.getGroupId(), groupId)) {
+            throw new BadRequestAlertException("Invalid groupId", ENTITY_NAME, "invalidGroupId");
         }
         return groupTimeTableService
             .save(groupTimeTableDTO)
@@ -93,6 +98,7 @@ public class GroupTimeTableResource {
      * or with status {@code 500 (Internal Server Error)} if the groupTimeTableDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@groupTimeTableSecurity.hasPermission(#id, 'ADMIN')")
     @PutMapping("/group-time-tables/{id}")
     public Mono<ResponseEntity<GroupTimeTableDTO>> updateGroupTimeTable(
         @PathVariable(value = "id", required = false) final Long id,
@@ -136,54 +142,55 @@ public class GroupTimeTableResource {
      * or with status {@code 500 (Internal Server Error)} if the groupTimeTableDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/group-time-tables/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public Mono<ResponseEntity<GroupTimeTableDTO>> partialUpdateGroupTimeTable(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody GroupTimeTableDTO groupTimeTableDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update GroupTimeTable partially : {}, {}", id, groupTimeTableDTO);
-        if (groupTimeTableDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, groupTimeTableDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        return groupTimeTableRepository
-            .existsById(id)
-            .flatMap(exists -> {
-                if (!exists) {
-                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                }
-
-                Mono<GroupTimeTableDTO> result = groupTimeTableService.partialUpdate(groupTimeTableDTO);
-
-                return result
-                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(res ->
-                        ResponseEntity
-                            .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
-                            .body(res)
-                    );
-            });
-    }
+//    @PatchMapping(value = "/group-time-tables/{id}", consumes = { "application/json", "application/merge-patch+json" })
+//    public Mono<ResponseEntity<GroupTimeTableDTO>> partialUpdateGroupTimeTable(
+//        @PathVariable(value = "id", required = false) final Long id,
+//        @NotNull @RequestBody GroupTimeTableDTO groupTimeTableDTO
+//    ) throws URISyntaxException {
+//        log.debug("REST request to partial update GroupTimeTable partially : {}, {}", id, groupTimeTableDTO);
+//        if (groupTimeTableDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        if (!Objects.equals(id, groupTimeTableDTO.getId())) {
+//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+//        }
+//
+//        return groupTimeTableRepository
+//            .existsById(id)
+//            .flatMap(exists -> {
+//                if (!exists) {
+//                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+//                }
+//
+//                Mono<GroupTimeTableDTO> result = groupTimeTableService.partialUpdate(groupTimeTableDTO);
+//
+//                return result
+//                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+//                    .map(res ->
+//                        ResponseEntity
+//                            .ok()
+//                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
+//                            .body(res)
+//                    );
+//            });
+//    }
 
     /**
-     * {@code GET  /group-time-tables} : get all the groupTimeTables.
+     * {@code GET  /group-time-tables/group/:groupId} : get all the groupTimeTables in Group "groupId".
      *
+     * @param groupId the id of the group.
      * @param pageable the pagination information.
      * @param request a {@link ServerHttpRequest} request.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groupTimeTables in body.
      */
-    @GetMapping("/group-time-tables")
-    public Mono<ResponseEntity<List<GroupTimeTableDTO>>> getAllGroupTimeTables(Pageable pageable, ServerHttpRequest request) {
+    @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'MEMBER')")
+    @GetMapping("/group-time-tables/group/{groupId}")
+    public Mono<ResponseEntity<List<GroupTimeTableDTO>>> getAllGroupTimeTables(@PathVariable Long groupId, Pageable pageable, ServerHttpRequest request) {
         log.debug("REST request to get a page of GroupTimeTables");
         return groupTimeTableService
             .countAll()
-            .zipWith(groupTimeTableService.findAll(pageable).collectList())
-            .map(countWithEntities -> {
-                return ResponseEntity
+            .zipWith(groupTimeTableService.findAllByGroupId(groupId, pageable).collectList())
+            .map(countWithEntities -> ResponseEntity
                     .ok()
                     .headers(
                         PaginationUtil.generatePaginationHttpHeaders(
@@ -191,8 +198,8 @@ public class GroupTimeTableResource {
                             new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
                         )
                     )
-                    .body(countWithEntities.getT2());
-            });
+                    .body(countWithEntities.getT2())
+            );
     }
 
     /**
@@ -201,6 +208,7 @@ public class GroupTimeTableResource {
      * @param id the id of the groupTimeTableDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the groupTimeTableDTO, or with status {@code 404 (Not Found)}.
      */
+    @PreAuthorize("@groupTimeTableSecurity.hasPermission(#id, 'MEMBER')")
     @GetMapping("/group-time-tables/{id}")
     public Mono<ResponseEntity<GroupTimeTableDTO>> getGroupTimeTable(@PathVariable Long id) {
         log.debug("REST request to get GroupTimeTable : {}", id);
@@ -214,17 +222,17 @@ public class GroupTimeTableResource {
      * @param id the id of the groupTimeTableDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/group-time-tables/{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public Mono<ResponseEntity<Void>> deleteGroupTimeTable(@PathVariable Long id) {
-        log.debug("REST request to delete GroupTimeTable : {}", id);
-        return groupTimeTableService
-            .delete(id)
-            .map(result ->
-                ResponseEntity
-                    .noContent()
-                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-                    .build()
-            );
-    }
+//    @DeleteMapping("/group-time-tables/{id}")
+//    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+//    public Mono<ResponseEntity<Void>> deleteGroupTimeTable(@PathVariable Long id) {
+//        log.debug("REST request to delete GroupTimeTable : {}", id);
+//        return groupTimeTableService
+//            .delete(id)
+//            .map(result ->
+//                ResponseEntity
+//                    .noContent()
+//                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+//                    .build()
+//            );
+//    }
 }

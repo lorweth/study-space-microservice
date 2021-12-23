@@ -37,4 +37,5 @@ interface GroupTimeTableRepositoryInternal {
     Mono<GroupTimeTable> findById(Long id);
     Flux<GroupTimeTable> findAllBy(Pageable pageable);
     Flux<GroupTimeTable> findAllBy(Pageable pageable, Criteria criteria);
+    Flux<GroupTimeTable> findAllByGroupId(Long groupId, Pageable pageable);
 }

@@ -28,6 +28,7 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.reactive.ResponseUtil;
 import vn.vnedu.studyspace.answer_store.repository.TimeTableRepository;
+import vn.vnedu.studyspace.answer_store.security.SecurityUtils;
 import vn.vnedu.studyspace.answer_store.service.TimeTableService;
 import vn.vnedu.studyspace.answer_store.service.dto.TimeTableDTO;
 import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
@@ -68,15 +69,20 @@ public class TimeTableResource {
         if (timeTableDTO.getId() != null) {
             throw new BadRequestAlertException("A new timeTable cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        return timeTableService
-            .save(timeTableDTO)
+        return SecurityUtils
+            .getCurrentUserLogin()
+            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")))
+            .flatMap(userLogin -> {
+                timeTableDTO.setUserLogin(userLogin);
+                return timeTableService.save(timeTableDTO);
+            })
             .map(result -> {
                 try {
                     return ResponseEntity
                         .created(new URI("/api/time-tables/" + result.getId()))
                         .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                         .body(result);
-                } catch (URISyntaxException e) {
+                } catch (URISyntaxException e){
                     throw new RuntimeException(e);
                 }
             });
@@ -105,23 +111,30 @@ public class TimeTableResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        return timeTableRepository
-            .existsById(id)
-            .flatMap(exists -> {
-                if (!exists) {
-                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                }
-
-                return timeTableService
-                    .save(timeTableDTO)
-                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(result ->
-                        ResponseEntity
-                            .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-                            .body(result)
-                    );
-            });
+        return SecurityUtils
+            .getCurrentUserLogin()
+            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")))
+            .flatMap(userLogin -> timeTableRepository
+                .findById(id)
+                .flatMap(timeTable -> {
+                    if(timeTable == null){
+                        return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "entityNotFound"));
+                    }
+                    if(!Objects.equals(timeTable.getUserLogin(), userLogin)) {
+                        return Mono.error(new BadRequestAlertException("User not have permission for this action", ENTITY_NAME, "notPermission"));
+                    }
+                    return timeTableService
+                        .save(timeTableDTO)
+                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                        .map(result ->
+                            ResponseEntity
+                                .ok()
+                                .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                                .body(result)
+                        );
+                    }
+                )
+            );
     }
 
     /**
@@ -135,41 +148,41 @@ public class TimeTableResource {
      * or with status {@code 500 (Internal Server Error)} if the timeTableDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/time-tables/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public Mono<ResponseEntity<TimeTableDTO>> partialUpdateTimeTable(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody TimeTableDTO timeTableDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update TimeTable partially : {}, {}", id, timeTableDTO);
-        if (timeTableDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, timeTableDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        return timeTableRepository
-            .existsById(id)
-            .flatMap(exists -> {
-                if (!exists) {
-                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                }
-
-                Mono<TimeTableDTO> result = timeTableService.partialUpdate(timeTableDTO);
-
-                return result
-                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(res ->
-                        ResponseEntity
-                            .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
-                            .body(res)
-                    );
-            });
-    }
+//    @PatchMapping(value = "/time-tables/{id}", consumes = { "application/json", "application/merge-patch+json" })
+//    public Mono<ResponseEntity<TimeTableDTO>> partialUpdateTimeTable(
+//        @PathVariable(value = "id", required = false) final Long id,
+//        @NotNull @RequestBody TimeTableDTO timeTableDTO
+//    ) throws URISyntaxException {
+//        log.debug("REST request to partial update TimeTable partially : {}, {}", id, timeTableDTO);
+//        if (timeTableDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        if (!Objects.equals(id, timeTableDTO.getId())) {
+//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+//        }
+//
+//        return timeTableRepository
+//            .existsById(id)
+//            .flatMap(exists -> {
+//                if (!exists) {
+//                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+//                }
+//
+//                Mono<TimeTableDTO> result = timeTableService.partialUpdate(timeTableDTO);
+//
+//                return result
+//                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+//                    .map(res ->
+//                        ResponseEntity
+//                            .ok()
+//                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
+//                            .body(res)
+//                    );
+//            });
+//    }
 
     /**
-     * {@code GET  /time-tables} : get all the timeTables.
+     * {@code GET  /time-tables} : get all the timeTables of current userLogin.
      *
      * @param pageable the pagination information.
      * @param request a {@link ServerHttpRequest} request.
@@ -178,20 +191,23 @@ public class TimeTableResource {
     @GetMapping("/time-tables")
     public Mono<ResponseEntity<List<TimeTableDTO>>> getAllTimeTables(Pageable pageable, ServerHttpRequest request) {
         log.debug("REST request to get a page of TimeTables");
-        return timeTableService
-            .countAll()
-            .zipWith(timeTableService.findAll(pageable).collectList())
-            .map(countWithEntities -> {
-                return ResponseEntity
-                    .ok()
-                    .headers(
-                        PaginationUtil.generatePaginationHttpHeaders(
-                            UriComponentsBuilder.fromHttpRequest(request),
-                            new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
-                        )
+        return SecurityUtils
+            .getCurrentUserLogin()
+            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")))
+            .flatMap(userLogin -> timeTableService
+                .countByUserLogin(userLogin)
+                .zipWith(timeTableService.findAllByUserLogin(userLogin, pageable).collectList())
+            )
+            .map(countWithEntities -> ResponseEntity
+                .ok()
+                .headers(
+                    PaginationUtil.generatePaginationHttpHeaders(
+                        UriComponentsBuilder.fromHttpRequest(request),
+                        new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
                     )
-                    .body(countWithEntities.getT2());
-            });
+                )
+                .body(countWithEntities.getT2())
+            );
     }
 
     /**
@@ -217,8 +233,18 @@ public class TimeTableResource {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public Mono<ResponseEntity<Void>> deleteTimeTable(@PathVariable Long id) {
         log.debug("REST request to delete TimeTable : {}", id);
-        return timeTableService
-            .delete(id)
+        return SecurityUtils
+            .getCurrentUserLogin()
+            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")))
+            .flatMap(userLogin -> timeTableService
+                .findOne(id)
+                .map(dto -> {
+                    if(!Objects.equals(dto.getUserLogin(), userLogin)){
+                        return Mono.error(new BadRequestAlertException("User not have permission", ENTITY_NAME, "userNotPermission"));
+                    }
+                    return timeTableService.delete(id);
+                })
+            )
             .map(result ->
                 ResponseEntity
                     .noContent()

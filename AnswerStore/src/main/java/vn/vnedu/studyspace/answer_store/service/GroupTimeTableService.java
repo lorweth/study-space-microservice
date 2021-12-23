@@ -74,6 +74,19 @@ public class GroupTimeTableService {
     }
 
     /**
+     * Get all the groupTimeTables by "groupId".
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<GroupTimeTableDTO> findAllByGroupId(Long groupId, Pageable pageable) {
+        log.debug("Request to get all GroupTimeTable by GroupId {}", groupId);
+        return groupTimeTableRepository.findAllByGroupId(groupId, pageable).map(groupTimeTableMapper::toDto);
+    }
+
+    /**
      * Returns the number of groupTimeTables available.
      * @return the number of entities in the database.
      *

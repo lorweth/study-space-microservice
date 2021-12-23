@@ -38,9 +38,11 @@ interface AnswerSheetItemRepositoryInternal {
     <S extends AnswerSheetItem> Mono<S> insert(S entity);
     <S extends AnswerSheetItem> Mono<S> save(S entity);
     Mono<Integer> update(AnswerSheetItem entity);
+    Mono<Long> countBy(Criteria criteria);
 
     Flux<AnswerSheetItem> findAll();
     Mono<AnswerSheetItem> findById(Long id);
+    Flux<AnswerSheetItem> findAllByAnswerSheetId(Long sheetId, Pageable pageable);
     Flux<AnswerSheetItem> findAllBy(Pageable pageable);
     Flux<AnswerSheetItem> findAllBy(Pageable pageable, Criteria criteria);
 }

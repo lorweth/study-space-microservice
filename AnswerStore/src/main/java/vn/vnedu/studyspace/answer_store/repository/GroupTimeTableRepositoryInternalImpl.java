@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.sql.Column;
@@ -61,6 +62,11 @@ class GroupTimeTableRepositoryInternalImpl implements GroupTimeTableRepositoryIn
     @Override
     public Flux<GroupTimeTable> findAllBy(Pageable pageable, Criteria criteria) {
         return createQuery(pageable, criteria).all();
+    }
+
+    @Override
+    public Flux<GroupTimeTable> findAllByGroupId(Long groupId, Pageable pageable) {
+        return createQuery(pageable, where("groupId").is(groupId)).all();
     }
 
     RowsFetchSpec<GroupTimeTable> createQuery(Pageable pageable, Criteria criteria) {

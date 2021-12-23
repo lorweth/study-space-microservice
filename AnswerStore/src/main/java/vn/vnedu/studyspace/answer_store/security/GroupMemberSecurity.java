@@ -3,6 +3,7 @@ package vn.vnedu.studyspace.answer_store.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 import vn.vnedu.studyspace.answer_store.repository.GroupMemberRepository;
 
 @Component
@@ -16,15 +17,7 @@ public class GroupMemberSecurity {
         this.groupMemberRepository = groupMemberRepository;
     }
 
-    /**
-     * Check permission of current user login.
-     *
-     * @param groupId the id of the group.
-     * @param authority the authority.
-     * @return true if user has permission, false or else.
-     */
-    public Boolean hasPermission(Long groupId, String authority){
-        log.debug("Request to check current userLogin has permission {} in group {}", authority, groupId);
+    protected Mono<Boolean> compareRole(Long groupId, String authority){
         return SecurityUtils
             .getCurrentUserLogin()
             .flatMap(userLogin -> groupMemberRepository.findByUserLoginAndGroupId(userLogin, groupId))
@@ -41,8 +34,19 @@ public class GroupMemberSecurity {
                             return false;
                     }
                 }
-            )
-            .block();
+            );
+    }
+
+    /**
+     * Check permission of current user login.
+     *
+     * @param groupId the id of the group.
+     * @param authority the authority.
+     * @return true if user has permission, false or else.
+     */
+    public Boolean hasPermission(Long groupId, String authority){
+        log.debug("Request to check current userLogin has permission {} in group {}", authority, groupId);
+        return compareRole(groupId, authority).block();
     }
 
     public Boolean notExists(Long groupId) {

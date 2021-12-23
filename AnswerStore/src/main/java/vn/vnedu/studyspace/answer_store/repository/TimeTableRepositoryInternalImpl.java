@@ -59,6 +59,16 @@ class TimeTableRepositoryInternalImpl implements TimeTableRepositoryInternal {
         return createQuery(pageable, criteria).all();
     }
 
+    @Override
+    public Flux<TimeTable> findAllByUserLogin(String userLogin, Pageable pageable) {
+        return createQuery(pageable, where("userLogin").is(userLogin)).all();
+    }
+
+    @Override
+    public Mono<Long> countBy(Criteria criteria) {
+        return r2dbcEntityTemplate.count(query(criteria), TimeTable.class);
+    }
+
     RowsFetchSpec<TimeTable> createQuery(Pageable pageable, Criteria criteria) {
         List<Expression> columns = TimeTableSqlHelper.getColumns(entityTable, EntityManager.ENTITY_ALIAS);
         SelectFromAndJoin selectFrom = Select.builder().select(columns).from(entityTable);

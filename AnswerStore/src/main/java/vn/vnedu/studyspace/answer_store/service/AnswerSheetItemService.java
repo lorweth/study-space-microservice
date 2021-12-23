@@ -3,6 +3,7 @@ package vn.vnedu.studyspace.answer_store.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -71,6 +72,21 @@ public class AnswerSheetItemService {
     public Flux<AnswerSheetItemDTO> findAll(Pageable pageable) {
         log.debug("Request to get all AnswerSheetItems");
         return answerSheetItemRepository.findAllBy(pageable).map(answerSheetItemMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Flux<AnswerSheetItemDTO> findAllByAnswerSheetId(Long sheetId, Pageable pageable) {
+        log.debug("Request to get all AnswerSheetItems by AnswerSheet {}", sheetId);
+        return answerSheetItemRepository.findAllByAnswerSheetId(sheetId, pageable).map(answerSheetItemMapper::toDto);
+    }
+
+    /**
+     * Returns the number of answerSheetItems available of answerSheet.
+     * @param sheetId the id of the answerSheet.
+     * @return the number of entities.
+     */
+    public Mono<Long> countAllByAnswerSheetId(Long sheetId) {
+        return answerSheetItemRepository.countBy(Criteria.where("answerSheetId").is(sheetId));
     }
 
     /**

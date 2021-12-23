@@ -67,6 +67,11 @@ class AnswerSheetItemRepositoryInternalImpl implements AnswerSheetItemRepository
         return createQuery(pageable, criteria).all();
     }
 
+    @Override
+    public Flux<AnswerSheetItem> findAllByAnswerSheetId(Long sheetId, Pageable pageable) {
+        return createQuery(pageable, where("answerSheetId").is(sheetId)).all();
+    }
+
     RowsFetchSpec<AnswerSheetItem> createQuery(Pageable pageable, Criteria criteria) {
         List<Expression> columns = AnswerSheetItemSqlHelper.getColumns(entityTable, EntityManager.ENTITY_ALIAS);
         columns.addAll(AnswerSheetSqlHelper.getColumns(answerSheetTable, "answerSheet"));
@@ -110,6 +115,11 @@ class AnswerSheetItemRepositoryInternalImpl implements AnswerSheetItemRepository
         AnswerSheetItem entity = answersheetitemMapper.apply(row, "e");
         entity.setAnswerSheet(answersheetMapper.apply(row, "answerSheet"));
         return entity;
+    }
+
+    @Override
+    public Mono<Long> countBy(Criteria criteria) {
+        return r2dbcEntityTemplate.count(query(criteria), AnswerSheetItem.class);
     }
 
     @Override

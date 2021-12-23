@@ -3,6 +3,7 @@ package vn.vnedu.studyspace.answer_store.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -74,12 +75,35 @@ public class TimeTableService {
     }
 
     /**
+     * Get all the timeTables by current user login name.
+     *
+     * @param userLogin the name of the user.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<TimeTableDTO> findAllByUserLogin(String userLogin, Pageable pageable) {
+        log.debug("Request to get all TimeTables of User {}", userLogin);
+        return timeTableRepository.findAllByUserLogin(userLogin, pageable).map(timeTableMapper::toDto);
+    }
+
+    /**
      * Returns the number of timeTables available.
      * @return the number of entities in the database.
      *
      */
     public Mono<Long> countAll() {
         return timeTableRepository.count();
+    }
+
+    /**
+     * Count all entity with userLogin "userLogin".
+     *
+     * @param userLogin the name of user.
+     * @return the number of entities.
+     */
+    public Mono<Long> countByUserLogin(String userLogin) {
+        return timeTableRepository.countBy(Criteria.where("userLogin").is(userLogin));
     }
 
     /**

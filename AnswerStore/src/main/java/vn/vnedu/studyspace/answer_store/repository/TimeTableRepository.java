@@ -1,7 +1,6 @@
 package vn.vnedu.studyspace.answer_store.repository;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Repository;
@@ -32,9 +31,11 @@ interface TimeTableRepositoryInternal {
     <S extends TimeTable> Mono<S> insert(S entity);
     <S extends TimeTable> Mono<S> save(S entity);
     Mono<Integer> update(TimeTable entity);
+    Mono<Long> countBy(Criteria criteria);
 
     Flux<TimeTable> findAll();
     Mono<TimeTable> findById(Long id);
     Flux<TimeTable> findAllBy(Pageable pageable);
     Flux<TimeTable> findAllBy(Pageable pageable, Criteria criteria);
+    Flux<TimeTable> findAllByUserLogin(String userLogin, Pageable pageable);
 }

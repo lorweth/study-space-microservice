@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -62,12 +63,16 @@ public class AnswerSheetItemResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new answerSheetItemDTO, or with status {@code 400 (Bad Request)} if the answerSheetItem has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@answerSecurity.hasPermissionToGet(#answerSheetItemDTO.getAnswerSheet().getId())")
     @PostMapping("/answer-sheet-items")
     public Mono<ResponseEntity<AnswerSheetItemDTO>> createAnswerSheetItem(@Valid @RequestBody AnswerSheetItemDTO answerSheetItemDTO)
         throws URISyntaxException {
         log.debug("REST request to save AnswerSheetItem : {}", answerSheetItemDTO);
         if (answerSheetItemDTO.getId() != null) {
             throw new BadRequestAlertException("A new answerSheetItem cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        if (answerSheetItemDTO.getAnswerSheet() == null){
+            throw new BadRequestAlertException("A answer must be in an AnswerSheet", ENTITY_NAME, "answerSheetNotFound");
         }
         return answerSheetItemService
             .save(answerSheetItemDTO)
@@ -93,6 +98,7 @@ public class AnswerSheetItemResource {
      * or with status {@code 500 (Internal Server Error)} if the answerSheetItemDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
+    @PreAuthorize("@answerSecurity.hasPermissionToChoose(#id)")
     @PutMapping("/answer-sheet-items/{id}")
     public Mono<ResponseEntity<AnswerSheetItemDTO>> updateAnswerSheetItem(
         @PathVariable(value = "id", required = false) final Long id,
@@ -136,38 +142,38 @@ public class AnswerSheetItemResource {
      * or with status {@code 500 (Internal Server Error)} if the answerSheetItemDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/answer-sheet-items/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public Mono<ResponseEntity<AnswerSheetItemDTO>> partialUpdateAnswerSheetItem(
-        @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody AnswerSheetItemDTO answerSheetItemDTO
-    ) throws URISyntaxException {
-        log.debug("REST request to partial update AnswerSheetItem partially : {}, {}", id, answerSheetItemDTO);
-        if (answerSheetItemDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, answerSheetItemDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        return answerSheetItemRepository
-            .existsById(id)
-            .flatMap(exists -> {
-                if (!exists) {
-                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                }
-
-                Mono<AnswerSheetItemDTO> result = answerSheetItemService.partialUpdate(answerSheetItemDTO);
-
-                return result
-                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(res ->
-                        ResponseEntity
-                            .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
-                            .body(res)
-                    );
-            });
-    }
+//    @PatchMapping(value = "/answer-sheet-items/{id}", consumes = { "application/json", "application/merge-patch+json" })
+//    public Mono<ResponseEntity<AnswerSheetItemDTO>> partialUpdateAnswerSheetItem(
+//        @PathVariable(value = "id", required = false) final Long id,
+//        @NotNull @RequestBody AnswerSheetItemDTO answerSheetItemDTO
+//    ) throws URISyntaxException {
+//        log.debug("REST request to partial update AnswerSheetItem partially : {}, {}", id, answerSheetItemDTO);
+//        if (answerSheetItemDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        if (!Objects.equals(id, answerSheetItemDTO.getId())) {
+//            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+//        }
+//
+//        return answerSheetItemRepository
+//            .existsById(id)
+//            .flatMap(exists -> {
+//                if (!exists) {
+//                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+//                }
+//
+//                Mono<AnswerSheetItemDTO> result = answerSheetItemService.partialUpdate(answerSheetItemDTO);
+//
+//                return result
+//                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+//                    .map(res ->
+//                        ResponseEntity
+//                            .ok()
+//                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, res.getId().toString()))
+//                            .body(res)
+//                    );
+//            });
+//    }
 
     /**
      * {@code GET  /answer-sheet-items} : get all the answerSheetItems.
@@ -176,23 +182,23 @@ public class AnswerSheetItemResource {
      * @param request a {@link ServerHttpRequest} request.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of answerSheetItems in body.
      */
-    @GetMapping("/answer-sheet-items")
-    public Mono<ResponseEntity<List<AnswerSheetItemDTO>>> getAllAnswerSheetItems(Pageable pageable, ServerHttpRequest request) {
+    @PreAuthorize("@answerSecurity.hasPermissionToGet(#sheetId)")
+    @GetMapping("/answer-sheet-items/sheet/{sheetId}")
+    public Mono<ResponseEntity<List<AnswerSheetItemDTO>>> getAllAnswerSheetItems(@PathVariable Long sheetId, Pageable pageable, ServerHttpRequest request) {
         log.debug("REST request to get a page of AnswerSheetItems");
         return answerSheetItemService
-            .countAll()
-            .zipWith(answerSheetItemService.findAll(pageable).collectList())
-            .map(countWithEntities -> {
-                return ResponseEntity
-                    .ok()
-                    .headers(
-                        PaginationUtil.generatePaginationHttpHeaders(
-                            UriComponentsBuilder.fromHttpRequest(request),
-                            new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
-                        )
+            .countAllByAnswerSheetId(sheetId)
+            .zipWith(answerSheetItemService.findAllByAnswerSheetId(sheetId, pageable).collectList())
+            .map(countWithEntities -> ResponseEntity
+                .ok()
+                .headers(
+                    PaginationUtil.generatePaginationHttpHeaders(
+                        UriComponentsBuilder.fromHttpRequest(request),
+                        new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
                     )
-                    .body(countWithEntities.getT2());
-            });
+                )
+                .body(countWithEntities.getT2())
+            );
     }
 
     /**
@@ -201,12 +207,12 @@ public class AnswerSheetItemResource {
      * @param id the id of the answerSheetItemDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the answerSheetItemDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/answer-sheet-items/{id}")
-    public Mono<ResponseEntity<AnswerSheetItemDTO>> getAnswerSheetItem(@PathVariable Long id) {
-        log.debug("REST request to get AnswerSheetItem : {}", id);
-        Mono<AnswerSheetItemDTO> answerSheetItemDTO = answerSheetItemService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(answerSheetItemDTO);
-    }
+//    @GetMapping("/answer-sheet-items/{id}")
+//    public Mono<ResponseEntity<AnswerSheetItemDTO>> getAnswerSheetItem(@PathVariable Long id) {
+//        log.debug("REST request to get AnswerSheetItem : {}", id);
+//        Mono<AnswerSheetItemDTO> answerSheetItemDTO = answerSheetItemService.findOne(id);
+//        return ResponseUtil.wrapOrNotFound(answerSheetItemDTO);
+//    }
 
     /**
      * {@code DELETE  /answer-sheet-items/:id} : delete the "id" answerSheetItem.
@@ -214,17 +220,17 @@ public class AnswerSheetItemResource {
      * @param id the id of the answerSheetItemDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/answer-sheet-items/{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public Mono<ResponseEntity<Void>> deleteAnswerSheetItem(@PathVariable Long id) {
-        log.debug("REST request to delete AnswerSheetItem : {}", id);
-        return answerSheetItemService
-            .delete(id)
-            .map(result ->
-                ResponseEntity
-                    .noContent()
-                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-                    .build()
-            );
-    }
+//    @DeleteMapping("/answer-sheet-items/{id}")
+//    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+//    public Mono<ResponseEntity<Void>> deleteAnswerSheetItem(@PathVariable Long id) {
+//        log.debug("REST request to delete AnswerSheetItem : {}", id);
+//        return answerSheetItemService
+//            .delete(id)
+//            .map(result ->
+//                ResponseEntity
+//                    .noContent()
+//                    .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+//                    .build()
+//            );
+//    }
 }
