@@ -3,34 +3,23 @@ package vn.vnedu.studyspace.answer_store.web.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tech.jhipster.web.util.HeaderUtil;
-import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.reactive.ResponseUtil;
 import vn.vnedu.studyspace.answer_store.repository.AnswerSheetRepository;
 import vn.vnedu.studyspace.answer_store.security.SecurityUtils;
+import vn.vnedu.studyspace.answer_store.security.oauth2.AuthorizationHeaderUtil;
 import vn.vnedu.studyspace.answer_store.service.AnswerSheetService;
 import vn.vnedu.studyspace.answer_store.service.dto.AnswerSheetDTO;
 import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
@@ -52,6 +41,9 @@ public class AnswerSheetResource {
     private final AnswerSheetService answerSheetService;
 
     private final AnswerSheetRepository answerSheetRepository;
+
+    @Autowired
+    private AuthorizationHeaderUtil authorizationUtil;
 
     public AnswerSheetResource(AnswerSheetService answerSheetService, AnswerSheetRepository answerSheetRepository) {
         this.answerSheetService = answerSheetService;
@@ -254,6 +246,11 @@ public class AnswerSheetResource {
         log.debug("REST request to get AnswerSheet : {}", id);
         Mono<AnswerSheetDTO> answerSheetDTO = answerSheetService.findOne(id);
         return ResponseUtil.wrapOrNotFound(answerSheetDTO);
+    }
+
+    @GetMapping("/answer-sheets/test")
+    public Mono<ResponseEntity<String>> getTest() {
+        return ResponseUtil.wrapOrNotFound(authorizationUtil.getAccessToken());
     }
 
     /**

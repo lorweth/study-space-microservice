@@ -3,6 +3,7 @@ package vn.vnedu.studyspace.exam_store.web.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -198,6 +199,12 @@ public class QuestionResource {
         log.debug("REST request to get Question : {}", id);
         Optional<QuestionDTO> questionDTO = questionService.findOne(id);
         return ResponseUtil.wrapOrNotFound(questionDTO);
+    }
+
+    @GetMapping("questions/test-feign")
+    public ResponseEntity<String> test(@RequestHeader Map<String, String> headers) {
+        headers.forEach((k, v) -> log.debug("Header {}: {}", k, v));
+        return ResponseEntity.ok().body("Test duoc roi ne");
     }
 
     /**
