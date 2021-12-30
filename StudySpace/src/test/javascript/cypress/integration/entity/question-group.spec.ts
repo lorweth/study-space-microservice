@@ -16,7 +16,7 @@ describe('QuestionGroup e2e test', () => {
   const questionGroupPageUrlPattern = new RegExp('/question-group(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
-  const questionGroupSample = { name: 'Rubber deposit redundant', userLogin: 'AGP neural' };
+  const questionGroupSample = { name: 'protocol', userLogin: 'Strategist transmitter Kids' };
 
   let questionGroup: any;
 
@@ -167,9 +167,9 @@ describe('QuestionGroup e2e test', () => {
     it('should create an instance of QuestionGroup', () => {
       cy.get(`[data-cy="name"]`).type('bluetooth input').should('have.value', 'bluetooth input');
 
-      cy.get(`[data-cy="groupId"]`).type('mobile').should('have.value', 'mobile');
+      cy.get(`[data-cy="groupId"]`).type('16780').should('have.value', '16780');
 
-      cy.get(`[data-cy="userLogin"]`).type('Metal customized Strategist').should('have.value', 'Metal customized Strategist');
+      cy.get(`[data-cy="userLogin"]`).type('Account').should('have.value', 'Account');
 
       cy.get(entityCreateSaveButtonSelector).click();
 
