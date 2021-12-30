@@ -15,6 +15,11 @@ import { AxiosError } from 'axios';
 export type IQueryParams = { query?: string; page?: number; size?: number; sort?: string };
 
 /**
+ * Model for redux actions with pagination and id
+ */
+export type IQueryParamsWithId = IQueryParams & { id: string | number };
+
+/**
  * Useful types for working with actions
  */
 type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>;

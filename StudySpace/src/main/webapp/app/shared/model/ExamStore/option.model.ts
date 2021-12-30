@@ -4,7 +4,7 @@ export interface IOption {
   id?: number;
   content?: string;
   isCorrect?: boolean;
-  question?: IQuestion | null;
+  question?: { id?: number } | null;
 }
 
 export const defaultValue: Readonly<IOption> = {

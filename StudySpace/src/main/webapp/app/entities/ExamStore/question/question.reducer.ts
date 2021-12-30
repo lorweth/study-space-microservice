@@ -3,7 +3,7 @@ import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/t
 import { loadMoreDataWhenScrolled, parseHeaderForLinks } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
-import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
+import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError, IQueryParamsWithId } from 'app/shared/reducers/reducer.utils';
 import { IQuestion, defaultValue } from 'app/shared/model/ExamStore/question.model';
 
 const initialState: EntityState<IQuestion> = {
@@ -20,6 +20,15 @@ const initialState: EntityState<IQuestion> = {
 const apiUrl = 'services/examstore/api/questions';
 
 // Actions
+
+export const getQuestionsFromRepository = createAsyncThunk(
+  'question/getQuestionFromRepository',
+  async ({ id, page, size, sort }: IQueryParamsWithId, thunkAPI) => {
+    const requestUrl = `${apiUrl}/repo/${id}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
+    return axios.get<IQuestion[]>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
 
 export const getEntities = createAsyncThunk('question/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
@@ -83,6 +92,17 @@ export const QuestionSlice = createEntitySlice({
         state.updating = false;
         state.updateSuccess = true;
         state.entity = {};
+      })
+      .addMatcher(isFulfilled(getQuestionsFromRepository), (state, action) => {
+        const links = parseHeaderForLinks(action.payload.headers.link);
+
+        return {
+          ...state,
+          loading: false,
+          links,
+          entities: loadMoreDataWhenScrolled(state.entities, action.payload.data, links),
+          totalItems: parseInt(action.payload.headers['x-total-count'], 10),
+        };
       })
       .addMatcher(isFulfilled(getEntities), (state, action) => {
         const links = parseHeaderForLinks(action.payload.headers.link);
