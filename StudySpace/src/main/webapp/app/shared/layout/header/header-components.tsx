@@ -31,3 +31,27 @@ export const Home = () => (
     </NavLink>
   </NavItem>
 );
+
+export const GroupManager = () => (
+  <NavItem>
+    <NavLink tag={Link} to="/group-manager" className="d-flex align-items-center">
+      <FontAwesomeIcon icon="users" />
+      <span>
+        {/* <Translate contentKey="global.menu.groupManager">Group Manager</Translate> */}
+        Group Manager
+      </span>
+    </NavLink>
+  </NavItem>
+);
+
+export const QuestionRepositoryManager = () => (
+  <NavItem>
+    <NavLink tag={Link} to="/question-repository-manager" className="d-flex align-items-center">
+      <FontAwesomeIcon icon="archive" />
+      <span>
+        {/* <Translate contentKey="global.menu.questionRepositoryManager">Question Repository Manager</Translate> */}
+        Question Repository Manager
+      </span>
+    </NavLink>
+  </NavItem>
+);
