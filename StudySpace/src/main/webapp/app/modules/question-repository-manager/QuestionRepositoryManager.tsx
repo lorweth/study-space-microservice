@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import OptionComponent from 'app/components/OptionComponent';
-import QuestionFormComponent from 'app/components/QuestionFormComponent';
+import OptionComponent from 'app/shared/components/OptionFormComponent';
+import QuestionFormComponent from 'app/shared/components/QuestionFormComponent';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import {
   createEntity as createRepo,
@@ -8,8 +8,7 @@ import {
   updateEntity as updateRepo,
 } from 'app/entities/ExamStore/question-group/question-group.reducer';
 import {
-  createEntity as createQuestion,
-  getEntity as getQuestion,
+  reset as resetQuestion,
   getQuestionsFromRepository as getQuestions,
   updateEntity as updateQuestion,
 } from 'app/entities/ExamStore/question/question.reducer';
@@ -22,6 +21,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { getSortState, translate, Translate, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Col, Row, Table } from 'reactstrap';
+import { defaultValue as defaultQuestion } from 'app/shared/model/ExamStore/question.model';
 
 const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
   const dispatch = useAppDispatch();
@@ -40,10 +40,14 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
   const updateSuccess = useAppSelector(state => state.questionGroup.updateSuccess);
 
   const questionList = useAppSelector(state => state.question.entities);
+  const questionListLoading = useAppSelector(state => state.question.loading);
+  const questionUpdating = useAppSelector(state => state.question.updating);
+  const questionUpdateSuccess = useAppSelector(state => state.question.updateSuccess);
   const links = useAppSelector(state => state.question.links);
 
   const [selectedQuestion, setSelectedQuestion] = useState<IQuestion>({});
 
+  // Handle Load More question
   const handleLoadMore = () => {
     if ((window as any).pageYOffset > 0) {
       setPaginationState({
@@ -53,6 +57,7 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
     }
   };
 
+  // Handle click sort
   const sort = p => () => {
     // dispatch(reset());
     setPaginationState({
@@ -64,8 +69,50 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
     setSorting(true);
   };
 
+  // Handle click a question in list.
+  const handleClickQuestion = (question: IQuestion) => {
+    setSelectedQuestion(cleanEntity(question));
+  };
+
+  // Handle Click Create new Question.
+  const handleClickNewQuestion = () => {
+    setSelectedQuestion({ ...defaultQuestion });
+  };
+
+  // Handle submit Form QuestionGroup.
+  const saveEntity = values => {
+    const entity = {
+      ...questionGroupEntity,
+      ...values,
+      topic: topics.find(it => it.id.toString() === values.topic.toString()),
+    };
+
+    if (isNew) {
+      dispatch(createRepo(entity));
+    } else {
+      dispatch(updateRepo(entity));
+    }
+  };
+
+  const defaultValues = () =>
+    isNew
+      ? {}
+      : {
+          ...questionGroupEntity,
+          topic: questionGroupEntity?.topic?.id,
+        };
+
+  const resetAll = () => {
+    dispatch(resetQuestion());
+    setPaginationState({
+      ...paginationState,
+      activePage: 1,
+    });
+    dispatch(getQuestions({ id: props.match.params.id }));
+  };
+
   const handleSyncList = () => {
-    // resetAll();
+    resetAll();
   };
 
   const handleClose = () => {
@@ -90,31 +137,12 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
     dispatch(getTopics({}));
   }, []);
 
-  const handleClickQuestion = (question: IQuestion) => {
-    setSelectedQuestion(cleanEntity(question));
-  };
-
-  const saveEntity = values => {
-    const entity = {
-      ...questionGroupEntity,
-      ...values,
-      topic: topics.find(it => it.id.toString() === values.topic.toString()),
-    };
-
-    if (isNew) {
-      dispatch(createRepo(entity));
-    } else {
-      dispatch(updateRepo(entity));
+  useEffect(() => {
+    if (questionUpdateSuccess) {
+      resetAll();
     }
-  };
+  }, [questionUpdating, questionUpdateSuccess]);
 
-  const defaultValues = () =>
-    isNew
-      ? {}
-      : {
-          ...questionGroupEntity,
-          topic: questionGroupEntity?.topic?.id,
-        };
   return (
     <div>
       {/* Tiêu đề QuestionGroup */}
@@ -188,9 +216,30 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
         </Col>
       </Row>
       {/* Quản lý câu hỏi */}
-      <Row>
+      <Row className="mt-4" hidden={isNew}>
         {/* Danh sách câu hỏi */}
         <Col md="6">
+          <div className="d-flex justify-content-between">
+            <Translate contentKey="studySpaceApp.examStoreQuestion.home.title">Question</Translate>
+            <div>
+              <Button className="me-2" color="info" onClick={handleSyncList} disabled={questionListLoading}>
+                <FontAwesomeIcon icon="sync" spin={questionListLoading} />{' '}
+                <Translate contentKey="studySpaceApp.examStoreQuestion.home.refreshListLabel">Refresh List</Translate>
+              </Button>
+              <Button
+                color="primary"
+                id="new-question"
+                data-cy="entityCreateNewQuestion"
+                type="button"
+                className=""
+                onClick={handleClickNewQuestion}
+              >
+                <FontAwesomeIcon icon="plus" />
+                &nbsp;
+                <Translate contentKey="studySpaceApp.examStoreQuestion.home.createLabel">Create new Question</Translate>
+              </Button>
+            </div>
+          </div>
           <div className="table-responsive">
             <InfiniteScroll
               dataLength={questionList ? questionList.length : 0}
@@ -216,7 +265,7 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
                         key={`entity-${i}`}
                         data-cy="entityTable"
                         onClick={() => {
-                          setSelectedQuestion(question);
+                          handleClickQuestion(question);
                         }}
                       >
                         <td>{question.id}</td>
@@ -236,7 +285,13 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
           </div>
         </Col>
         {/* Form Question */}
-        <Col md="6">{loading ? <p>Loading...</p> : <QuestionFormComponent selectedQuestion={selectedQuestion} />}</Col>
+        <Col md="6">
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <QuestionFormComponent selectedQuestion={selectedQuestion} questionGroupId={questionGroupEntity.id} syncList={handleSyncList} />
+          )}
+        </Col>
       </Row>
     </div>
   );

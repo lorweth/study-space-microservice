@@ -9,4 +9,14 @@ export interface IQuestion {
   questionGroup?: IQuestionGroup | null;
 }
 
-export const defaultValue: Readonly<IQuestion> = {};
+export const defaultValue: Readonly<IQuestion> = {
+  content: '',
+  note: null,
+  options: [
+    { content: '', isCorrect: false },
+    { content: '', isCorrect: false },
+    { content: '', isCorrect: false },
+    { content: '', isCorrect: true },
+  ],
+  questionGroup: null,
+};
