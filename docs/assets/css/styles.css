@@ -4,14 +4,8 @@
   width: 160px; /* Set the width of the sidebar */
   position: fixed; /* Fixed Sidebar (stay in place on scroll) */
   z-index: 1; /* Stay on top */
-  top: 0; /* Stay at the top */
   left: 0;
-  background-color: radial-gradient(
-    circle,
-    rgba(2, 0, 36, 1) 0%,
-    rgba(21, 11, 77, 1) 63%,
-    rgba(0, 1, 75, 1) 100%
-  ); /* Black */
+  background: whitesmoke;
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 20px;
 }
@@ -20,14 +14,15 @@
 .sidenav a {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
-  font-size: 25px;
-  color: #818181;
+  font-size: 20px;
+  color: #3c3a3a;
   display: block;
 }
 
 /* When you mouse over the navigation links, change their color */
 .sidenav a:hover {
-  color: #f1f1f1;
+  color: #1e1c1c;
+  background: white;
 }
 
 /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
