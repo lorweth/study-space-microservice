@@ -198,16 +198,13 @@ public class GroupResource {
      * {@code GET /groups/find/:id} : get the group by id.
      *
      * @param id the name to retrieve.
-     * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
      */
     @GetMapping("/groups/find/{id}")
-    public ResponseEntity<List<GroupDTO>> getGroupById(@PathVariable Long id, Pageable pageable) {
+    public ResponseEntity<List<GroupDTO>> getGroupById(@PathVariable Long id) {
         log.debug("REST request to get a page of Groups which id {}", id);
-        Optional<GroupDTO> groupDTO = groupService.findOne(id);
-        Page<GroupDTO> page = new PageImpl<>(Collections.singletonList(groupDTO.orElse(null)));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        List<GroupDTO> result = Collections.singletonList(groupService.findOne(id).orElse(null));
+        return ResponseEntity.ok().body(result);
     }
 
     /**
