@@ -2,6 +2,7 @@ package vn.vnedu.studyspace.group_store.web.rest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -184,10 +186,26 @@ public class GroupResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
      */
-    @GetMapping("/groups/name/{name}")
-    public ResponseEntity<List<GroupDTO>> getAllGroupByName(@PathVariable String name, Pageable pageable) {
-        log.debug("REST request to get a page of Groups which name containing {}", name);
-        Page<GroupDTO> page = groupService.findAllByNameContaining(name, pageable);
+//    @GetMapping("/groups/name")
+//    public ResponseEntity<List<GroupDTO>> getAllGroupByName(@RequestBody String name, Pageable pageable) {
+//        log.debug("REST request to get a page of Groups which name containing {}", name);
+//        Page<GroupDTO> page = groupService.findAllByNameContaining(name, pageable);
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+//        return ResponseEntity.ok().headers(headers).body(page.getContent());
+//    }
+
+    /**
+     * {@code GET /groups/find/:id} : get the group by id.
+     *
+     * @param id the name to retrieve.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groups in body.
+     */
+    @GetMapping("/groups/find/{id}")
+    public ResponseEntity<List<GroupDTO>> getGroupById(@PathVariable Long id, Pageable pageable) {
+        log.debug("REST request to get a page of Groups which id {}", id);
+        Optional<GroupDTO> groupDTO = groupService.findOne(id);
+        Page<GroupDTO> page = new PageImpl<>(Collections.singletonList(groupDTO.orElse(null)));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
