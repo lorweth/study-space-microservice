@@ -32,13 +32,13 @@ export const Home = () => (
   </NavItem>
 );
 
-export const GroupManager = () => (
+export const Group = () => (
   <NavItem>
-    <NavLink tag={Link} to="/group-manager" className="d-flex align-items-center">
+    <NavLink tag={Link} to="/group" className="d-flex align-items-center">
       <FontAwesomeIcon icon="users" />
       <span>
         {/* <Translate contentKey="global.menu.groupManager">Group Manager</Translate> */}
-        Group Manager
+        Group
       </span>
     </NavLink>
   </NavItem>

@@ -11,7 +11,7 @@ import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 import PageNotFound from 'app/shared/error/page-not-found';
 import { AUTHORITIES } from 'app/config/constants';
 import QuestionRepositoryManagerRoute from 'app/modules/question-repository-manager';
-
+import GroupManagerRoute from 'app/modules/group-manager';
 const Admin = Loadable({
   loader: () => import(/* webpackChunkName: "administration" */ 'app/modules/administration'),
   loading: () => <div>loading ...</div>,
@@ -27,8 +27,9 @@ const Routes = () => {
         <PrivateRoute
           path="/question-repository-manager"
           component={QuestionRepositoryManagerRoute}
-          hasAnyAuthorities={[AUTHORITIES.USER]}
+          hasAnyAuthorities={[AUTHORITIES.USER, AUTHORITIES.ADMIN]}
         />
+        <PrivateRoute path="/group" component={GroupManagerRoute} hasAnyAuthorities={[AUTHORITIES.USER, AUTHORITIES.ADMIN]} />
         <ErrorBoundaryRoute path="/oauth2/authorization/oidc" component={LoginRedirect} />
         <PrivateRoute path="/" component={Entities} hasAnyAuthorities={[AUTHORITIES.USER]} />
         <ErrorBoundaryRoute component={PageNotFound} />

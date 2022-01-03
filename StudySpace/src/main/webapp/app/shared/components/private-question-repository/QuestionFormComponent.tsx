@@ -10,6 +10,7 @@ import { createEntity as createQuestion, updateEntity as updateQuestion } from '
 import OptionFormComponent from './OptionFormComponent';
 import OptionComponent from './OptionFormComponent';
 import QuestionDeleteDialog from './QuestionDeleteDialog';
+import { toast } from 'react-toastify';
 
 type PropType = {
   questionGroupId: number;
@@ -68,9 +69,15 @@ const QuestionFormComponent = (props: PropType) => {
   };
 
   const onSubmit = values => {
-    // window.alert(JSON.stringify(values));
-    save(values);
-    // TODO: Sync List sau khi đã cập nhật, chuyển qua gọi bên QuestionRepositoryManager
+    const questionData: IQuestion = values;
+    const correctOptions = questionData.options.filter(option => option.isCorrect === true);
+    if (correctOptions.length === questionData.options.length || correctOptions.length === 0) {
+      // toast.error(translate('question.error.correctOption'));
+      toast.error('Vui lòng chọn số đáp án đúng cho hợp lý');
+    } else {
+      save(values);
+      // TODO: Sync List sau khi đã cập nhật, chuyển qua gọi bên QuestionRepositoryManager
+    }
   };
 
   return (

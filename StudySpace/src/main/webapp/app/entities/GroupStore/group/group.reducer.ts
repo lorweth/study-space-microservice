@@ -2,7 +2,7 @@ import axios from 'axios';
 import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/toolkit';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
-import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
+import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError, IQueryParamsExtended } from 'app/shared/reducers/reducer.utils';
 import { IGroup, defaultValue } from 'app/shared/model/GroupStore/group.model';
 
 const initialState: EntityState<IGroup> = {
@@ -18,6 +18,15 @@ const initialState: EntityState<IGroup> = {
 const apiUrl = 'services/groupstore/api/groups';
 
 // Actions
+
+export const findById = createAsyncThunk(
+  'group/fetch_entity_list_by_id',
+  async (id: number | string) => {
+    const requestUrl = `${apiUrl}/find/${id}`;
+    return axios.get<IGroup[]>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
 
 export const getEntities = createAsyncThunk('group/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
@@ -90,7 +99,7 @@ export const GroupSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
-      .addMatcher(isFulfilled(getEntities), (state, action) => {
+      .addMatcher(isFulfilled(getEntities, findById), (state, action) => {
         return {
           ...state,
           loading: false,
@@ -104,7 +113,7 @@ export const GroupSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity), state => {
+      .addMatcher(isPending(getEntities, findById, getEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;

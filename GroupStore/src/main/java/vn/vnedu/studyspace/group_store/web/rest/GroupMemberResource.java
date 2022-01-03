@@ -159,6 +159,21 @@ public class GroupMemberResource {
     }
 
     /**
+     * {@code GET  /group-members/group/:groupId/admin} : get all the admin in group {id}.
+     *
+     * @param groupId the id of the group.
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of groupMembers in body.
+     */
+    @GetMapping("/group-members/group/{groupId}/admin")
+    public ResponseEntity<List<GroupMemberDTO>> getAllAdmin(@PathVariable Long groupId, Pageable pageable) {
+        log.debug("REST request to get a page of GroupMembers");
+        Page<GroupMemberDTO> page = groupMemberService.findAllAdminInGroup(groupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+    
+    /**
      * {@code GET  /group-members/group/:groupId/member} : get all the member in group {id}.
      *
      * @param groupId the id of the group.

@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import OptionComponent from 'app/shared/components/OptionFormComponent';
-import QuestionFormComponent from 'app/shared/components/QuestionFormComponent';
+import QuestionFormComponent from 'app/shared/components/private-question-repository/QuestionFormComponent';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import {
   createEntity as createRepo,
@@ -193,7 +192,7 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
                 {topics
                   ? topics.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.name}
                       </option>
                     ))
                   : null}

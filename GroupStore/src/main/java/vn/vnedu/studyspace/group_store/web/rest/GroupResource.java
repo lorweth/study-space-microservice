@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -203,8 +204,8 @@ public class GroupResource {
     @GetMapping("/groups/find/{id}")
     public ResponseEntity<List<GroupDTO>> getGroupById(@PathVariable Long id) {
         log.debug("REST request to get a page of Groups which id {}", id);
-        List<GroupDTO> result = Collections.singletonList(groupService.findOne(id).orElse(null));
-        return ResponseEntity.ok().body(result);
+        return groupService.findOne(id).map(response -> ResponseEntity.ok().body(Collections.singletonList(response)))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     /**

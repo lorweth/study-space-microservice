@@ -2,7 +2,7 @@ import axios from 'axios';
 import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/toolkit';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
-import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
+import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError, IQueryParamsExtended } from 'app/shared/reducers/reducer.utils';
 import { IGroupMember, defaultValue } from 'app/shared/model/GroupStore/group-member.model';
 
 const initialState: EntityState<IGroupMember> = {
@@ -18,6 +18,13 @@ const initialState: EntityState<IGroupMember> = {
 const apiUrl = 'services/groupstore/api/group-members';
 
 // Actions
+
+export const getAllAdmins = createAsyncThunk('group-member/fetch_admin_list', async ({ id, page, size, sort }: IQueryParamsExtended) => {
+  const requestUrl = `${apiUrl}/group/${id}/admin${
+    sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'
+  }cacheBuster=${new Date().getTime()}`;
+  return axios.get<IGroupMember[]>(requestUrl);
+});
 
 export const getEntities = createAsyncThunk('groupMember/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
@@ -90,7 +97,7 @@ export const GroupMemberSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
-      .addMatcher(isFulfilled(getEntities), (state, action) => {
+      .addMatcher(isFulfilled(getEntities, getAllAdmins), (state, action) => {
         return {
           ...state,
           loading: false,
@@ -104,7 +111,7 @@ export const GroupMemberSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity), state => {
+      .addMatcher(isPending(getEntities, getAllAdmins, getEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;

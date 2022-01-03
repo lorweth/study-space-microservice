@@ -20,6 +20,11 @@ export type IQueryParams = { query?: string; page?: number; size?: number; sort?
 export type IQueryParamsWithId = IQueryParams & { id: string | number };
 
 /**
+ * Model for redux actions with pagination and extended data
+ */
+export type IQueryParamsExtended = IQueryParams & { id?: string | number; name?: string };
+
+/**
  * Useful types for working with actions
  */
 type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>;
