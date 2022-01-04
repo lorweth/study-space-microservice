@@ -52,7 +52,7 @@ const SearchForm = (props: PropType) => {
 
   const clear = () => {
     setTerm(null);
-    dispatch(findAll());
+    dispatch(findAll({}));
   };
 
   const handleFindBy = e => setFindType(e.target.value);

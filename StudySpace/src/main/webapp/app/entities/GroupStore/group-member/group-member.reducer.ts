@@ -26,6 +26,38 @@ export const getAllAdmins = createAsyncThunk('group-member/fetch_admin_list', as
   return axios.get<IGroupMember[]>(requestUrl);
 });
 
+export const getAllMembers = createAsyncThunk('group-member/fetch_admin_list', async ({ id, page, size, sort }: IQueryParamsExtended) => {
+  const requestUrl = `${apiUrl}/group/${id}/member${
+    sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'
+  }cacheBuster=${new Date().getTime()}`;
+  return axios.get<IGroupMember[]>(requestUrl);
+});
+
+export const getAllWaitings = createAsyncThunk('group-member/fetch_admin_list', async ({ id, page, size, sort }: IQueryParamsExtended) => {
+  const requestUrl = `${apiUrl}/group/${id}/waiting${
+    sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'
+  }cacheBuster=${new Date().getTime()}`;
+  return axios.get<IGroupMember[]>(requestUrl);
+});
+
+export const getMemberDataOfCurrentUser = createAsyncThunk(
+  'groupMember/fetch_member_of_current_user_and_group',
+  async (id: string | number) => {
+    const requestUrl = `${apiUrl}/group/${id}`;
+    return axios.get<IGroupMember>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
+
+export const requestJoinGroup = createAsyncThunk(
+  'groupMember/request_join_group',
+  async (id: string | number) => {
+    const requestUrl = `${apiUrl}/group/${id}`;
+    return axios.post<IGroupMember>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
+
 export const getEntities = createAsyncThunk('groupMember/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
   return axios.get<IGroupMember[]>(requestUrl);
@@ -97,7 +129,7 @@ export const GroupMemberSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
-      .addMatcher(isFulfilled(getEntities, getAllAdmins), (state, action) => {
+      .addMatcher(isFulfilled(getEntities, getAllAdmins, getAllMembers, getAllWaitings), (state, action) => {
         return {
           ...state,
           loading: false,
@@ -105,18 +137,22 @@ export const GroupMemberSlice = createEntitySlice({
           totalItems: parseInt(action.payload.headers['x-total-count'], 10),
         };
       })
-      .addMatcher(isFulfilled(createEntity, updateEntity, partialUpdateEntity), (state, action) => {
+      .addMatcher(isFulfilled(getMemberDataOfCurrentUser), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(createEntity, requestJoinGroup, updateEntity, partialUpdateEntity), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getAllAdmins, getEntity), state => {
+      .addMatcher(isPending(getEntities, getAllAdmins, getAllMembers, getAllWaitings, getEntity, getMemberDataOfCurrentUser), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;
       })
-      .addMatcher(isPending(createEntity, updateEntity, partialUpdateEntity, deleteEntity), state => {
+      .addMatcher(isPending(createEntity, requestJoinGroup, updateEntity, partialUpdateEntity, deleteEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.updating = true;

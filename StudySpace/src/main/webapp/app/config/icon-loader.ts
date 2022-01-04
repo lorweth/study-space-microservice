@@ -33,7 +33,7 @@ import { faUsersCog } from '@fortawesome/free-solid-svg-icons/faUsersCog';
 import { faWrench } from '@fortawesome/free-solid-svg-icons/faWrench';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faArchive } from '@fortawesome/free-solid-svg-icons';
+import { faArchive, faFeatherAlt, faUserLock } from '@fortawesome/free-solid-svg-icons';
 
 export const loadIcons = () => {
   library.add(
@@ -70,6 +70,8 @@ export const loadIcons = () => {
     faUsers,
     faUsersCog,
     faWrench,
-    faArchive
+    faArchive,
+    faUserLock,
+    faFeatherAlt
   );
 };

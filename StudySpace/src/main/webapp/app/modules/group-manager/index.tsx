@@ -3,6 +3,7 @@ import React from 'react';
 import { Switch } from 'react-router-dom';
 import Group from './group';
 import GroupDetail from './group-detail';
+import GroupMemberManager from './group-member-manager';
 import GroupUpdate from './group-update';
 import GroupManager from './GroupManager';
 
@@ -13,6 +14,7 @@ const Routes = ({ match }) => (
       <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={GroupUpdate} />
       <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={GroupDetail} />
       <ErrorBoundaryRoute exact path={`${match.url}/:id/management`} component={GroupManager} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/member-management`} component={GroupMemberManager} />
       <ErrorBoundaryRoute path={match.url} component={Group} />
     </Switch>
   </>

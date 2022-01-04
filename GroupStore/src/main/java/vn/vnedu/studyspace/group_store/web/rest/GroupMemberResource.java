@@ -159,6 +159,22 @@ public class GroupMemberResource {
     }
 
     /**
+     * {@code GET /group-members/group/:group-id} : get member data by current user login and groupId.
+     *
+     * @param groupId the id of the group.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the groupMemberDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/group-members/group/{groupId}")
+    public ResponseEntity<GroupMemberDTO> getMemberData(@PathVariable Long groupId) {
+        log.debug("REST request to get a Member Data by Current user login with groupId {}", groupId);
+        String currentUserLogin = SecurityUtils
+            .getCurrentUserLogin()
+            .orElseThrow(() -> new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn"));
+        Optional<GroupMemberDTO> result = groupMemberService.findByUserLoginAndGroupId(currentUserLogin, groupId);
+        return ResponseEntity.ok().body(result.orElse(null));
+    }
+
+    /**
      * {@code GET  /group-members/group/:groupId/admin} : get all the admin in group {id}.
      *
      * @param groupId the id of the group.
@@ -172,7 +188,7 @@ public class GroupMemberResource {
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
-    
+
     /**
      * {@code GET  /group-members/group/:groupId/member} : get all the member in group {id}.
      *
@@ -198,7 +214,7 @@ public class GroupMemberResource {
      */
     @PreAuthorize("@groupMemberSecurity.hasPermission(#groupId, 'MEMBER')")
     @GetMapping("/group-members/group/{groupId}/waiting")
-    public ResponseEntity<List<GroupMemberDTO>> GetAllWaitingMember(@PathVariable Long groupId, Pageable pageable) {
+    public ResponseEntity<List<GroupMemberDTO>> getAllWaitingMember(@PathVariable Long groupId, Pageable pageable) {
         log.debug("REST request to get a page of GroupMembers");
         Page<GroupMemberDTO> page = groupMemberService.findAllWaitingInGroup(groupId, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
