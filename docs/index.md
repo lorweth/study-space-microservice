@@ -4,7 +4,7 @@
 
 ## Tổng quan về kiến trúc hệ thống
 
-<iframe src="https://prezi.com/embed/dcco-rchqjcj/" id="iframe_container" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" allow="autoplay; fullscreen" height="516" width="832"></iframe>
+<iframe src="https://prezi.com/embed/dcco-rchqjcj/" id="iframe_container" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" allow="autoplay; fullscreen" height="500em" width="100%"></iframe>
 
 ## Slide báo cáo kết quả thực hiện
 
