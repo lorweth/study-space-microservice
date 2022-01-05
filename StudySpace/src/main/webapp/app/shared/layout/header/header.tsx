@@ -5,7 +5,7 @@ import { Translate, Storage } from 'react-jhipster';
 import { Navbar, Nav, NavbarToggler, Collapse } from 'reactstrap';
 import LoadingBar from 'react-redux-loading-bar';
 
-import { Home, Brand, Group, QuestionRepositoryManager } from './header-components';
+import { Home, Brand, Group, QuestionRepositoryManager, LearningManager } from './header-components';
 import { AdminMenu, EntitiesMenu, AccountMenu, LocaleMenu } from '../menus';
 import { useAppDispatch } from 'app/config/store';
 import { setLocale } from 'app/shared/reducers/locale';
@@ -55,6 +55,7 @@ const Header = (props: IHeaderProps) => {
             <Home />
             {props.isAuthenticated && <Group />}
             {props.isAuthenticated && <QuestionRepositoryManager />}
+            {props.isAuthenticated && <LearningManager />}
             {props.isAuthenticated && <EntitiesMenu />}
             {props.isAuthenticated && props.isAdmin && <AdminMenu showOpenAPI={props.isOpenAPIEnabled} />}
             <LocaleMenu currentLocale={props.currentLocale} onClick={handleLocaleChange} />

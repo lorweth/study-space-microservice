@@ -55,3 +55,15 @@ export const QuestionRepositoryManager = () => (
     </NavLink>
   </NavItem>
 );
+
+export const LearningManager = () => (
+  <NavItem>
+    <NavLink tag={Link} to="/learning-manager" className="d-flex align-items-center">
+      <FontAwesomeIcon icon="book" />
+      <span>
+        {/* <Translate contentKey="global.menu.learningManager">Learning Manager</Translate> */}
+        Learning Manager
+      </span>
+    </NavLink>
+  </NavItem>
+);
