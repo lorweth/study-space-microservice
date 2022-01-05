@@ -52,6 +52,9 @@ class ExamResourceIT {
     private static final Long DEFAULT_GROUP_ID = 1L;
     private static final Long UPDATED_GROUP_ID = 2L;
 
+    private static final String DEFAULT_USER_LOGIN = "AAAAAAAAAA";
+    private static final String UPDATED_USER_LOGIN = "BBBBBBBBBB";
+
     private static final String ENTITY_API_URL = "/api/exams";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -85,7 +88,8 @@ class ExamResourceIT {
             .endAt(DEFAULT_END_AT)
             .duration(DEFAULT_DURATION)
             .mix(DEFAULT_MIX)
-            .groupId(DEFAULT_GROUP_ID);
+            .groupId(DEFAULT_GROUP_ID)
+            .userLogin(DEFAULT_USER_LOGIN);
         return exam;
     }
 
@@ -102,7 +106,8 @@ class ExamResourceIT {
             .endAt(UPDATED_END_AT)
             .duration(UPDATED_DURATION)
             .mix(UPDATED_MIX)
-            .groupId(UPDATED_GROUP_ID);
+            .groupId(UPDATED_GROUP_ID)
+            .userLogin(UPDATED_USER_LOGIN);
         return exam;
     }
 
@@ -136,6 +141,7 @@ class ExamResourceIT {
         assertThat(testExam.getDuration()).isEqualTo(DEFAULT_DURATION);
         assertThat(testExam.getMix()).isEqualTo(DEFAULT_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(DEFAULT_GROUP_ID);
+        assertThat(testExam.getUserLogin()).isEqualTo(DEFAULT_USER_LOGIN);
     }
 
     @Test
@@ -233,29 +239,6 @@ class ExamResourceIT {
 
     @Test
     @Transactional
-    void checkGroupIdIsRequired() throws Exception {
-        int databaseSizeBeforeTest = examRepository.findAll().size();
-        // set the field null
-        exam.setGroupId(null);
-
-        // Create the Exam, which fails.
-        ExamDTO examDTO = examMapper.toDto(exam);
-
-        restExamMockMvc
-            .perform(
-                post(ENTITY_API_URL)
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(examDTO))
-            )
-            .andExpect(status().isBadRequest());
-
-        List<Exam> examList = examRepository.findAll();
-        assertThat(examList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     void getAllExams() throws Exception {
         // Initialize the database
         examRepository.saveAndFlush(exam);
@@ -271,7 +254,8 @@ class ExamResourceIT {
             .andExpect(jsonPath("$.[*].endAt").value(hasItem(DEFAULT_END_AT.toString())))
             .andExpect(jsonPath("$.[*].duration").value(hasItem(DEFAULT_DURATION)))
             .andExpect(jsonPath("$.[*].mix").value(hasItem(DEFAULT_MIX)))
-            .andExpect(jsonPath("$.[*].groupId").value(hasItem(DEFAULT_GROUP_ID.intValue())));
+            .andExpect(jsonPath("$.[*].groupId").value(hasItem(DEFAULT_GROUP_ID.intValue())))
+            .andExpect(jsonPath("$.[*].userLogin").value(hasItem(DEFAULT_USER_LOGIN)));
     }
 
     @Test
@@ -291,7 +275,8 @@ class ExamResourceIT {
             .andExpect(jsonPath("$.endAt").value(DEFAULT_END_AT.toString()))
             .andExpect(jsonPath("$.duration").value(DEFAULT_DURATION))
             .andExpect(jsonPath("$.mix").value(DEFAULT_MIX))
-            .andExpect(jsonPath("$.groupId").value(DEFAULT_GROUP_ID.intValue()));
+            .andExpect(jsonPath("$.groupId").value(DEFAULT_GROUP_ID.intValue()))
+            .andExpect(jsonPath("$.userLogin").value(DEFAULT_USER_LOGIN));
     }
 
     @Test
@@ -319,7 +304,8 @@ class ExamResourceIT {
             .endAt(UPDATED_END_AT)
             .duration(UPDATED_DURATION)
             .mix(UPDATED_MIX)
-            .groupId(UPDATED_GROUP_ID);
+            .groupId(UPDATED_GROUP_ID)
+            .userLogin(UPDATED_USER_LOGIN);
         ExamDTO examDTO = examMapper.toDto(updatedExam);
 
         restExamMockMvc
@@ -341,6 +327,7 @@ class ExamResourceIT {
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);
+        assertThat(testExam.getUserLogin()).isEqualTo(UPDATED_USER_LOGIN);
     }
 
     @Test
@@ -430,7 +417,8 @@ class ExamResourceIT {
             .endAt(UPDATED_END_AT)
             .duration(UPDATED_DURATION)
             .mix(UPDATED_MIX)
-            .groupId(UPDATED_GROUP_ID);
+            .groupId(UPDATED_GROUP_ID)
+            .userLogin(UPDATED_USER_LOGIN);
 
         restExamMockMvc
             .perform(
@@ -451,6 +439,7 @@ class ExamResourceIT {
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);
+        assertThat(testExam.getUserLogin()).isEqualTo(UPDATED_USER_LOGIN);
     }
 
     @Test
@@ -471,7 +460,8 @@ class ExamResourceIT {
             .endAt(UPDATED_END_AT)
             .duration(UPDATED_DURATION)
             .mix(UPDATED_MIX)
-            .groupId(UPDATED_GROUP_ID);
+            .groupId(UPDATED_GROUP_ID)
+            .userLogin(UPDATED_USER_LOGIN);
 
         restExamMockMvc
             .perform(
@@ -492,6 +482,7 @@ class ExamResourceIT {
         assertThat(testExam.getDuration()).isEqualTo(UPDATED_DURATION);
         assertThat(testExam.getMix()).isEqualTo(UPDATED_MIX);
         assertThat(testExam.getGroupId()).isEqualTo(UPDATED_GROUP_ID);
+        assertThat(testExam.getUserLogin()).isEqualTo(UPDATED_USER_LOGIN);
     }
 
     @Test

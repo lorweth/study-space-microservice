@@ -48,9 +48,11 @@ public class Exam implements Serializable {
     @Column(name = "mix", nullable = false)
     private Integer mix;
 
-    @NotNull
-    @Column(name = "group_id", nullable = false)
+    @Column(name = "group_id")
     private Long groupId;
+
+    @Column(name = "user_login")
+    private String userLogin;
 
     @OneToMany(mappedBy = "exam")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -150,6 +152,19 @@ public class Exam implements Serializable {
         this.groupId = groupId;
     }
 
+    public String getUserLogin() {
+        return this.userLogin;
+    }
+
+    public Exam userLogin(String userLogin) {
+        this.setUserLogin(userLogin);
+        return this;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
+
     public Set<ExamItem> getItems() {
         return this.items;
     }
@@ -211,6 +226,7 @@ public class Exam implements Serializable {
             ", duration=" + getDuration() +
             ", mix=" + getMix() +
             ", groupId=" + getGroupId() +
+            ", userLogin='" + getUserLogin() + "'" +
             "}";
     }
 }

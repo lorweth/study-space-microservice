@@ -30,8 +30,9 @@ public class ExamDTO implements Serializable {
     @Max(value = 2)
     private Integer mix;
 
-    @NotNull
     private Long groupId;
+
+    private String userLogin;
 
     public Long getId() {
         return id;
@@ -89,6 +90,14 @@ public class ExamDTO implements Serializable {
         this.groupId = groupId;
     }
 
+    public String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -121,6 +130,7 @@ public class ExamDTO implements Serializable {
             ", duration=" + getDuration() +
             ", mix=" + getMix() +
             ", groupId=" + getGroupId() +
+            ", userLogin='" + getUserLogin() + "'" +
             "}";
     }
 }
