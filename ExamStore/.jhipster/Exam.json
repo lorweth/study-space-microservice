@@ -33,7 +33,11 @@
     {
       "fieldName": "groupId",
       "fieldType": "Long",
-      "fieldValidateRules": ["required"]
+      "fieldValidateRules": []
+    },
+    {
+      "fieldName": "userLogin",
+      "fieldType": "String"
     }
   ],
   "relationships": [
