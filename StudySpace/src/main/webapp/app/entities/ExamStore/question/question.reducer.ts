@@ -93,18 +93,7 @@ export const QuestionSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
-      .addMatcher(isFulfilled(getQuestionsFromRepository), (state, action) => {
-        const links = parseHeaderForLinks(action.payload.headers.link);
-
-        return {
-          ...state,
-          loading: false,
-          links,
-          entities: loadMoreDataWhenScrolled(state.entities, action.payload.data, links),
-          totalItems: parseInt(action.payload.headers['x-total-count'], 10),
-        };
-      })
-      .addMatcher(isFulfilled(getEntities), (state, action) => {
+      .addMatcher(isFulfilled(getEntities, getQuestionsFromRepository), (state, action) => {
         const links = parseHeaderForLinks(action.payload.headers.link);
 
         return {
@@ -121,7 +110,7 @@ export const QuestionSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity), state => {
+      .addMatcher(isPending(getEntities, getEntity, getQuestionsFromRepository), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;

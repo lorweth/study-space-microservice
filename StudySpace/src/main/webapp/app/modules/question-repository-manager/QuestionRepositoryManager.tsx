@@ -6,11 +6,7 @@ import {
   getEntity as getRepo,
   updateEntity as updateRepo,
 } from 'app/entities/ExamStore/question-group/question-group.reducer';
-import {
-  reset as resetQuestion,
-  getQuestionsFromRepository as getQuestions,
-  updateEntity as updateQuestion,
-} from 'app/entities/ExamStore/question/question.reducer';
+import { reset as resetQuestion, getQuestionsFromRepository as getQuestions } from 'app/entities/ExamStore/question/question.reducer';
 import { getEntities as getTopics } from 'app/entities/ExamStore/topic/topic.reducer';
 import { IQuestion } from 'app/shared/model/ExamStore/question.model';
 import { cleanEntity, overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
@@ -25,7 +21,7 @@ import { defaultValue as defaultQuestion } from 'app/shared/model/ExamStore/ques
 const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
   const dispatch = useAppDispatch();
 
-  const [isNew] = useState(!props.match.params || !props.match.params.id);
+  const [isNew, setIsNew] = useState(!props.match.params || !props.match.params.id);
 
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(props.location, ITEMS_PER_PAGE, 'id'), props.location.search)
@@ -45,6 +41,25 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
   const links = useAppSelector(state => state.question.links);
 
   const [selectedQuestion, setSelectedQuestion] = useState<IQuestion>({});
+
+  useEffect(() => {
+    if (!isNew) {
+      // Lấy thông tin của QuestionGroup.
+      dispatch(getRepo(props.match.params.id));
+
+      // Reset question list.
+      dispatch(resetQuestion());
+      // Cập nhật pagination lại từ đầu.
+      setPaginationState({
+        ...paginationState,
+        activePage: 1,
+      });
+      // Lấy các Questions của QuestionGroup.
+      dispatch(getQuestions({ id: props.match.params.id }));
+    }
+
+    dispatch(getTopics({}));
+  }, []);
 
   // Handle Load More question
   const handleLoadMore = () => {
@@ -88,6 +103,7 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
 
     if (isNew) {
       dispatch(createRepo(entity));
+      handleClose();
     } else {
       dispatch(updateRepo(entity));
     }
@@ -117,24 +133,6 @@ const QuestionGroupManager = (props: RouteComponentProps<{ id: string }>) => {
   const handleClose = () => {
     props.history.push('/question-repository-manager');
   };
-
-  useEffect(() => {
-    if (!isNew) {
-      // Lấy thông tin của QuestionGroup.
-      dispatch(getRepo(props.match.params.id));
-      // Lấy các Questions của QuestionGroup.
-      dispatch(
-        getQuestions({
-          id: props.match.params.id,
-          page: paginationState.activePage - 1,
-          size: paginationState.itemsPerPage,
-          sort: `${paginationState.sort},${paginationState.sort}`,
-        })
-      );
-    }
-
-    dispatch(getTopics({}));
-  }, []);
 
   useEffect(() => {
     if (questionUpdateSuccess) {
