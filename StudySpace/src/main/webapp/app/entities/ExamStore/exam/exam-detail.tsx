@@ -53,6 +53,12 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
             </span>
           </dt>
           <dd>{examEntity.groupId}</dd>
+          <dt>
+            <span id="userLogin">
+              <Translate contentKey="studySpaceApp.examStoreExam.userLogin">User Login</Translate>
+            </span>
+          </dt>
+          <dd>{examEntity.userLogin}</dd>
         </dl>
         <Button tag={Link} to="/exam" replace color="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}

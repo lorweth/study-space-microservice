@@ -19,6 +19,7 @@
       "duration": "Duration",
       "mix": "Mix",
       "groupId": "Group Id",
+      "userLogin": "User Login",
       "items": "Items"
     }
   },

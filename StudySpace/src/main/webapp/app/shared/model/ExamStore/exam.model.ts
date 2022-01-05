@@ -5,7 +5,8 @@ export interface IExam {
   name?: string;
   duration?: number;
   mix?: number;
-  groupId?: number;
+  groupId?: number | null;
+  userLogin?: string | null;
   items?: IExamItem[] | null;
 }
 

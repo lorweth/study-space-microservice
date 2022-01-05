@@ -135,6 +135,9 @@ export const Exam = (props: RouteComponentProps<{ url: string }>) => {
                   <th className="hand" onClick={sort('groupId')}>
                     <Translate contentKey="studySpaceApp.examStoreExam.groupId">Group Id</Translate> <FontAwesomeIcon icon="sort" />
                   </th>
+                  <th className="hand" onClick={sort('userLogin')}>
+                    <Translate contentKey="studySpaceApp.examStoreExam.userLogin">User Login</Translate> <FontAwesomeIcon icon="sort" />
+                  </th>
                   <th />
                 </tr>
               </thead>
@@ -150,6 +153,7 @@ export const Exam = (props: RouteComponentProps<{ url: string }>) => {
                     <td>{exam.duration}</td>
                     <td>{exam.mix}</td>
                     <td>{exam.groupId}</td>
+                    <td>{exam.userLogin}</td>
                     <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
                         <Button tag={Link} to={`${match.url}/${exam.id}`} color="info" size="sm" data-cy="entityDetailsButton">

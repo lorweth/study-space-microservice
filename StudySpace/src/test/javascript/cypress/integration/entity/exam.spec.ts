@@ -16,7 +16,7 @@ describe('Exam e2e test', () => {
   const examPageUrlPattern = new RegExp('/exam(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
-  const examSample = { name: 'Utah', duration: 176, mix: 1, groupId: 85152 };
+  const examSample = { name: 'Summit Account engage', duration: 20, mix: 2 };
 
   let exam: any;
 
@@ -172,6 +172,8 @@ describe('Exam e2e test', () => {
       cy.get(`[data-cy="mix"]`).type('1').should('have.value', '1');
 
       cy.get(`[data-cy="groupId"]`).type('31577').should('have.value', '31577');
+
+      cy.get(`[data-cy="userLogin"]`).type('Utah').should('have.value', 'Utah');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

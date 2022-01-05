@@ -124,10 +124,13 @@ export const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
                 name="groupId"
                 data-cy="groupId"
                 type="text"
-                validate={{
-                  required: { value: true, message: translate('entity.validation.required') },
-                  validate: v => isNumber(v) || translate('entity.validation.number'),
-                }}
+              />
+              <ValidatedField
+                label={translate('studySpaceApp.examStoreExam.userLogin')}
+                id="exam-userLogin"
+                name="userLogin"
+                data-cy="userLogin"
+                type="text"
               />
               <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/exam" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
