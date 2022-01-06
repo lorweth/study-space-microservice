@@ -22,6 +22,7 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.vnedu.studyspace.exam_store.repository.ExamItemRepository;
+import vn.vnedu.studyspace.exam_store.repository.QuestionRepository;
 import vn.vnedu.studyspace.exam_store.service.ExamItemService;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamItemDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
@@ -44,9 +45,12 @@ public class ExamItemResource {
 
     private final ExamItemRepository examItemRepository;
 
-    public ExamItemResource(ExamItemService examItemService, ExamItemRepository examItemRepository) {
+    private final QuestionRepository questionRepository;
+
+    public ExamItemResource(ExamItemService examItemService, ExamItemRepository examItemRepository, QuestionRepository questionRepository) {
         this.examItemService = examItemService;
         this.examItemRepository = examItemRepository;
+        this.questionRepository = questionRepository;
     }
 
     /**
@@ -63,6 +67,12 @@ public class ExamItemResource {
         if (examItemDTO.getId() != null) {
             throw new BadRequestAlertException("A new examItem cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
+        // Check num of question
+        if(examItemDTO.getNumOfQuestion() > questionRepository.countByQuestionGroupId(examItemDTO.getQuestionGroup().getId())){
+            throw new BadRequestAlertException("Mum of question bigger than count of question in questionGroup", ENTITY_NAME, "numOfQuestionBiggerThanTotalQuestion");
+        }
+
         ExamItemDTO result = examItemService.save(examItemDTO);
         return ResponseEntity
             .created(new URI("/api/exam-items/" + result.getId()))
@@ -96,6 +106,11 @@ public class ExamItemResource {
 
         if (!examItemRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        // Check num of question
+        if(examItemDTO.getNumOfQuestion() > questionRepository.countByQuestionGroupId(examItemDTO.getQuestionGroup().getId())){
+            throw new BadRequestAlertException("Mum of question bigger than count of question in questionGroup", ENTITY_NAME, "numOfQuestionBiggerThanTotalQuestion");
         }
 
         ExamItemDTO result = examItemService.save(examItemDTO);

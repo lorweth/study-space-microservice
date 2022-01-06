@@ -21,7 +21,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.vnedu.studyspace.exam_store.domain.Exam;
 import vn.vnedu.studyspace.exam_store.repository.ExamRepository;
+import vn.vnedu.studyspace.exam_store.security.SecurityUtils;
 import vn.vnedu.studyspace.exam_store.service.ExamService;
 import vn.vnedu.studyspace.exam_store.service.dto.ExamDTO;
 import vn.vnedu.studyspace.exam_store.web.rest.errors.BadRequestAlertException;
@@ -63,6 +65,30 @@ public class ExamResource {
         if (examDTO.getId() != null) {
             throw new BadRequestAlertException("A new exam cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        examDTO.setUserLogin(null); // remove userLogin if exists.
+        ExamDTO result = examService.save(examDTO);
+        return ResponseEntity
+            .created(new URI("/api/exams/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * {@code POST  /exams/user} : Create a new exam for current user login.
+     *
+     * @param examDTO the examDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new examDTO, or with status {@code 400 (Bad Request)} if the exam has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/exams/user")
+    public ResponseEntity<ExamDTO> createExamOfUser(@Valid @RequestBody ExamDTO examDTO) throws URISyntaxException {
+        log.debug("REST request to save Exam for current user login {}", examDTO);
+        if (examDTO.getId() != null) {
+            throw new BadRequestAlertException("A new exam cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn"));
+        examDTO.setGroupId(null);
+        examDTO.setUserLogin(currentUserLogin);
         ExamDTO result = examService.save(examDTO);
         return ResponseEntity
             .created(new URI("/api/exams/" + result.getId()))
@@ -167,6 +193,23 @@ public class ExamResource {
     public ResponseEntity<List<ExamDTO>> getAllExamsInGroup(@PathVariable Long groupId, Pageable pageable) {
         log.debug("REST request to get a page of Exams");
         Page<ExamDTO> page = examService.findAllByGroupId(groupId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code GET  /exams/user} : get all the exams of the current user login.
+     *
+     * @param pageable the pagination information.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of exams in body.
+     */
+    @GetMapping("/exams/user")
+    public ResponseEntity<List<ExamDTO>> getAllExamsOfCurrentUserLogin(Pageable pageable) {
+        log.debug("REST request to get a page of Exams");
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
+            new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")
+        );
+        Page<ExamDTO> page = examService.findAllByUserLogin(currentUserLogin, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

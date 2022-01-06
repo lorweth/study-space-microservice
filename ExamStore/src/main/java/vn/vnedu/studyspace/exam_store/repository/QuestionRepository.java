@@ -16,4 +16,5 @@ import java.util.List;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findAllByQuestionGroupId(Long repoId, Pageable pageable);
     List<Question> findByQuestionGroupId(Long repoId);
+    Long countByQuestionGroupId(Long repoId);
 }

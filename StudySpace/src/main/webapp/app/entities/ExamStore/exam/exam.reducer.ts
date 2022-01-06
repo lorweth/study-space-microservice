@@ -21,8 +21,9 @@ const apiUrl = 'services/examstore/api/exams';
 
 // Actions
 
+// Get all exam of current user login
 export const getEntities = createAsyncThunk('exam/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
-  const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
+  const requestUrl = `${apiUrl}/user${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
   return axios.get<IExam[]>(requestUrl);
 });
 
@@ -38,7 +39,7 @@ export const getEntity = createAsyncThunk(
 export const createEntity = createAsyncThunk(
   'exam/create_entity',
   async (entity: IExam, thunkAPI) => {
-    return axios.post<IExam>(apiUrl, cleanEntity(entity));
+    return axios.post<IExam>(`${apiUrl}/user`, cleanEntity(entity));
   },
   { serializeError: serializeAxiosError }
 );

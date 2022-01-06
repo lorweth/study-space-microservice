@@ -93,6 +93,19 @@ public class ExamService {
     }
 
     /**
+     * Get all the exams of user.
+     *
+     * @param userLogin the name of user.
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<ExamDTO> findAllByUserLogin(String userLogin, Pageable pageable) {
+        log.debug("Request to get all Exams of User {}", userLogin);
+        return examRepository.findAllByUserLoginOrderByStartAtDesc(userLogin, pageable).map(examMapper::toDto);
+    }
+
+    /**
      * Get one exam by id.
      *
      * @param id the id of the entity.

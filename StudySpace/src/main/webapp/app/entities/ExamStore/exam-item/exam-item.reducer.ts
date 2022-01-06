@@ -3,7 +3,7 @@ import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/t
 import { loadMoreDataWhenScrolled, parseHeaderForLinks } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
-import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
+import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError, IQueryParamsExtended } from 'app/shared/reducers/reducer.utils';
 import { IExamItem, defaultValue } from 'app/shared/model/ExamStore/exam-item.model';
 
 const initialState: EntityState<IExamItem> = {
@@ -23,6 +23,11 @@ const apiUrl = 'services/examstore/api/exam-items';
 
 export const getEntities = createAsyncThunk('examItem/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
+  return axios.get<IExamItem[]>(requestUrl);
+});
+
+export const getItemsOfExam = createAsyncThunk('examItem/fetch_item_list_of_exam', async ({ id }: IQueryParamsExtended) => {
+  const requestUrl = `${apiUrl}/exam/${id}?cacheBuster=${new Date().getTime()}`;
   return axios.get<IExamItem[]>(requestUrl);
 });
 
@@ -73,6 +78,14 @@ export const deleteEntity = createAsyncThunk(
 export const ExamItemSlice = createEntitySlice({
   name: 'examItem',
   initialState,
+  reducers: {
+    setEntity(state, action) {
+      return {
+        ...state,
+        entity: action.payload,
+      };
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(getEntity.fulfilled, (state, action) => {
@@ -83,6 +96,14 @@ export const ExamItemSlice = createEntitySlice({
         state.updating = false;
         state.updateSuccess = true;
         state.entity = {};
+      })
+      .addMatcher(isFulfilled(getItemsOfExam), (state, action) => {
+        return {
+          ...state,
+          loading: false,
+          entities: action.payload.data,
+          totalItems: parseInt(action.payload.headers['x-total-count'], 10),
+        };
       })
       .addMatcher(isFulfilled(getEntities), (state, action) => {
         const links = parseHeaderForLinks(action.payload.headers.link);
@@ -101,7 +122,7 @@ export const ExamItemSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity), state => {
+      .addMatcher(isPending(getEntities, getItemsOfExam, getEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;
@@ -114,7 +135,7 @@ export const ExamItemSlice = createEntitySlice({
   },
 });
 
-export const { reset } = ExamItemSlice.actions;
+export const { reset, setEntity } = ExamItemSlice.actions;
 
 // Reducer
 export default ExamItemSlice.reducer;

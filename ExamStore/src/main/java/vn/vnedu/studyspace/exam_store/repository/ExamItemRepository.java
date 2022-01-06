@@ -15,4 +15,5 @@ public interface ExamItemRepository extends JpaRepository<ExamItem, Long> {
     void deleteByExamId(Long examId);
 
     List<ExamItem> findAllByExamId(Long examId);
+    Long countByExamId(Long examId);
 }
