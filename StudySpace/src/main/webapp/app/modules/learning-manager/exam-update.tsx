@@ -26,7 +26,9 @@ const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
   }, []);
 
   useEffect(() => {
-    dispatch(getItemList({ id: props.match.params.id }));
+    if (!isNew) {
+      dispatch(getItemList({ id: props.match.params.id }));
+    }
   }, [itemUpdateSuccess]);
 
   const resetAll = () => {
@@ -53,15 +55,17 @@ const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
           <ExamUpdateForm history={props.history} location={props.location} match={props.match} />
         </Col>
       </Row>
-      <Row className="mt-3">
-        <Col md="6">
-          <ExamItemsList history={props.history} location={props.location} match={props.match} handleSyncList={handleSyncList} />
-        </Col>
-        <Col md="6">
-          <ItemUpdateForm examId={props.match.params.id} setIsOpenDeleteDialog={setIsOpenDeleteDialog} />
-          <ItemDeleteDialog isOpen={isOpenDeleteDialog} setIsOpen={setIsOpenDeleteDialog} />
-        </Col>
-      </Row>
+      {!isNew && (
+        <Row className="mt-3">
+          <Col md="6">
+            <ExamItemsList history={props.history} location={props.location} match={props.match} handleSyncList={handleSyncList} />
+          </Col>
+          <Col md="6">
+            <ItemUpdateForm examId={props.match.params.id} setIsOpenDeleteDialog={setIsOpenDeleteDialog} />
+            <ItemDeleteDialog isOpen={isOpenDeleteDialog} setIsOpen={setIsOpenDeleteDialog} />
+          </Col>
+        </Row>
+      )}
     </div>
   );
 };
