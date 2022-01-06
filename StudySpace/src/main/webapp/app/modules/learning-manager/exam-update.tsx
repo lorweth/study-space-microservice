@@ -42,7 +42,7 @@ const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
   }, [examUpdateSuccess]);
 
   useEffect(() => {
-    if (!isNew) {
+    if (!isNew && itemUpdateSuccess) {
       dispatch(getItemList({ id: examId }));
     }
   }, [itemUpdateSuccess]);
