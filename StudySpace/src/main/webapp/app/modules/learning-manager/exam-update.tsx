@@ -15,26 +15,41 @@ const ExamUpdate = (props: RouteComponentProps<{ id: string }>) => {
   const dispatch = useAppDispatch();
 
   const [isNew, setIsNew] = useState(!props.match.params || !props.match.params.id);
+  const [examId, setExamId] = useState<string>('');
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
 
+  const examUpdateSuccess = useAppSelector(state => state.exam.updateSuccess);
   const itemUpdateSuccess = useAppSelector(state => state.examItem.updateSuccess);
+  const examEntity = useAppSelector(state => state.exam.entity);
 
   useEffect(() => {
     if (!isNew) {
-      resetAll();
+      setExamId(props.match.params.id);
+      dispatch(getExam(props.match.params.id)); // Lấy thông tin bài thi
+      dispatch(resetItem()); // Xóa thông tin các câu hỏi của bài thi
+      dispatch(getItemList({ id: props.match.params.id })); // Lấy danh sách câu hỏi của bài thi
+      dispatch(getQuestionGroups({})); // Lấy danh mục câu hỏi của user.
     }
   }, []);
 
   useEffect(() => {
+    if (examUpdateSuccess) {
+      setIsNew(false);
+      setExamId(examEntity.id.toString());
+      dispatch(getQuestionGroups({})); // Lấy danh mục câu hỏi của user.
+      props.history.push(`/learning-manager/${examEntity.id}/edit`);
+    }
+  }, [examUpdateSuccess]);
+
+  useEffect(() => {
     if (!isNew) {
-      dispatch(getItemList({ id: props.match.params.id }));
+      dispatch(getItemList({ id: examId }));
     }
   }, [itemUpdateSuccess]);
 
   const resetAll = () => {
-    dispatch(getExam(props.match.params.id));
-    dispatch(resetItem());
-    dispatch(getItemList({ id: props.match.params.id }));
+    dispatch(resetItem()); // Reset toàn bộ state của exam item
+    dispatch(getItemList({ id: examId })); // Lấy danh sách các exam item
   };
 
   const handleSyncList = () => {
