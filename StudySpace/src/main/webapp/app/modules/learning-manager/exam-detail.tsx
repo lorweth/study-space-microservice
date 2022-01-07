@@ -55,7 +55,7 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
           </span>
         </Button>
         &nbsp;
-        <Button to="/take-a-test" replace color="primary" data-cy="entityTakeATestButton">
+        <Button tag={Link} to={`${props.match.url}/take-a-test`} replace color="primary" data-cy="entityTakeATestButton">
           <FontAwesomeIcon icon="play" />{' '}
           <span className="d-none d-md-inline">
             <Translate contentKey="entity.action.take-a-test">Take a test</Translate>

@@ -30,6 +30,17 @@ export const getQuestionsFromRepository = createAsyncThunk(
   { serializeError: serializeAxiosError }
 );
 
+export const getQuestionsFromExam = createAsyncThunk(
+  'question/fetch_question_list_from_exam',
+  async ({ id }: IQueryParamsWithId, thunkAPI) => {
+    const requestUrl = `${apiUrl}/exam/${id}`;
+    return axios.get<IQuestion[]>(requestUrl);
+  },
+  {
+    serializeError: serializeAxiosError,
+  }
+);
+
 export const getEntities = createAsyncThunk('question/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}&` : '?'}cacheBuster=${new Date().getTime()}`;
   return axios.get<IQuestion[]>(requestUrl);
@@ -93,6 +104,15 @@ export const QuestionSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
+      .addMatcher(isFulfilled(getQuestionsFromExam), (state, action) => {
+        return {
+          ...state,
+          loading: false,
+          entities: action.payload.data,
+          // totalItems: parseInt(action.payload.headers['x-total-count'], 10)
+          totalItems: action.payload.data.length,
+        };
+      })
       .addMatcher(isFulfilled(getEntities, getQuestionsFromRepository), (state, action) => {
         const links = parseHeaderForLinks(action.payload.headers.link);
 
@@ -110,7 +130,7 @@ export const QuestionSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity, getQuestionsFromRepository), state => {
+      .addMatcher(isPending(getEntities, getEntity, getQuestionsFromRepository, getQuestionsFromExam), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;

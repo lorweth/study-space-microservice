@@ -13,6 +13,11 @@ public interface QuestionMapper extends EntityMapper<QuestionDTO, Question> {
     @Mapping(target = "options", source = "options", qualifiedByName = "setDTO")
     QuestionDTO toDto(Question s);
 
+    @Named("toDtoIgnoreCorrectOption")
+    @Mapping(target = "questionGroup", source = "questionGroup", qualifiedByName = "id")
+    @Mapping(target = "options", source = "options", qualifiedByName = "toDtoIgnoreIsCorrect")
+    QuestionDTO toDtoIgnoreCorrectOption(Question s);
+
     @Named("id")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")

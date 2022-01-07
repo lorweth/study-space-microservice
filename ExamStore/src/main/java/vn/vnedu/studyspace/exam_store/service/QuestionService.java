@@ -163,7 +163,7 @@ public class QuestionService {
             result = Stream.concat(result.stream(), questionList.stream()).collect(Collectors.toList());
         }
 
-        return result.stream().map(questionMapper::toDto).collect(Collectors.toList());
+        return result.stream().map(questionMapper::toDtoIgnoreCorrectOption).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

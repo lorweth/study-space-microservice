@@ -5,6 +5,7 @@ import ExamDeleteDialog from './exam-delete-dialog';
 import ExamUpdate from './exam-update';
 import ExamList from './exam-list';
 import ExamDetail from './exam-detail';
+import DisplayTestComponent from 'app/shared/components/display-test-component/display-test-component';
 
 const Routes = ({ match }) => (
   <>
@@ -13,6 +14,7 @@ const Routes = ({ match }) => (
       <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={ExamDetail} />
       <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={ExamUpdate} />
       <ErrorBoundaryRoute exact path={`${match.url}/:id/delete`} component={ExamDeleteDialog} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/take-a-test`} component={DisplayTestComponent} />
       <ErrorBoundaryRoute path={match.url} component={ExamList} />
     </Switch>
   </>

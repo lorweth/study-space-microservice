@@ -14,6 +14,11 @@ public interface OptionMapper extends EntityMapper<OptionDTO, Option> {
     @Mapping(target = "question", source = "question", qualifiedByName = "id")
     OptionDTO toDto(Option s);
 
+    @Named("toDtoIgnoreIsCorrect")
+    @Mapping(target = "question", source = "question", qualifiedByName = "id")
+    @Mapping(target = "isCorrect", ignore = true)
+    OptionDTO toDtoIgnoreIsCorrect(Option s);
+
     @Named("setDTO")
     @Mapping(target = "question", source = "question", qualifiedByName = "id")
     Set<OptionDTO> toSetDTO(Set<Option> set);

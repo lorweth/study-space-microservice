@@ -158,20 +158,6 @@ public class QuestionResource {
     }
 
     /**
-     * {@code GET  /questions/self-training} : get all the questions to self-training.
-     *
-     * @param items the list of ExamItems not Save.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of questions in body.
-     */
-    @PreAuthorize("@questionGroupSecurity.hasPermissionWithAllItems(#items, 'MEMBER')")
-    @GetMapping("/questions/self-training")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestionsToSelfTraining(@RequestBody List<ExamItemDTO> items) {
-        log.debug("REST request to get a list of Questions for Self-Training");
-        List<QuestionDTO> questions = questionService.findQuestions(items);
-        return ResponseEntity.ok().body(questions);
-    }
-
-    /**
      * {@code GET /questions/repo/:repoId} : get all question in repo "repoId".
      *
      * @param repoId the id of question group.

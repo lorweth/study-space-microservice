@@ -1,0 +1,15 @@
+.answer-template {
+  border-radius: 13px;
+  background-color: #021642;
+  color: #fff;
+}
+
+.answer-form {
+  display: block;
+  font-size: 0.9em;
+}
+
+.answer-form legend {
+  font-weight: bold;
+  font-size: 1.2em;
+}
