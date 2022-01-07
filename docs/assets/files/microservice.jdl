@@ -178,6 +178,7 @@ entity TimeTable {
 entity AnswerSheet {
 	time Instant required   // thơi gian nộp bài
   userLogin String required
+  examId Long required
 }
 
 entity AnswerSheetItem {
