@@ -31,6 +31,10 @@ public class AnswerSheet implements Serializable {
     @Column("user_login")
     private String userLogin;
 
+    @NotNull(message = "must not be null")
+    @Column("exam_id")
+    private Long examId;
+
     @Transient
     @JsonIgnoreProperties(value = { "answerSheet" }, allowSetters = true)
     private Set<AnswerSheetItem> answerSheetItems = new HashSet<>();
@@ -80,6 +84,19 @@ public class AnswerSheet implements Serializable {
 
     public void setUserLogin(String userLogin) {
         this.userLogin = userLogin;
+    }
+
+    public Long getExamId() {
+        return this.examId;
+    }
+
+    public AnswerSheet examId(Long examId) {
+        this.setExamId(examId);
+        return this;
+    }
+
+    public void setExamId(Long examId) {
+        this.examId = examId;
     }
 
     public Set<AnswerSheetItem> getAnswerSheetItems() {
@@ -161,6 +178,7 @@ public class AnswerSheet implements Serializable {
             "id=" + getId() +
             ", time='" + getTime() + "'" +
             ", userLogin='" + getUserLogin() + "'" +
+            ", examId=" + getExamId() +
             "}";
     }
 }

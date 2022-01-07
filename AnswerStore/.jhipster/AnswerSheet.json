@@ -10,6 +10,11 @@
       "fieldName": "userLogin",
       "fieldType": "String",
       "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "examId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
     }
   ],
   "relationships": [

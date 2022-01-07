@@ -18,6 +18,9 @@ public class AnswerSheetDTO implements Serializable {
     @NotNull(message = "must not be null")
     private String userLogin;
 
+    @NotNull(message = "must not be null")
+    private Long examId;
+
     private GroupTimeTableDTO groupTimeTable;
 
     public Long getId() {
@@ -42,6 +45,14 @@ public class AnswerSheetDTO implements Serializable {
 
     public void setUserLogin(String userLogin) {
         this.userLogin = userLogin;
+    }
+
+    public Long getExamId() {
+        return examId;
+    }
+
+    public void setExamId(Long examId) {
+        this.examId = examId;
     }
 
     public GroupTimeTableDTO getGroupTimeTable() {
@@ -80,6 +91,7 @@ public class AnswerSheetDTO implements Serializable {
             "id=" + getId() +
             ", time='" + getTime() + "'" +
             ", userLogin='" + getUserLogin() + "'" +
+            ", examId=" + getExamId() +
             ", groupTimeTable=" + getGroupTimeTable() +
             "}";
     }
