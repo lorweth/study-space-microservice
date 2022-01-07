@@ -36,7 +36,7 @@ const ItemUpdateForm = (props: PropType) => {
     }
   };
 
-  const defaultValues = () => (item.id ? { ...item } : {});
+  const defaultValues = () => (item.id ? { ...item, questionGroup: item.questionGroup.id } : {});
 
   return (
     <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity} disabled={itemLoading}>
@@ -49,12 +49,12 @@ const ItemUpdateForm = (props: PropType) => {
         data-cy="questionGroup"
         label={translate('studySpaceApp.examStoreExamItem.questionGroup')}
         type="select"
-        validate={{ required: true }}
       >
+        <option value="" key="0" />
         {questionGroups
           ? questionGroups.map(otherEntity => (
               <option value={otherEntity.id} key={otherEntity.id}>
-                {otherEntity.id}
+                {otherEntity.id} - {otherEntity.name}
               </option>
             ))
           : null}
@@ -70,12 +70,6 @@ const ItemUpdateForm = (props: PropType) => {
           validate: v => isNumber(v) || translate('entity.validation.number'),
         }}
       />
-      <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={itemUpdating}>
-        <FontAwesomeIcon icon="save" />
-        &nbsp;
-        <Translate contentKey="entity.action.save">Save</Translate>
-      </Button>
-      &nbsp;
       <Button
         color="danger"
         id="delete-entity"
@@ -87,6 +81,12 @@ const ItemUpdateForm = (props: PropType) => {
         <FontAwesomeIcon icon="trash" />
         &nbsp;
         <Translate contentKey="entity.action.delete">Delete</Translate>
+      </Button>
+      &nbsp;
+      <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={itemUpdating}>
+        <FontAwesomeIcon icon="save" />
+        &nbsp;
+        <Translate contentKey="entity.action.save">Save</Translate>
       </Button>
     </ValidatedForm>
   );

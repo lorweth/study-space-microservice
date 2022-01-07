@@ -14,18 +14,6 @@ const ExamUpdateForm = (props: RouteComponentProps<{ id: string }>) => {
   const loading = useAppSelector(state => state.exam.loading);
   const examEntity = useAppSelector(state => state.exam.entity);
   const updating = useAppSelector(state => state.exam.updating);
-  const updateSuccess = useAppSelector(state => state.exam.updateSuccess);
-
-  const handleClose = () => {
-    props.history.push('/learning-manager');
-  };
-
-  // Cập nhật mỗi khi lưu câu hỏi thành công
-  // useEffect(() => {
-  //   if (updateSuccess) {
-  //      // handleClose();
-  //   }
-  // }, [updateSuccess]);
 
   const saveEntity = values => {
     const entity = {

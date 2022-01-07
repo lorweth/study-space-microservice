@@ -73,7 +73,7 @@ const ExamItemsList = (props: PropType) => {
             </thead>
             <tbody>
               {examItemList.map((examItem, i) => (
-                <tr key={`entity-${i}`} data-cy="entityTable">
+                <tr key={`entity-${i}`} data-cy="entityTable" onClick={() => handleClickItem(examItem)}>
                   <td>
                     <Button tag={Link} to={`${match.url}/${examItem.id}`} color="link" size="sm">
                       {examItem.id}
@@ -81,16 +81,6 @@ const ExamItemsList = (props: PropType) => {
                   </td>
                   <td>{examItem.questionGroup ? examItem.questionGroup.id : ''}</td>
                   <td>{examItem.numOfQuestion}</td>
-                  <td className="text-end">
-                    <div className="btn-group flex-btn-group-container">
-                      <Button color="info" size="sm" data-cy="entityEditButton" onClick={() => handleClickItem(examItem)}>
-                        <FontAwesomeIcon icon="pencil-alt" />{' '}
-                        <span className="d-none d-md-inline">
-                          <Translate contentKey="entity.action.edit">Edit</Translate>
-                        </span>
-                      </Button>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>
