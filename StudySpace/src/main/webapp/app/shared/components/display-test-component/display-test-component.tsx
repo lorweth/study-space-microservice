@@ -34,7 +34,7 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
             {exam.name} <sub>{exam.duration} phút</sub>{' '}
           </legend>
           <hr />
-          <CountDownTimer duration={exam.duration} />
+          {/* <CountDownTimer duration={exam.duration} /> */}
         </div>
         {questionList && questionList.length > 0 ? (
           questionList.map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
