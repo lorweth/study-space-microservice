@@ -21,12 +21,14 @@ import vn.vnedu.studyspace.answer_store.repository.AnswerSheetRepository;
 import vn.vnedu.studyspace.answer_store.security.SecurityUtils;
 import vn.vnedu.studyspace.answer_store.security.oauth2.AuthorizationHeaderUtil;
 import vn.vnedu.studyspace.answer_store.service.AnswerSheetService;
+import vn.vnedu.studyspace.answer_store.service.FeignClientService;
 import vn.vnedu.studyspace.answer_store.service.dto.AnswerSheetDTO;
 import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
 
 /**
  * REST controller for managing {@link vn.vnedu.studyspace.answer_store.domain.AnswerSheet}.
  */
+
 @RestController
 @RequestMapping("/api")
 public class AnswerSheetResource {
@@ -41,6 +43,9 @@ public class AnswerSheetResource {
     private final AnswerSheetService answerSheetService;
 
     private final AnswerSheetRepository answerSheetRepository;
+
+    @Autowired
+    private FeignClientService feignClientService;
 
     @Autowired
     private AuthorizationHeaderUtil authorizationUtil;
@@ -249,8 +254,9 @@ public class AnswerSheetResource {
     }
 
     @GetMapping("/answer-sheets/test")
-    public Mono<ResponseEntity<String>> getTest() {
-        return ResponseUtil.wrapOrNotFound(authorizationUtil.getAccessToken());
+    public Mono<ResponseEntity<String>> getTest(@RequestHeader("Authorization") String authorization) {
+        log.debug("REST request with authorization: {}", authorization);
+        return feignClientService.demo(authorization).map(str -> ResponseEntity.ok().body(str));
     }
 
     /**
