@@ -29,7 +29,9 @@ import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.reactive.ResponseUtil;
 import vn.vnedu.studyspace.answer_store.repository.AnswerSheetItemRepository;
+import vn.vnedu.studyspace.answer_store.security.SecurityUtils;
 import vn.vnedu.studyspace.answer_store.service.AnswerSheetItemService;
+import vn.vnedu.studyspace.answer_store.service.AnswerSheetService;
 import vn.vnedu.studyspace.answer_store.service.dto.AnswerSheetItemDTO;
 import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
 
@@ -49,10 +51,15 @@ public class AnswerSheetItemResource {
 
     private final AnswerSheetItemService answerSheetItemService;
 
+    private final AnswerSheetService answerSheetService;
+
     private final AnswerSheetItemRepository answerSheetItemRepository;
 
-    public AnswerSheetItemResource(AnswerSheetItemService answerSheetItemService, AnswerSheetItemRepository answerSheetItemRepository) {
+    public AnswerSheetItemResource(
+        AnswerSheetItemService answerSheetItemService, AnswerSheetService answerSheetService, AnswerSheetItemRepository answerSheetItemRepository
+    ) {
         this.answerSheetItemService = answerSheetItemService;
+        this.answerSheetService = answerSheetService;
         this.answerSheetItemRepository = answerSheetItemRepository;
     }
 
@@ -63,7 +70,6 @@ public class AnswerSheetItemResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new answerSheetItemDTO, or with status {@code 400 (Bad Request)} if the answerSheetItem has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PreAuthorize("@answerSecurity.hasPermissionToGet(#answerSheetItemDTO.getAnswerSheet().getId())")
     @PostMapping("/answer-sheet-items")
     public Mono<ResponseEntity<AnswerSheetItemDTO>> createAnswerSheetItem(@Valid @RequestBody AnswerSheetItemDTO answerSheetItemDTO)
         throws URISyntaxException {
@@ -71,21 +77,30 @@ public class AnswerSheetItemResource {
         if (answerSheetItemDTO.getId() != null) {
             throw new BadRequestAlertException("A new answerSheetItem cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        if (answerSheetItemDTO.getAnswerSheet() == null){
+        if (answerSheetItemDTO.getAnswerSheet() == null || answerSheetItemDTO.getAnswerSheet().getId() == null){
             throw new BadRequestAlertException("A answer must be in an AnswerSheet", ENTITY_NAME, "answerSheetNotFound");
         }
-        return answerSheetItemService
-            .save(answerSheetItemDTO)
-            .map(result -> {
-                try {
-                    return ResponseEntity
-                        .created(new URI("/api/answer-sheet-items/" + result.getId()))
-                        .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-                        .body(result);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        return SecurityUtils.getCurrentUserLogin()
+            .flatMap(userLogin -> answerSheetService
+                .findOne(answerSheetItemDTO.getAnswerSheet().getId())
+                .flatMap(sheet -> {
+                    if (!Objects.equals(sheet.getUserLogin(), userLogin)){
+                        return Mono.error(new BadRequestAlertException("User have not permission", ENTITY_NAME, "userNotPermit"));
+                    }
+                    return answerSheetItemService.save(answerSheetItemDTO)
+                        .map(result -> {
+                            try {
+                                return ResponseEntity
+                                    .created(new URI("/api/answer-sheet-items/" + result.getId()))
+                                    .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                                    .body(result);
+                            } catch (URISyntaxException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                })
+            );
+
     }
 
     /**
@@ -98,7 +113,6 @@ public class AnswerSheetItemResource {
      * or with status {@code 500 (Internal Server Error)} if the answerSheetItemDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PreAuthorize("@answerSecurity.hasPermissionToChoose(#id)")
     @PutMapping("/answer-sheet-items/{id}")
     public Mono<ResponseEntity<AnswerSheetItemDTO>> updateAnswerSheetItem(
         @PathVariable(value = "id", required = false) final Long id,
@@ -112,23 +126,32 @@ public class AnswerSheetItemResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        return answerSheetItemRepository
-            .existsById(id)
-            .flatMap(exists -> {
-                if (!exists) {
-                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-                }
+        return SecurityUtils.getCurrentUserLogin()
+            .flatMap(userLogin -> answerSheetService
+                .findOne(answerSheetItemDTO.getAnswerSheet().getId())
+                .flatMap(sheet -> {
+                    if (!Objects.equals(sheet.getUserLogin(), userLogin)){
+                        return Mono.error(new BadRequestAlertException("User have not permission", ENTITY_NAME, "userNotPermit"));
+                    }
+                    return answerSheetItemRepository
+                        .existsById(id)
+                        .flatMap(exists -> {
+                            if (!exists) {
+                                return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+                            }
 
-                return answerSheetItemService
-                    .save(answerSheetItemDTO)
-                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(result ->
-                        ResponseEntity
-                            .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-                            .body(result)
-                    );
-            });
+                            return answerSheetItemService
+                                .save(answerSheetItemDTO)
+                                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                                .map(result ->
+                                    ResponseEntity
+                                        .ok()
+                                        .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                                        .body(result)
+                                );
+                        });
+                })
+            );
     }
 
     /**
@@ -182,7 +205,6 @@ public class AnswerSheetItemResource {
      * @param request a {@link ServerHttpRequest} request.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of answerSheetItems in body.
      */
-    @PreAuthorize("@answerSecurity.hasPermissionToGet(#sheetId)")
     @GetMapping("/answer-sheet-items/sheet/{sheetId}")
     public Mono<ResponseEntity<List<AnswerSheetItemDTO>>> getAllAnswerSheetItems(@PathVariable Long sheetId, Pageable pageable, ServerHttpRequest request) {
         log.debug("REST request to get a page of AnswerSheetItems");

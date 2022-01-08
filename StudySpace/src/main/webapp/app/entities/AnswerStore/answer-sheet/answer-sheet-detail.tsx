@@ -42,6 +42,12 @@ export const AnswerSheetDetail = (props: RouteComponentProps<{ id: string }>) =>
           </dt>
           <dd>{answerSheetEntity.userLogin}</dd>
           <dt>
+            <span id="examId">
+              <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.examId">Exam Id</Translate>
+            </span>
+          </dt>
+          <dd>{answerSheetEntity.examId}</dd>
+          <dt>
             <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.groupTimeTable">Group Time Table</Translate>
           </dt>
           <dd>{answerSheetEntity.groupTimeTable ? answerSheetEntity.groupTimeTable.id : ''}</dd>

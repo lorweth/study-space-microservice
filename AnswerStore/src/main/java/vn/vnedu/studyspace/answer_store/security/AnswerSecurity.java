@@ -16,7 +16,7 @@ import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException
 import java.util.Objects;
 
 @Component
-public class AnswerSecurity extends GroupMemberSecurity{
+public class AnswerSecurity{
 
     private final Logger log = LoggerFactory.getLogger(AnswerSecurity.class);
 
@@ -32,14 +32,18 @@ public class AnswerSecurity extends GroupMemberSecurity{
         GroupTimeTableRepository groupTimeTableRepository,
         AnswerSheetItemRepository itemRepository
     ) {
-        super(groupMemberRepository);
         this.answerSheetRepository = answerSheetRepository;
         this.groupTimeTableRepository = groupTimeTableRepository;
         this.itemRepository = itemRepository;
     }
 
-    @Override
-    public Boolean hasPermission(Long sheetId, String authority) {
+    /**
+     * Check permission for the action.
+     *
+     * @param sheetId id of the answerSheet.
+     * @return true if answerSheet belongs to the current user login, false or else.
+     */
+    public Boolean hasPermission(Long sheetId) {
         // Check userLogin get userLogin
         // Check AnswerSheetId get GroupTimeTableId
         // Check GroupTimeTable get GroupId
@@ -50,34 +54,7 @@ public class AnswerSecurity extends GroupMemberSecurity{
             .flatMap(currentUserLogin -> answerSheetRepository
                 .findById(sheetId)
                 .switchIfEmpty(Mono.error(new BadRequestAlertException("Entity not found", "AnswerStore", "entityNotFound")))
-                .flatMap(sheet -> {
-                    if(Objects.equals(sheet.getUserLogin(), currentUserLogin)){
-                        return Mono.error(new BadRequestAlertException("User not have permission", "AnswerStore", "userNotPermission"));
-                    }
-                    return Mono.just(sheet.getGroupTimeTable().getId());
-                })
-            )
-            .flatMap(groupTimeTableRepository::findById)
-            .switchIfEmpty(Mono.error(new BadRequestAlertException("Entity not found", "AnswerStore", "entityNotFound")))
-            .map(GroupTimeTable::getGroupId)
-            .flatMap(groupId -> super.compareRole(groupId, authority))
-            .block();
-    }
-
-    /**
-     * Check permission to get of current user.
-     *
-     * @param sheetId id of AnswerSheet.
-     * @return true if user has permission or else false.
-     */
-    public Boolean hasPermissionToGet(Long sheetId) {
-        return SecurityUtils
-            .getCurrentUserLogin()
-            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", "AnswerStore", "userNotLoggedIn")))
-            .flatMap(currentUserLogin -> answerSheetRepository
-                .findById(sheetId)
-                .switchIfEmpty(Mono.error(new BadRequestAlertException("Entity not found", "AnswerStore", "entityNotFound")))
-                .map(sheet -> Objects.equals(sheet.getUserLogin(), currentUserLogin))
+                .map(sheet -> Objects.equals(currentUserLogin, sheet.getUserLogin()))
             )
             .block();
     }

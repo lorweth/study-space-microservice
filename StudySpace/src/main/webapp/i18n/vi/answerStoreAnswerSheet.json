@@ -17,6 +17,7 @@
       "id": "ID",
       "time": "Time",
       "userLogin": "User Login",
+      "examId": "Exam Id",
       "answerSheetItem": "Answer Sheet Item",
       "groupTimeTable": "Group Time Table"
     }

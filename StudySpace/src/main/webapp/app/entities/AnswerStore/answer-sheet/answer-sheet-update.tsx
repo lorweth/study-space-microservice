@@ -114,6 +114,17 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
                 }}
               />
               <ValidatedField
+                label={translate('studySpaceApp.answerStoreAnswerSheet.examId')}
+                id="answer-sheet-examId"
+                name="examId"
+                data-cy="examId"
+                type="text"
+                validate={{
+                  required: { value: true, message: translate('entity.validation.required') },
+                  validate: v => isNumber(v) || translate('entity.validation.number'),
+                }}
+              />
+              <ValidatedField
                 id="answer-sheet-groupTimeTable"
                 name="groupTimeTable"
                 data-cy="groupTimeTable"

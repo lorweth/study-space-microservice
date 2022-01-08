@@ -1,6 +1,10 @@
-import { useAppDispatch } from 'app/config/store';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { IAnswerSheetItem } from 'app/shared/model/AnswerStore/answer-sheet-item.model';
 import { IQuestion } from 'app/shared/model/ExamStore/question.model';
+import {
+  createEntity as createAnswer,
+  updateEntity as updateAnswer,
+} from 'app/entities/AnswerStore/answer-sheet-item/answer-sheet-item.reducer';
 import React, { useEffect, useState } from 'react';
 import { ValidatedField } from 'react-jhipster';
 import { RouteComponentProps } from 'react-router-dom';
@@ -8,7 +12,6 @@ import { Form, FormGroup, Input, Label } from 'reactstrap';
 
 type PropType = {
   index: number;
-  // answerSheetId: number;
   question: IQuestion;
 };
 
@@ -18,19 +21,49 @@ const AnswerFormComponent = (props: PropType) => {
   const { question, index } = props;
   const [answer, setAnswer] = useState<IAnswerSheetItem>({ questionId: question.id });
 
-  // Mới vào là chạy rồi
+  // Bài làm
+  const sheetEntity = useAppSelector(state => state.answerSheet.entity);
+
+  // Câu trả lời của từng câu hỏi trong bài làm.
+  const answerEntity = useAppSelector(state => state.answerSheetItem.entity);
+  // Cập nhật câu trả lời thành công.
+  const answerUpdateSuccess = useAppSelector(state => state.answerSheetItem.updateSuccess);
+
+  /**
+   * Submit mỗi khi chọn đáp án khác.
+   */
   useEffect(() => {
     if (answer.answerId) {
       onSubmit();
     }
   }, [answer.answerId]);
 
+  /**
+   * Cập nhật id vào state mỗi khi lưu lại câu trả lời xong.
+   */
+  useEffect(() => {
+    if (question.id === answerEntity.questionId) {
+      setAnswer({ ...answer, id: answerEntity.id });
+    }
+  }, [answerUpdateSuccess]);
+
+  // Cập nhật câu trả lời khi chọn đáp án khác.
   const handleClickRadioButton = (answerId: number) => {
     setAnswer({ ...answer, answerId });
   };
 
+  /**
+   * Lưu lại câu trả lời.
+   */
   const onSubmit = () => {
-    window.alert(JSON.stringify(answer));
+    const entity = { ...answer, answerSheet: { id: sheetEntity.id } } as IAnswerSheetItem;
+    window.alert(JSON.stringify(entity));
+
+    if (entity.id) {
+      dispatch(updateAnswer(entity));
+    } else {
+      dispatch(createAnswer(entity));
+    }
   };
 
   return (

@@ -130,6 +130,9 @@ export const AnswerSheet = (props: RouteComponentProps<{ url: string }>) => {
                     <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.userLogin">User Login</Translate>{' '}
                     <FontAwesomeIcon icon="sort" />
                   </th>
+                  <th className="hand" onClick={sort('examId')}>
+                    <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.examId">Exam Id</Translate> <FontAwesomeIcon icon="sort" />
+                  </th>
                   <th>
                     <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.groupTimeTable">Group Time Table</Translate>{' '}
                     <FontAwesomeIcon icon="sort" />
@@ -147,6 +150,7 @@ export const AnswerSheet = (props: RouteComponentProps<{ url: string }>) => {
                     </td>
                     <td>{answerSheet.time ? <TextFormat type="date" value={answerSheet.time} format={APP_DATE_FORMAT} /> : null}</td>
                     <td>{answerSheet.userLogin}</td>
+                    <td>{answerSheet.examId}</td>
                     <td>
                       {answerSheet.groupTimeTable ? (
                         <Link to={`group-time-table/${answerSheet.groupTimeTable.id}`}>{answerSheet.groupTimeTable.id}</Link>

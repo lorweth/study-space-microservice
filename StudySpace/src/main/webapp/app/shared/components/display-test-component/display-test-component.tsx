@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getQuestionsFromExam } from 'app/entities/ExamStore/question/question.reducer';
 import { getEntity as getExam } from 'app/entities/ExamStore/exam/exam.reducer';
+import { createEntity as createAnswerSheet } from 'app/entities/AnswerStore/answer-sheet/answer-sheet.reducer';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Button, Col, Form, FormGroup, Input, Label, Row } from 'reactstrap';
@@ -24,6 +25,7 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
   useEffect(() => {
     dispatch(getExam(examId));
     dispatch(getQuestionsFromExam({ id: examId }));
+    dispatch(createAnswerSheet({ examId: +examId }));
   }, []);
 
   return (

@@ -6,6 +6,7 @@ export interface IAnswerSheet {
   id?: number;
   time?: string;
   userLogin?: string;
+  examId?: number;
   answerSheetItems?: IAnswerSheetItem[] | null;
   groupTimeTable?: IGroupTimeTable | null;
 }
