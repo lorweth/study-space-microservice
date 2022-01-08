@@ -3,6 +3,7 @@ package vn.vnedu.studyspace.answer_store.web.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.reactive.ResponseUtil;
+import vn.vnedu.studyspace.answer_store.domain.AnswerSheetItem;
 import vn.vnedu.studyspace.answer_store.repository.AnswerSheetRepository;
 import vn.vnedu.studyspace.answer_store.security.SecurityUtils;
 import vn.vnedu.studyspace.answer_store.security.oauth2.AuthorizationHeaderUtil;
@@ -96,7 +98,6 @@ public class AnswerSheetResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new answerSheetDTO, or with status {@code 400 (Bad Request)} if the answerSheet has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PreAuthorize("@groupTimeTableSecurity.hasPermission(#timeTableId, 'MEMBER')")
     @PostMapping("/answer-sheets/group-time-table/{timeTableId}")
     public Mono<ResponseEntity<AnswerSheetDTO>> createAnswerSheet(@PathVariable Long timeTableId, @Valid @RequestBody AnswerSheetDTO answerSheetDTO)
         throws URISyntaxException {
@@ -245,7 +246,6 @@ public class AnswerSheetResource {
      * @param id the id of the answerSheetDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the answerSheetDTO, or with status {@code 404 (Not Found)}.
      */
-    @PreAuthorize("@answerSecurity.hasPermissionToGet(#id)")
     @GetMapping("/answer-sheets/{id}")
     public Mono<ResponseEntity<AnswerSheetDTO>> getAnswerSheet(@PathVariable Long id) {
         log.debug("REST request to get AnswerSheet : {}", id);
@@ -257,6 +257,14 @@ public class AnswerSheetResource {
     public Mono<ResponseEntity<String>> getTest(@RequestHeader("Authorization") String authorization) {
         log.debug("REST request with authorization: {}", authorization);
         return feignClientService.demo(authorization).map(str -> ResponseEntity.ok().body(str));
+    }
+
+    @GetMapping("/answer-sheets/{id}/wrong-answer")
+    public Mono<ResponseEntity<List<AnswerSheetItem>>> getWrongAnswer(@RequestHeader("Authorization") String authorization, @PathVariable Long id) {
+        log.debug("REST request to get all Wrong answer of AnswerSheet {}", id);
+        return answerSheetService.findWrongAnswer(id, authorization)
+            .collectList()
+            .map(list -> ResponseEntity.ok().body(list));
     }
 
     /**
