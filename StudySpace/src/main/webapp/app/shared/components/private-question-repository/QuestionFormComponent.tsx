@@ -71,7 +71,7 @@ const QuestionFormComponent = (props: PropType) => {
   const onSubmit = values => {
     const questionData: IQuestion = values;
     const correctOptions = questionData.options.filter(option => option.isCorrect === true);
-    if (correctOptions.length === questionData.options.length || correctOptions.length === 0) {
+    if (correctOptions.length > 1 || correctOptions.length === 0) {
       // toast.error(translate('question.error.correctOption'));
       toast.error('Vui lòng chọn số đáp án đúng cho hợp lý');
     } else {
