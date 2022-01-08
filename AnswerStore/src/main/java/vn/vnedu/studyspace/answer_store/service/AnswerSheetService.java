@@ -114,6 +114,7 @@ public class AnswerSheetService {
                                 if(
                                     Objects.equals(userOption.getQuestionId(), correct.getQuestionId()) // same question
                                     && !Objects.equals(userOption.getAnswerId(), correct.getAnswerId()) // different answer
+                                    && !wrongOption.contains(userOption) // wrongOptionList not contained it
                                 ){
                                     wrongOption.add(userOption);
                                 }
