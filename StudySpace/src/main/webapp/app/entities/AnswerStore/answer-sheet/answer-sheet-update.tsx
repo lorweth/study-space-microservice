@@ -41,7 +41,8 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
   }, [updateSuccess]);
 
   const saveEntity = values => {
-    values.time = convertDateTimeToServer(values.time);
+    values.createAt = convertDateTimeToServer(values.createAt);
+    values.endAt = convertDateTimeToServer(values.endAt);
 
     const entity = {
       ...answerSheetEntity,
@@ -59,11 +60,13 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
   const defaultValues = () =>
     isNew
       ? {
-          time: displayDefaultDateTime(),
+          createAt: displayDefaultDateTime(),
+          endAt: displayDefaultDateTime(),
         }
       : {
           ...answerSheetEntity,
-          time: convertDateTimeFromServer(answerSheetEntity.time),
+          createAt: convertDateTimeFromServer(answerSheetEntity.createAt),
+          endAt: convertDateTimeFromServer(answerSheetEntity.endAt),
           groupTimeTable: answerSheetEntity?.groupTimeTable?.id,
         };
 
@@ -93,15 +96,23 @@ export const AnswerSheetUpdate = (props: RouteComponentProps<{ id: string }>) =>
                 />
               ) : null}
               <ValidatedField
-                label={translate('studySpaceApp.answerStoreAnswerSheet.time')}
-                id="answer-sheet-time"
-                name="time"
-                data-cy="time"
+                label={translate('studySpaceApp.answerStoreAnswerSheet.createAt')}
+                id="answer-sheet-createAt"
+                name="createAt"
+                data-cy="createAt"
                 type="datetime-local"
                 placeholder="YYYY-MM-DD HH:mm"
                 validate={{
                   required: { value: true, message: translate('entity.validation.required') },
                 }}
+              />
+              <ValidatedField
+                label={translate('studySpaceApp.answerStoreAnswerSheet.endAt')}
+                id="answer-sheet-endAt"
+                name="endAt"
+                data-cy="endAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
               />
               <ValidatedField
                 label={translate('studySpaceApp.answerStoreAnswerSheet.userLogin')}

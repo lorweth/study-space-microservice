@@ -15,7 +15,8 @@
         "title": "Answer Sheet"
       },
       "id": "ID",
-      "time": "Time",
+      "createAt": "Create At",
+      "endAt": "End At",
       "userLogin": "User Login",
       "examId": "Exam Id",
       "answerSheetItem": "Answer Sheet Item",

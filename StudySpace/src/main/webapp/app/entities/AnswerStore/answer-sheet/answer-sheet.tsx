@@ -123,8 +123,12 @@ export const AnswerSheet = (props: RouteComponentProps<{ url: string }>) => {
                   <th className="hand" onClick={sort('id')}>
                     <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.id">ID</Translate> <FontAwesomeIcon icon="sort" />
                   </th>
-                  <th className="hand" onClick={sort('time')}>
-                    <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.time">Time</Translate> <FontAwesomeIcon icon="sort" />
+                  <th className="hand" onClick={sort('createAt')}>
+                    <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.createAt">Create At</Translate>{' '}
+                    <FontAwesomeIcon icon="sort" />
+                  </th>
+                  <th className="hand" onClick={sort('endAt')}>
+                    <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.endAt">End At</Translate> <FontAwesomeIcon icon="sort" />
                   </th>
                   <th className="hand" onClick={sort('userLogin')}>
                     <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.userLogin">User Login</Translate>{' '}
@@ -148,7 +152,10 @@ export const AnswerSheet = (props: RouteComponentProps<{ url: string }>) => {
                         {answerSheet.id}
                       </Button>
                     </td>
-                    <td>{answerSheet.time ? <TextFormat type="date" value={answerSheet.time} format={APP_DATE_FORMAT} /> : null}</td>
+                    <td>
+                      {answerSheet.createAt ? <TextFormat type="date" value={answerSheet.createAt} format={APP_DATE_FORMAT} /> : null}
+                    </td>
+                    <td>{answerSheet.endAt ? <TextFormat type="date" value={answerSheet.endAt} format={APP_DATE_FORMAT} /> : null}</td>
                     <td>{answerSheet.userLogin}</td>
                     <td>{answerSheet.examId}</td>
                     <td>

@@ -16,7 +16,7 @@ describe('AnswerSheet e2e test', () => {
   const answerSheetPageUrlPattern = new RegExp('/answer-sheet(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'admin';
   const password = Cypress.env('E2E_PASSWORD') ?? 'admin';
-  const answerSheetSample = { time: '2021-12-16T01:18:20.747Z', userLogin: 'Administrator Ngultrum initiatives', examId: 48232 };
+  const answerSheetSample = { createAt: '2021-12-15T23:17:30.908Z', userLogin: 'transparent Computer Stravenue', examId: 6522 };
 
   let answerSheet: any;
 
@@ -165,11 +165,13 @@ describe('AnswerSheet e2e test', () => {
     });
 
     it('should create an instance of AnswerSheet', () => {
-      cy.get(`[data-cy="time"]`).type('2021-12-16T10:25').should('have.value', '2021-12-16T10:25');
+      cy.get(`[data-cy="createAt"]`).type('2021-12-16T10:25').should('have.value', '2021-12-16T10:25');
 
-      cy.get(`[data-cy="userLogin"]`).type('Checking').should('have.value', 'Checking');
+      cy.get(`[data-cy="endAt"]`).type('2021-12-16T14:26').should('have.value', '2021-12-16T14:26');
 
-      cy.get(`[data-cy="examId"]`).type('96970').should('have.value', '96970');
+      cy.get(`[data-cy="userLogin"]`).type('Rustic Vermont').should('have.value', 'Rustic Vermont');
+
+      cy.get(`[data-cy="examId"]`).type('40700').should('have.value', '40700');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

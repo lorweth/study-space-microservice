@@ -30,11 +30,19 @@ export const AnswerSheetDetail = (props: RouteComponentProps<{ id: string }>) =>
           </dt>
           <dd>{answerSheetEntity.id}</dd>
           <dt>
-            <span id="time">
-              <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.time">Time</Translate>
+            <span id="createAt">
+              <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.createAt">Create At</Translate>
             </span>
           </dt>
-          <dd>{answerSheetEntity.time ? <TextFormat value={answerSheetEntity.time} type="date" format={APP_DATE_FORMAT} /> : null}</dd>
+          <dd>
+            {answerSheetEntity.createAt ? <TextFormat value={answerSheetEntity.createAt} type="date" format={APP_DATE_FORMAT} /> : null}
+          </dd>
+          <dt>
+            <span id="endAt">
+              <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.endAt">End At</Translate>
+            </span>
+          </dt>
+          <dd>{answerSheetEntity.endAt ? <TextFormat value={answerSheetEntity.endAt} type="date" format={APP_DATE_FORMAT} /> : null}</dd>
           <dt>
             <span id="userLogin">
               <Translate contentKey="studySpaceApp.answerStoreAnswerSheet.userLogin">User Login</Translate>

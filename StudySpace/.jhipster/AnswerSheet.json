@@ -4,9 +4,7 @@
     {
       "fieldName": "createAt",
       "fieldType": "Instant",
-      "fieldValidateRules": [
-        "required"
-      ]
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "endAt",
@@ -15,16 +13,12 @@
     {
       "fieldName": "userLogin",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "required"
-      ]
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "examId",
       "fieldType": "Long",
-      "fieldValidateRules": [
-        "required"
-      ]
+      "fieldValidateRules": ["required"]
     }
   ],
   "relationships": [
@@ -50,10 +44,7 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "applications": [
-    "StudySpace",
-    "AnswerStore"
-  ],
+  "applications": ["StudySpace", "AnswerStore"],
   "microserviceName": "AnswerStore",
   "clientRootFolder": "AnswerStore",
   "databaseType": "sql",

@@ -12,7 +12,6 @@ public class AnswerSheetDTO implements Serializable {
 
     private Long id;
 
-    @NotNull(message = "must not be null")
     private Instant createdAt;
 
     private Instant endAt;

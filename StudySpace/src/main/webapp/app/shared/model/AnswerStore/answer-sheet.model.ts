@@ -4,7 +4,8 @@ import { IGroupTimeTable } from 'app/shared/model/AnswerStore/group-time-table.m
 
 export interface IAnswerSheet {
   id?: number;
-  time?: string;
+  createAt?: string;
+  endAt?: string | null;
   userLogin?: string;
   examId?: number;
   answerSheetItems?: IAnswerSheetItem[] | null;
