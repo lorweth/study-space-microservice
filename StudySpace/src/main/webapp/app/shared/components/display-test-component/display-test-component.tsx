@@ -9,6 +9,8 @@ import AnswerFormComponent from './answer-form-component';
 import CountDownTimer from '../count-down-timer/count-down-timer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './test.css';
+import CompleteTestDialog from './complete-test-dialog';
+import useCountDown from 'app/shared/custom-hook/useCountDown';
 
 /**
  * DisplayTestComponent
@@ -17,7 +19,11 @@ import './test.css';
 const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
   const dispatch = useAppDispatch();
 
+  // Lấy examId từ match.params.
   const [examId] = useState(props.match.params.id);
+
+  // Quản lý đóng mở complete dialog.
+  const [isOpenCompleteDialog, setIsOpenCompleteDialog] = useState(false);
 
   const exam = useAppSelector(state => state.exam.entity);
   const questionList = useAppSelector(state => state.question.entities);
@@ -36,7 +42,7 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
             {exam.name} <sub>{exam.duration} phút</sub>{' '}
           </legend>
           <hr />
-          {/* <CountDownTimer duration={exam.duration} /> */}
+          <CountDownTimer duration={1} history={props.history} location={props.location} match={props.match} />
         </div>
         {questionList && questionList.length > 0 ? (
           questionList.map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
@@ -44,12 +50,15 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
           <p>No question found</p>
         )}
         <div className="text-center">
-          <Button color="primary">
+          <Button color="primary" onClick={() => setIsOpenCompleteDialog(true)}>
             <FontAwesomeIcon icon="check" />
             &nbsp;
             <span>Hoàn tất</span>
           </Button>
         </div>
+        {isOpenCompleteDialog && (
+          <CompleteTestDialog setIsOpen={setIsOpenCompleteDialog} history={props.history} location={props.location} match={props.match} />
+        )}
       </Col>
     </Row>
   );

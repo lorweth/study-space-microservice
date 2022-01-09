@@ -57,7 +57,7 @@ const AnswerFormComponent = (props: PropType) => {
    */
   const onSubmit = () => {
     const entity = { ...answer, answerSheet: { id: sheetEntity.id } } as IAnswerSheetItem;
-    window.alert(JSON.stringify(entity));
+    // window.alert(JSON.stringify(entity));
 
     if (entity.id) {
       dispatch(updateAnswer(entity));

@@ -1,26 +1,24 @@
+import useCountDown from 'app/shared/custom-hook/useCountDown';
 import React, { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './clock.css';
 
 type PropType = {
   duration: number;
-};
+} & RouteComponentProps<{ id: string }>;
 
 const CountDownTimer = (props: PropType) => {
-  const { duration } = props;
+  const { duration, history, match } = props;
 
-  const [second, setSecond] = useState(duration * 60);
+  const [second, isFinish] = useCountDown(duration * 60);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (second > 0) {
-        setSecond(s => s - 1);
-      } else {
-        clearInterval(interval);
-        toast.error('Time out');
-      }
-    }, 1000);
-  }, [duration]);
+    if (isFinish) {
+      toast.success('Bài làm đã kết thúc');
+      history.push(`/learning-manager/${match.params.id}`);
+    }
+  }, [isFinish]);
 
   const displayTime = () => {
     const hour = Math.floor(second / 3600);
