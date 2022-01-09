@@ -14,8 +14,11 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="time" type="${datetimeType}">
+            <column name="created_at" type="${datetimeType}">
                 <constraints nullable="false" />
+            </column>
+            <column name="end_at" type="${datetimeType}">
+                <constraints nullable="true" />
             </column>
             <column name="user_login" type="varchar(255)">
                 <constraints nullable="false" />
@@ -28,7 +31,8 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="answer_sheet" columnName="time" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="answer_sheet" columnName="created_at" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="answer_sheet" columnName="end_at" columnDataType="${datetimeType}"/>
     </changeSet>
 
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
@@ -48,7 +52,8 @@
                   tableName="answer_sheet"
                   usePreparedStatements="true">
             <column name="id" type="numeric"/>
-            <column name="time" type="date"/>
+            <column name="created_at" type="date"/>
+            <column name="end_at" type="date"/>
             <column name="user_login" type="string"/>
             <column name="exam_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->

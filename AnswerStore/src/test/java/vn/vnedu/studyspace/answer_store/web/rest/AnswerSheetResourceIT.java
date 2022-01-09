@@ -37,8 +37,11 @@ import vn.vnedu.studyspace.answer_store.service.mapper.AnswerSheetMapper;
 @WithMockUser
 class AnswerSheetResourceIT {
 
-    private static final Instant DEFAULT_TIME = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_TIME = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final Instant DEFAULT_CREATED_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_CREATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final Instant DEFAULT_END_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_END_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_USER_LOGIN = "AAAAAAAAAA";
     private static final String UPDATED_USER_LOGIN = "BBBBBBBBBB";
@@ -73,7 +76,11 @@ class AnswerSheetResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static AnswerSheet createEntity(EntityManager em) {
-        AnswerSheet answerSheet = new AnswerSheet().time(DEFAULT_TIME).userLogin(DEFAULT_USER_LOGIN).examId(DEFAULT_EXAM_ID);
+        AnswerSheet answerSheet = new AnswerSheet()
+            .createdAt(DEFAULT_CREATED_AT)
+            .endAt(DEFAULT_END_AT)
+            .userLogin(DEFAULT_USER_LOGIN)
+            .examId(DEFAULT_EXAM_ID);
         return answerSheet;
     }
 
@@ -84,7 +91,11 @@ class AnswerSheetResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static AnswerSheet createUpdatedEntity(EntityManager em) {
-        AnswerSheet answerSheet = new AnswerSheet().time(UPDATED_TIME).userLogin(UPDATED_USER_LOGIN).examId(UPDATED_EXAM_ID);
+        AnswerSheet answerSheet = new AnswerSheet()
+            .createdAt(UPDATED_CREATED_AT)
+            .endAt(UPDATED_END_AT)
+            .userLogin(UPDATED_USER_LOGIN)
+            .examId(UPDATED_EXAM_ID);
         return answerSheet;
     }
 
@@ -130,7 +141,8 @@ class AnswerSheetResourceIT {
         List<AnswerSheet> answerSheetList = answerSheetRepository.findAll().collectList().block();
         assertThat(answerSheetList).hasSize(databaseSizeBeforeCreate + 1);
         AnswerSheet testAnswerSheet = answerSheetList.get(answerSheetList.size() - 1);
-        assertThat(testAnswerSheet.getTime()).isEqualTo(DEFAULT_TIME);
+        assertThat(testAnswerSheet.getCreatedAt()).isEqualTo(DEFAULT_CREATED_AT);
+        assertThat(testAnswerSheet.getEndAt()).isEqualTo(DEFAULT_END_AT);
         assertThat(testAnswerSheet.getUserLogin()).isEqualTo(DEFAULT_USER_LOGIN);
         assertThat(testAnswerSheet.getExamId()).isEqualTo(DEFAULT_EXAM_ID);
     }
@@ -159,10 +171,10 @@ class AnswerSheetResourceIT {
     }
 
     @Test
-    void checkTimeIsRequired() throws Exception {
+    void checkCreatedAtIsRequired() throws Exception {
         int databaseSizeBeforeTest = answerSheetRepository.findAll().collectList().block().size();
         // set the field null
-        answerSheet.setTime(null);
+        answerSheet.setCreatedAt(null);
 
         // Create the AnswerSheet, which fails.
         AnswerSheetDTO answerSheetDTO = answerSheetMapper.toDto(answerSheet);
@@ -242,8 +254,10 @@ class AnswerSheetResourceIT {
             .expectBody()
             .jsonPath("$.[*].id")
             .value(hasItem(answerSheet.getId().intValue()))
-            .jsonPath("$.[*].time")
-            .value(hasItem(DEFAULT_TIME.toString()))
+            .jsonPath("$.[*].createdAt")
+            .value(hasItem(DEFAULT_CREATED_AT.toString()))
+            .jsonPath("$.[*].endAt")
+            .value(hasItem(DEFAULT_END_AT.toString()))
             .jsonPath("$.[*].userLogin")
             .value(hasItem(DEFAULT_USER_LOGIN))
             .jsonPath("$.[*].examId")
@@ -268,8 +282,10 @@ class AnswerSheetResourceIT {
             .expectBody()
             .jsonPath("$.id")
             .value(is(answerSheet.getId().intValue()))
-            .jsonPath("$.time")
-            .value(is(DEFAULT_TIME.toString()))
+            .jsonPath("$.createdAt")
+            .value(is(DEFAULT_CREATED_AT.toString()))
+            .jsonPath("$.endAt")
+            .value(is(DEFAULT_END_AT.toString()))
             .jsonPath("$.userLogin")
             .value(is(DEFAULT_USER_LOGIN))
             .jsonPath("$.examId")
@@ -297,7 +313,7 @@ class AnswerSheetResourceIT {
 
         // Update the answerSheet
         AnswerSheet updatedAnswerSheet = answerSheetRepository.findById(answerSheet.getId()).block();
-        updatedAnswerSheet.time(UPDATED_TIME).userLogin(UPDATED_USER_LOGIN).examId(UPDATED_EXAM_ID);
+        updatedAnswerSheet.createdAt(UPDATED_CREATED_AT).endAt(UPDATED_END_AT).userLogin(UPDATED_USER_LOGIN).examId(UPDATED_EXAM_ID);
         AnswerSheetDTO answerSheetDTO = answerSheetMapper.toDto(updatedAnswerSheet);
 
         webTestClient
@@ -313,7 +329,8 @@ class AnswerSheetResourceIT {
         List<AnswerSheet> answerSheetList = answerSheetRepository.findAll().collectList().block();
         assertThat(answerSheetList).hasSize(databaseSizeBeforeUpdate);
         AnswerSheet testAnswerSheet = answerSheetList.get(answerSheetList.size() - 1);
-        assertThat(testAnswerSheet.getTime()).isEqualTo(UPDATED_TIME);
+        assertThat(testAnswerSheet.getCreatedAt()).isEqualTo(UPDATED_CREATED_AT);
+        assertThat(testAnswerSheet.getEndAt()).isEqualTo(UPDATED_END_AT);
         assertThat(testAnswerSheet.getUserLogin()).isEqualTo(UPDATED_USER_LOGIN);
         assertThat(testAnswerSheet.getExamId()).isEqualTo(UPDATED_EXAM_ID);
     }
@@ -398,7 +415,7 @@ class AnswerSheetResourceIT {
         AnswerSheet partialUpdatedAnswerSheet = new AnswerSheet();
         partialUpdatedAnswerSheet.setId(answerSheet.getId());
 
-        partialUpdatedAnswerSheet.time(UPDATED_TIME);
+        partialUpdatedAnswerSheet.createdAt(UPDATED_CREATED_AT).examId(UPDATED_EXAM_ID);
 
         webTestClient
             .patch()
@@ -413,9 +430,10 @@ class AnswerSheetResourceIT {
         List<AnswerSheet> answerSheetList = answerSheetRepository.findAll().collectList().block();
         assertThat(answerSheetList).hasSize(databaseSizeBeforeUpdate);
         AnswerSheet testAnswerSheet = answerSheetList.get(answerSheetList.size() - 1);
-        assertThat(testAnswerSheet.getTime()).isEqualTo(UPDATED_TIME);
+        assertThat(testAnswerSheet.getCreatedAt()).isEqualTo(UPDATED_CREATED_AT);
+        assertThat(testAnswerSheet.getEndAt()).isEqualTo(DEFAULT_END_AT);
         assertThat(testAnswerSheet.getUserLogin()).isEqualTo(DEFAULT_USER_LOGIN);
-        assertThat(testAnswerSheet.getExamId()).isEqualTo(DEFAULT_EXAM_ID);
+        assertThat(testAnswerSheet.getExamId()).isEqualTo(UPDATED_EXAM_ID);
     }
 
     @Test
@@ -429,7 +447,7 @@ class AnswerSheetResourceIT {
         AnswerSheet partialUpdatedAnswerSheet = new AnswerSheet();
         partialUpdatedAnswerSheet.setId(answerSheet.getId());
 
-        partialUpdatedAnswerSheet.time(UPDATED_TIME).userLogin(UPDATED_USER_LOGIN).examId(UPDATED_EXAM_ID);
+        partialUpdatedAnswerSheet.createdAt(UPDATED_CREATED_AT).endAt(UPDATED_END_AT).userLogin(UPDATED_USER_LOGIN).examId(UPDATED_EXAM_ID);
 
         webTestClient
             .patch()
@@ -444,7 +462,8 @@ class AnswerSheetResourceIT {
         List<AnswerSheet> answerSheetList = answerSheetRepository.findAll().collectList().block();
         assertThat(answerSheetList).hasSize(databaseSizeBeforeUpdate);
         AnswerSheet testAnswerSheet = answerSheetList.get(answerSheetList.size() - 1);
-        assertThat(testAnswerSheet.getTime()).isEqualTo(UPDATED_TIME);
+        assertThat(testAnswerSheet.getCreatedAt()).isEqualTo(UPDATED_CREATED_AT);
+        assertThat(testAnswerSheet.getEndAt()).isEqualTo(UPDATED_END_AT);
         assertThat(testAnswerSheet.getUserLogin()).isEqualTo(UPDATED_USER_LOGIN);
         assertThat(testAnswerSheet.getExamId()).isEqualTo(UPDATED_EXAM_ID);
     }

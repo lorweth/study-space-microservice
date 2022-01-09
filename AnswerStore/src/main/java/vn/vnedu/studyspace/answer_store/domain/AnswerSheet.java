@@ -24,8 +24,11 @@ public class AnswerSheet implements Serializable {
     private Long id;
 
     @NotNull(message = "must not be null")
-    @Column("time")
-    private Instant time;
+    @Column("created_at")
+    private Instant createdAt;
+
+    @Column("end_at")
+    private Instant endAt;
 
     @NotNull(message = "must not be null")
     @Column("user_login")
@@ -60,17 +63,30 @@ public class AnswerSheet implements Serializable {
         this.id = id;
     }
 
-    public Instant getTime() {
-        return this.time;
+    public Instant getCreatedAt() {
+        return this.createdAt;
     }
 
-    public AnswerSheet time(Instant time) {
-        this.setTime(time);
+    public AnswerSheet createdAt(Instant createdAt) {
+        this.setCreatedAt(createdAt);
         return this;
     }
 
-    public void setTime(Instant time) {
-        this.time = time;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getEndAt() {
+        return this.endAt;
+    }
+
+    public AnswerSheet endAt(Instant endAt) {
+        this.setEndAt(endAt);
+        return this;
+    }
+
+    public void setEndAt(Instant endAt) {
+        this.endAt = endAt;
     }
 
     public String getUserLogin() {
@@ -176,7 +192,8 @@ public class AnswerSheet implements Serializable {
     public String toString() {
         return "AnswerSheet{" +
             "id=" + getId() +
-            ", time='" + getTime() + "'" +
+            ", createdAt='" + getCreatedAt() + "'" +
+            ", endAt='" + getEndAt() + "'" +
             ", userLogin='" + getUserLogin() + "'" +
             ", examId=" + getExamId() +
             "}";

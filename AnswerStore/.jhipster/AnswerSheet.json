@@ -2,9 +2,13 @@
   "name": "AnswerSheet",
   "fields": [
     {
-      "fieldName": "time",
+      "fieldName": "createdAt",
       "fieldType": "Instant",
       "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "endAt",
+      "fieldType": "Instant"
     },
     {
       "fieldName": "userLogin",

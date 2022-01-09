@@ -12,8 +12,12 @@ public class AnswerSheetDTO implements Serializable {
 
     private Long id;
 
-    private Instant time;
+    @NotNull(message = "must not be null")
+    private Instant createdAt;
 
+    private Instant endAt;
+
+    @NotNull(message = "must not be null")
     private String userLogin;
 
     @NotNull(message = "must not be null")
@@ -29,12 +33,20 @@ public class AnswerSheetDTO implements Serializable {
         this.id = id;
     }
 
-    public Instant getTime() {
-        return time;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setTime(Instant time) {
-        this.time = time;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getEndAt() {
+        return endAt;
+    }
+
+    public void setEndAt(Instant endAt) {
+        this.endAt = endAt;
     }
 
     public String getUserLogin() {
@@ -87,7 +99,8 @@ public class AnswerSheetDTO implements Serializable {
     public String toString() {
         return "AnswerSheetDTO{" +
             "id=" + getId() +
-            ", time='" + getTime() + "'" +
+            ", createdAt='" + getCreatedAt() + "'" +
+            ", endAt='" + getEndAt() + "'" +
             ", userLogin='" + getUserLogin() + "'" +
             ", examId=" + getExamId() +
             ", groupTimeTable=" + getGroupTimeTable() +

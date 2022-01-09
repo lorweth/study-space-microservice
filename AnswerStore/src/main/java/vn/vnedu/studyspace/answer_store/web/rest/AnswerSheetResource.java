@@ -71,7 +71,8 @@ public class AnswerSheetResource {
             throw new BadRequestAlertException("A new answerSheet cannot already have an ID", ENTITY_NAME, "idexists");
         }
         answerSheetDTO.setGroupTimeTable(null); // clear groupTimeTable... this answer sheet of user self learn
-        answerSheetDTO.setTime(Instant.now()); // set current time.
+        answerSheetDTO.setCreatedAt(Instant.now()); // set current time.
+        answerSheetDTO.setEndAt(null); // new answersheet
         return SecurityUtils
             .getCurrentUserLogin()
             .map(userLogin -> {
@@ -108,7 +109,8 @@ public class AnswerSheetResource {
         if(!Objects.equals(timeTableId, answerSheetDTO.getGroupTimeTable().getId())){
             throw new BadRequestAlertException("Invalid Id", ENTITY_NAME, "invalidId");
         }
-        answerSheetDTO.setTime(Instant.now()); // set current time
+        answerSheetDTO.setCreatedAt(Instant.now()); // set current time
+        answerSheetDTO.setEndAt(null); // new answersheet
         return SecurityUtils
             .getCurrentUserLogin()
             .map(userLogin -> {

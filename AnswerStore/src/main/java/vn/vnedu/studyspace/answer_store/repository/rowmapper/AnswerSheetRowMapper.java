@@ -27,7 +27,8 @@ public class AnswerSheetRowMapper implements BiFunction<Row, String, AnswerSheet
     public AnswerSheet apply(Row row, String prefix) {
         AnswerSheet entity = new AnswerSheet();
         entity.setId(converter.fromRow(row, prefix + "_id", Long.class));
-        entity.setTime(converter.fromRow(row, prefix + "_time", Instant.class));
+        entity.setCreatedAt(converter.fromRow(row, prefix + "_created_at", Instant.class));
+        entity.setEndAt(converter.fromRow(row, prefix + "_end_at", Instant.class));
         entity.setUserLogin(converter.fromRow(row, prefix + "_user_login", String.class));
         entity.setExamId(converter.fromRow(row, prefix + "_exam_id", Long.class));
         entity.setGroupTimeTableId(converter.fromRow(row, prefix + "_group_time_table_id", Long.class));

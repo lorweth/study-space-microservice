@@ -176,7 +176,8 @@ entity TimeTable {
 }
 
 entity AnswerSheet {
-	time Instant required   // thơi gian nộp bài
+  createAt Instant required
+  endAt Instant
   userLogin String required
   examId Long required
 }
