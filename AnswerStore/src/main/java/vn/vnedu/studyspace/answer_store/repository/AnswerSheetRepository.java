@@ -42,5 +42,6 @@ interface AnswerSheetRepositoryInternal {
     Flux<AnswerSheet> findAll();
     Mono<AnswerSheet> findById(Long id);
     Flux<AnswerSheet> findAllBy(Pageable pageable);
+    Flux<AnswerSheet> findAllByExamIdAndUserLogin(Long examId, String userLogin);
     Flux<AnswerSheet> findAllBy(Pageable pageable, Criteria criteria);
 }

@@ -1,4 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { finishAnswerSheet } from 'app/entities/AnswerStore/answer-sheet/answer-sheet.reducer';
 import useCountDown from 'app/shared/custom-hook/useCountDown';
 import React, { useEffect, useState } from 'react';
 import { Translate } from 'react-jhipster';
@@ -10,14 +12,18 @@ type PropType = {
 } & RouteComponentProps<{ id: string }>;
 
 const CompleteTestDialog = (props: PropType) => {
+  const dispatch = useAppDispatch();
+
   const { setIsOpen, history, match, location } = props;
   const [timeLeft, isFinish] = useCountDown(5);
+  const answerSheet = useAppSelector(state => state.answerSheet.entity);
 
   // Close the modal
   const handleClose = () => setIsOpen(false);
 
   // Stop this test
   const confirmStopTest = () => {
+    dispatch(finishAnswerSheet(answerSheet.id));
     history.push(`/learning-manager/${match.params.id}`);
     handleClose();
   };

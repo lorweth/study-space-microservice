@@ -68,6 +68,11 @@ class AnswerSheetRepositoryInternalImpl implements AnswerSheetRepositoryInternal
         return createQuery(pageable, criteria).all();
     }
 
+    @Override
+    public Flux<AnswerSheet> findAllByExamIdAndUserLogin(Long examId, String userLogin) {
+        return createQuery(null, where("exam_id").is(examId).and(where("user_login").is(userLogin))).all();
+    }
+
     RowsFetchSpec<AnswerSheet> createQuery(Pageable pageable, Criteria criteria) {
         List<Expression> columns = AnswerSheetSqlHelper.getColumns(entityTable, EntityManager.ENTITY_ALIAS);
         columns.addAll(GroupTimeTableSqlHelper.getColumns(groupTimeTableTable, "groupTimeTable"));

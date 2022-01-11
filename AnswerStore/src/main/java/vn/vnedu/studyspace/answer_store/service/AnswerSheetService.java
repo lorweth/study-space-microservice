@@ -14,8 +14,8 @@ import vn.vnedu.studyspace.answer_store.repository.AnswerSheetItemRepository;
 import vn.vnedu.studyspace.answer_store.repository.AnswerSheetRepository;
 import vn.vnedu.studyspace.answer_store.service.dto.AnswerSheetDTO;
 import vn.vnedu.studyspace.answer_store.service.dto.CorrectAnswerDTO;
+import vn.vnedu.studyspace.answer_store.service.dto.UserAnswerDTO;
 import vn.vnedu.studyspace.answer_store.service.mapper.AnswerSheetMapper;
-import vn.vnedu.studyspace.answer_store.web.rest.errors.BadRequestAlertException;
 
 import java.util.LinkedList;
 import java.util.List;

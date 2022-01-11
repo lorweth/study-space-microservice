@@ -10,7 +10,6 @@ import CountDownTimer from '../count-down-timer/count-down-timer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './test.css';
 import CompleteTestDialog from './complete-test-dialog';
-import useCountDown from 'app/shared/custom-hook/useCountDown';
 
 /**
  * DisplayTestComponent
@@ -42,7 +41,7 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
             {exam.name} <sub>{exam.duration} phút</sub>{' '}
           </legend>
           <hr />
-          <CountDownTimer duration={1} history={props.history} location={props.location} match={props.match} />
+          {/* <CountDownTimer duration={exam.duration} history={props.history} location={props.location} match={props.match} /> */}
         </div>
         {questionList && questionList.length > 0 ? (
           questionList.map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)

@@ -35,6 +35,15 @@ export const getEntity = createAsyncThunk(
   { serializeError: serializeAxiosError }
 );
 
+export const finishAnswerSheet = createAsyncThunk(
+  'answerSheet/finish_answer_sheet',
+  async (id: string | number) => {
+    const requestUrl = `${apiUrl}/${id}/finish`;
+    return axios.put<IAnswerSheet>(requestUrl);
+  },
+  { serializeError: serializeAxiosError }
+);
+
 export const createEntity = createAsyncThunk(
   'answerSheet/create_entity',
   async (entity: IAnswerSheet, thunkAPI) => {
@@ -95,7 +104,7 @@ export const AnswerSheetSlice = createEntitySlice({
           totalItems: parseInt(action.payload.headers['x-total-count'], 10),
         };
       })
-      .addMatcher(isFulfilled(createEntity, updateEntity, partialUpdateEntity), (state, action) => {
+      .addMatcher(isFulfilled(createEntity, updateEntity, finishAnswerSheet, partialUpdateEntity), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
@@ -106,7 +115,7 @@ export const AnswerSheetSlice = createEntitySlice({
         state.updateSuccess = false;
         state.loading = true;
       })
-      .addMatcher(isPending(createEntity, updateEntity, partialUpdateEntity, deleteEntity), state => {
+      .addMatcher(isPending(createEntity, updateEntity, finishAnswerSheet, partialUpdateEntity, deleteEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.updating = true;

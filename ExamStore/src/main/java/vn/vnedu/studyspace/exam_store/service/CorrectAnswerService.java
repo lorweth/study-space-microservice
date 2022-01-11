@@ -38,17 +38,19 @@ public class CorrectAnswerService {
         List<CorrectAnswerDTO> correctAnswerList = new LinkedList<>();
 
         for(Long questionId: questionIdList){
-            if (!questionRepository.existsById(questionId)) {
-                throw new BadRequestAlertException("Question not found", "CorrectAnswer", "questionNotFound");
-            }
+            final Question question = questionRepository.findById(questionId).orElseThrow(() ->
+                new BadRequestAlertException("Question not found", "CorrectAnswer", "questionNotFound")
+            );
 
             CorrectAnswerDTO answer = new CorrectAnswerDTO();
             answer.setQuestionId(questionId);
+            answer.setQuestionContent(question.getContent());
 
             List<Option> optionOfQuestion = optionRepository.findAllByQuestionId(questionId);
             for(Option o: optionOfQuestion){
                 if(Boolean.TRUE.equals(o.getIsCorrect())){
                     answer.setAnswerId(o.getId());
+                    answer.setAnswerContent(o.getContent());
                 }
             }
             correctAnswerList.add(answer);

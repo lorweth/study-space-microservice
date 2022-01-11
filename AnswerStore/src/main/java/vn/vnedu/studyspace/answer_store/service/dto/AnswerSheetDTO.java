@@ -16,7 +16,6 @@ public class AnswerSheetDTO implements Serializable {
 
     private Instant endAt;
 
-    @NotNull(message = "must not be null")
     private String userLogin;
 
     @NotNull(message = "must not be null")

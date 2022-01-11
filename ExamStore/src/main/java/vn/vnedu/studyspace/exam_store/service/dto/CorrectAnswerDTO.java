@@ -8,8 +8,12 @@ public class CorrectAnswerDTO {
     @NotNull
     private Long questionId;
 
+    private String questionContent;
+
     @NotNull
     private Long answerId;
+
+    private String answerContent;
 
     public Long getQuestionId() {
         return questionId;
@@ -25,6 +29,22 @@ public class CorrectAnswerDTO {
 
     public void setAnswerId(Long answerId) {
         this.answerId = answerId;
+    }
+
+    public String getQuestionContent() {
+        return questionContent;
+    }
+
+    public void setQuestionContent(String questionContent) {
+        this.questionContent = questionContent;
+    }
+
+    public String getAnswerContent() {
+        return answerContent;
+    }
+
+    public void setAnswerContent(String answerContent) {
+        this.answerContent = answerContent;
     }
 
     @Override

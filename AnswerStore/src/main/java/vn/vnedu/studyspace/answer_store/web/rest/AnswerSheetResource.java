@@ -72,7 +72,7 @@ public class AnswerSheetResource {
         }
         answerSheetDTO.setGroupTimeTable(null); // clear groupTimeTable... this answer sheet of user self learn
         answerSheetDTO.setCreatedAt(Instant.now()); // set current time.
-        answerSheetDTO.setEndAt(null); // new answersheet
+        answerSheetDTO.setEndAt(Instant.EPOCH); // new answersheet
         return SecurityUtils
             .getCurrentUserLogin()
             .map(userLogin -> {
@@ -110,7 +110,7 @@ public class AnswerSheetResource {
             throw new BadRequestAlertException("Invalid Id", ENTITY_NAME, "invalidId");
         }
         answerSheetDTO.setCreatedAt(Instant.now()); // set current time
-        answerSheetDTO.setEndAt(null); // new answersheet
+        answerSheetDTO.setEndAt(Instant.EPOCH); // new answersheet has endAt min time
         return SecurityUtils
             .getCurrentUserLogin()
             .map(userLogin -> {
@@ -123,6 +123,45 @@ public class AnswerSheetResource {
                     return ResponseEntity
                         .created(new URI("/api/answer-sheets/" + result.getId()))
                         .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                        .body(result);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
+
+    /**
+     * {@code PUT  /answer-sheets/:sheetId/finish} : Finish the answerSheet "sheetId".
+     *
+     * @param sheetId the id of the answerSheet.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated answerSheetDTO,
+     * or with status {@code 400 (Bad Request)} if the answerSheetDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the answerSheetDTO couldn't be updated.
+     */
+    @PutMapping("/answer-sheets/{sheetId}/finish")
+    public Mono<ResponseEntity<AnswerSheetDTO>> finishAnswerSheet(@PathVariable Long sheetId) {
+        log.debug("REST request to finish AnswerSheet : {}", sheetId);
+
+        return SecurityUtils
+            .getCurrentUserLogin()
+            .switchIfEmpty(Mono.error(new BadRequestAlertException("User not logged in", ENTITY_NAME, "userNotLoggedIn")))
+            .flatMap(userLogin -> answerSheetService
+                .findOne(sheetId)
+                .switchIfEmpty(Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "entityNotFound")))
+                .map(sheet -> {
+                    if(!Objects.equals(sheet.getUserLogin(), userLogin)){
+                        throw new BadRequestAlertException("User not permission for this action", ENTITY_NAME, "userNotPermission");
+                    }
+                    sheet.setEndAt(Instant.now()); // set endAt
+                    return sheet;
+                })
+            )
+            .flatMap(answerSheetService::save)
+            .map(result -> {
+                try {
+                    return ResponseEntity
+                        .created(new URI("/api/answer-sheets/" + result.getId()))
+                        .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                         .body(result);
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
@@ -240,6 +279,12 @@ public class AnswerSheetResource {
 //                    )
 //                    .body(countWithEntities.getT2());
 //            });
+//    }
+
+//    @GetMapping("/answer-sheets/exam/{examId}/current")
+//    public Mono<ResponseEntity<AnswerSheetDTO>> getCurrentAnswerSheetForExam(@PathVariable Long examId) {
+//        log.debug("REST request to get the current AnswerSheet of exam : {}", examId);
+//
 //    }
 
     /**
