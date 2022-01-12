@@ -1,4 +1,4 @@
-import useCountDown from 'app/shared/custom-hook/useCountDown';
+import useCountDown from 'app/shared/hooks/useCountDown';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { toast } from 'react-toastify';

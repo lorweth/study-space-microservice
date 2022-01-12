@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { finishAnswerSheet } from 'app/entities/AnswerStore/answer-sheet/answer-sheet.reducer';
-import useCountDown from 'app/shared/custom-hook/useCountDown';
+import useCountDown from 'app/shared/hooks/useCountDown';
 import React, { useEffect, useState } from 'react';
 import { Translate } from 'react-jhipster';
 import { RouteComponentProps } from 'react-router-dom';
