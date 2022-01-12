@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 import { Translate } from 'react-jhipster';
@@ -7,13 +7,51 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getEntity as getExam } from 'app/entities/ExamStore/exam/exam.reducer';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { getSummaryResults } from 'app/shared/reducers/summary-result.reducer';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
   const dispatch = useAppDispatch();
+  const [examId] = useState(props.match.params.id);
+
+  const summaryResult = useAppSelector(state => state.summaryResult.entities);
 
   useEffect(() => {
-    dispatch(getExam(props.match.params.id));
+    dispatch(getExam(examId));
+    dispatch(getSummaryResults(examId));
   }, []);
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Kết quả làm bài của những bài trước',
+      },
+    },
+  };
+
+  const labels = () => summaryResult.map(item => item.time);
+
+  const data = () => {
+    return {
+      labels: labels(),
+      datasets: [
+        {
+          label: 'Số câu trả lời sai',
+          data: summaryResult.map(item => item.wrongAnswerCount),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        },
+      ],
+    };
+  };
 
   const examEntity = useAppSelector(state => state.exam.entity);
   return (
@@ -69,6 +107,8 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
             <Translate contentKey="entity.action.take-a-test">Take a test</Translate>
           </span>
         </Button>
+        <br />
+        <Line options={options} data={data()} />
       </Col>
     </Row>
   );
