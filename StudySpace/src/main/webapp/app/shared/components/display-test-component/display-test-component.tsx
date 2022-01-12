@@ -10,6 +10,8 @@ import CountDownTimer from '../count-down-timer/count-down-timer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './test.css';
 import CompleteTestDialog from './complete-test-dialog';
+import { MIX_TYPES } from 'app/config/constants';
+import { IQuestion } from 'app/shared/model/ExamStore/question.model';
 
 /**
  * DisplayTestComponent
@@ -33,6 +35,34 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
     dispatch(createAnswerSheet({ examId: +examId }));
   }, []);
 
+  const randomizedQuestionList = () => {
+    if (exam.mix === MIX_TYPES.BYGROUP) {
+      const questionListMap = new Map<number, Array<IQuestion>>();
+      const keys = [];
+
+      questionList.forEach(question => {
+        const key = question.questionGroup.id;
+        if (keys.indexOf(key) === -1) {
+          keys.push();
+        }
+        const collection = questionListMap.get(key);
+        if (!collection) {
+          questionListMap.set(key, [question]);
+        } else {
+          collection.push(question);
+        }
+      });
+
+      questionListMap.forEach((value, key) => {
+        value.sort(() => Math.random() - 0.5);
+      });
+      return [].concat(...Array.from(questionListMap.values()));
+    } else if (exam.mix === MIX_TYPES.ALL) {
+      return [...questionList].sort(() => Math.random() - 0.5);
+    }
+    return questionList;
+  };
+
   return (
     <Row className="justify-content-center">
       <Col md="8">
@@ -44,7 +74,7 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
           {/* <CountDownTimer duration={exam.duration} history={props.history} location={props.location} match={props.match} /> */}
         </div>
         {questionList && questionList.length > 0 ? (
-          questionList.map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
+          randomizedQuestionList().map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
         ) : (
           <p>No question found</p>
         )}

@@ -18,3 +18,8 @@ export const ROLES = {
   MEMBER: 1,
   WAITING: 0,
 };
+export const MIX_TYPES = {
+  NO: 0,
+  BYGROUP: 1,
+  ALL: 2,
+};

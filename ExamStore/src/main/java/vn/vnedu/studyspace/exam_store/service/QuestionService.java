@@ -135,7 +135,7 @@ public class QuestionService {
     }
 
     /**
-     * Get some random question in exam "examId".
+     * Get some question in exam "examId".
      *
      * @param examId the id of the exam.
      * @return the list of entity.
