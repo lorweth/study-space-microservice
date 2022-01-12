@@ -2,7 +2,7 @@ package vn.vnedu.studyspace.answer_store.service.dto;
 
 import java.util.Objects;
 
-public class UserAnswerDTO extends CorrectAnswerDTO{
+public class UserAnswerDTO extends AnswerDTO {
 
     private Long examId;
 

@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
-import vn.vnedu.studyspace.answer_store.service.dto.CorrectAnswerDTO;
+import vn.vnedu.studyspace.answer_store.service.dto.AnswerDTO;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public interface FeignClientService {
     Mono<String> demo(@RequestHeader("Authorization") String authorize);
 
     @GetMapping("/api/questions/correct-answer")
-    Mono<List<CorrectAnswerDTO>> getCorrectAnswer(@RequestHeader("Authorization") String authorization, List<Long> questionIdList);
+    Mono<List<AnswerDTO>> getCorrectAnswer(@RequestHeader("Authorization") String authorization, List<Long> questionIdList);
 }

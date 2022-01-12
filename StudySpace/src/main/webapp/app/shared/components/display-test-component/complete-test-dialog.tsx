@@ -24,7 +24,7 @@ const CompleteTestDialog = (props: PropType) => {
   // Stop this test
   const confirmStopTest = () => {
     dispatch(finishAnswerSheet(answerSheet.id));
-    history.push(`/learning-manager/${match.params.id}`);
+    history.push(`/learning-manager/${answerSheet.id}/result`);
     handleClose();
   };
 

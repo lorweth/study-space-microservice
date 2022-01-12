@@ -47,9 +47,6 @@ public class AnswerSheetResource {
     private final AnswerSheetRepository answerSheetRepository;
 
     @Autowired
-    private FeignClientService feignClientService;
-
-    @Autowired
     private AuthorizationHeaderUtil authorizationUtil;
 
     public AnswerSheetResource(AnswerSheetService answerSheetService, AnswerSheetRepository answerSheetRepository) {
@@ -298,20 +295,6 @@ public class AnswerSheetResource {
         log.debug("REST request to get AnswerSheet : {}", id);
         Mono<AnswerSheetDTO> answerSheetDTO = answerSheetService.findOne(id);
         return ResponseUtil.wrapOrNotFound(answerSheetDTO);
-    }
-
-    @GetMapping("/answer-sheets/test")
-    public Mono<ResponseEntity<String>> getTest(@RequestHeader("Authorization") String authorization) {
-        log.debug("REST request with authorization: {}", authorization);
-        return feignClientService.demo(authorization).map(str -> ResponseEntity.ok().body(str));
-    }
-
-    @GetMapping("/answer-sheets/{id}/wrong-answer")
-    public Mono<ResponseEntity<List<AnswerSheetItem>>> getWrongAnswer(@RequestHeader("Authorization") String authorization, @PathVariable Long id) {
-        log.debug("REST request to get all Wrong answer of AnswerSheet {}", id);
-        return answerSheetService.findWrongAnswer(id, authorization)
-            .collectList()
-            .map(list -> ResponseEntity.ok().body(list));
     }
 
     /**

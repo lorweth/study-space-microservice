@@ -31,6 +31,10 @@ import timeTable from 'app/entities/AnswerStore/time-table/time-table.reducer';
 // prettier-ignore
 import exam from 'app/entities/ExamStore/exam/exam.reducer';
 /* jhipster-needle-add-reducer-import - JHipster will add reducer here */
+// prettier-ignore
+import answer from 'app/shared/reducers/answer.reducer';
+// prettier-ignore
+import summaryResultReducer from 'app/shared/reducers/summary-result.reducer';
 
 const rootReducer = {
   authentication,
@@ -50,6 +54,8 @@ const rootReducer = {
   examItem,
   timeTable,
   exam,
+  answer,
+  summaryResultReducer,
   /* jhipster-needle-add-reducer-combine - JHipster will add reducer here */
   loadingBar,
 };

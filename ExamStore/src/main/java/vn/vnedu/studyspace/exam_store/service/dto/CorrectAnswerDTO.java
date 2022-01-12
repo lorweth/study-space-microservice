@@ -64,7 +64,9 @@ public class CorrectAnswerDTO {
     public String toString() {
         return "CorrectAnswerDTO{" +
             "questionId=" + questionId +
+            ", questionContent='" + questionContent + '\'' +
             ", answerId=" + answerId +
+            ", answerContent='" + answerContent + '\'' +
             '}';
     }
 }

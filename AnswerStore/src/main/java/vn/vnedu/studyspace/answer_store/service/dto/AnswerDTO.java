@@ -1,9 +1,11 @@
 package vn.vnedu.studyspace.answer_store.service.dto;
 
+import vn.vnedu.studyspace.answer_store.domain.AnswerSheetItem;
+
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-public class CorrectAnswerDTO {
+public class AnswerDTO {
 
     @NotNull
     private Long questionId;
@@ -51,7 +53,7 @@ public class CorrectAnswerDTO {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CorrectAnswerDTO that = (CorrectAnswerDTO) o;
+        AnswerDTO that = (AnswerDTO) o;
         return Objects.equals(questionId, that.questionId) && Objects.equals(answerId, that.answerId);
     }
 
