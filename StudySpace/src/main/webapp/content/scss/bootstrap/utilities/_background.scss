@@ -1,0 +1,27 @@
+// stylelint-disable declaration-no-important
+
+@each $color, $value in $theme-colors {
+  @include bg-variant('.bg-#{$color}', $value);
+}
+
+@if $enable-gradients {
+  @each $color, $value in $theme-colors {
+    @include bg-gradient-variant('.bg-gradient-#{$color}', $value);
+  }
+}
+
+.bg-white {
+  background-color: $white !important;
+}
+
+.bg-transparent {
+  background-color: transparent !important;
+}
+
+.bg-primary {
+  background: rgb(2, 0, 36);
+  background: -moz-linear-gradient(63deg, rgba(2, 0, 36, 1) 0%, rgba(0, 0, 87, 1) 44%, rgba(129, 0, 0, 1) 98%);
+  background: -webkit-linear-gradient(63deg, rgba(2, 0, 36, 1) 0%, rgba(0, 0, 87, 1) 44%, rgba(129, 0, 0, 1) 98%);
+  background: linear-gradient(63deg, rgba(2, 0, 36, 1) 0%, rgba(0, 0, 87, 1) 44%, rgba(129, 0, 0, 1) 98%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#020024",endColorstr="#810000",GradientType=1);
+}

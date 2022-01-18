@@ -1,19 +1,16 @@
 {
   "home": {
-    "title": "Chào mừng bạn đến với Java Hipster!",
+    "title": "Chào mừng bạn đến với StudySpace!",
     "subtitle": "Đây là trang chủ của bạn",
     "logged": {
       "message": "Bạn đang đăng nhập bằng tài khoản \"{{username}}\"."
     },
-    "question": "Nếu bạn có bất kỳ câu hỏi nào về JHipster vui lòng truy cập:",
+    "question": "Nếu bạn có bất kỳ câu hỏi nào về StudySpace vui lòng truy cập:",
     "link": {
-      "homepage": "Trang chủ JHipster",
-      "stackoverflow": "JHipster trên Stack Overflow",
-      "bugtracker": "Theo dõi các lỗi JHipster",
-      "chat": "Phòng chat công cộng JHipster",
-      "follow": "Theo dõi @jhipster trên Twitter"
+      "homepage": "Trang chủ StudySpace",
+      "chat": "Phòng chat công cộng StudySpace"
     },
-    "like": "Nếu bạn thích JHipster, đừng quên cho chúng tôi thêm một ngôi sao trên",
+    "like": "Nếu bạn thích StudySpace, đừng quên cho chúng tôi thêm một ngôi sao trên",
     "github": "GitHub"
   }
 }

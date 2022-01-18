@@ -1,19 +1,16 @@
 {
   "home": {
-    "title": "Welcome, Java Hipster!",
+    "title": "Welcome, StudySpace!",
     "subtitle": "This is your homepage",
     "logged": {
       "message": "You are logged in as user \"{{username}}\"."
     },
-    "question": "If you have any question on JHipster:",
+    "question": "If you have any question on StudySpace:",
     "link": {
-      "homepage": "JHipster homepage",
-      "stackoverflow": "JHipster on Stack Overflow",
-      "bugtracker": "JHipster bug tracker",
-      "chat": "JHipster public chat room",
-      "follow": "follow @jhipster on Twitter"
+      "homepage": "StudySpace homepage",
+      "chat": "StudySpace chatroom"
     },
-    "like": "If you like JHipster, don't forget to give us a star on",
+    "like": "If you like StudySpace, don't forget to give us a star on",
     "github": "GitHub"
   }
 }

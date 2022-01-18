@@ -34,6 +34,7 @@ import { faWrench } from '@fortawesome/free-solid-svg-icons/faWrench';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faArchive, faCheck, faFeatherAlt, faPlay, faPrint, faUserLock } from '@fortawesome/free-solid-svg-icons';
+import { faGithub, faGithubAlt, faTelegram } from '@fortawesome/free-brands-svg-icons';
 
 export const loadIcons = () => {
   library.add(
@@ -75,6 +76,9 @@ export const loadIcons = () => {
     faFeatherAlt,
     faPlay,
     faCheck,
-    faPrint
+    faPrint,
+    faGithubAlt,
+    faTelegram,
+    faGithub
   );
 };
