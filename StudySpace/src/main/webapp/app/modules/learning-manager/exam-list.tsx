@@ -96,7 +96,7 @@ const ExamList = (props: RouteComponentProps<{ url: string }>) => {
     } else if (value === 1) {
       return 'Trộn theo nhóm câu hỏi';
     } else {
-      return 'Trộn hết';
+      return 'Trộn ngẫu nhiên';
     }
   };
 

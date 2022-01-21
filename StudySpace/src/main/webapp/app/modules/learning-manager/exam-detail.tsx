@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getSummaryResults } from 'app/shared/reducers/summary-result.reducer';
+import dayjs from 'dayjs';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -37,15 +38,21 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
     },
   };
 
-  const labels = () => summaryResult.map(item => item.time);
+  const chartData = () => {
+    const summaryData = [...summaryResult].sort((a, b) => (a.time > b.time ? 1 : -1));
 
-  const data = () => {
+    const result = { labels: [], datas: [] } as any;
+    summaryData.map(item => {
+      result.labels.push(dayjs(item.time).format('DD/MM/YYYY hh:mm:ss'));
+      result.datas.push(item.wrongAnswerCount);
+    });
+
     return {
-      labels: labels(),
+      labels: result.labels,
       datasets: [
         {
           label: 'Số câu trả lời sai',
-          data: summaryResult.map(item => item.wrongAnswerCount),
+          data: result.datas,
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
         },
@@ -86,14 +93,14 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
           </dt>
           <dd>{examEntity.mix}</dd>
         </dl>
-        <Button tag={Link} to="/learning-manager" replace color="info" data-cy="entityDetailsBackButton">
+        <Button tag={Link} to="/learning-manager" color="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}
           <span className="d-none d-md-inline">
             <Translate contentKey="entity.action.back">Back</Translate>
           </span>
         </Button>
         &nbsp;
-        <Button replace color="success" data-cy="entityPrintButton">
+        <Button color="success" data-cy="entityPrintButton">
           <FontAwesomeIcon icon="print" />{' '}
           <span className="d-none d-md-inline">
             In
@@ -101,14 +108,14 @@ export const ExamDetail = (props: RouteComponentProps<{ id: string }>) => {
           </span>
         </Button>
         &nbsp;
-        <Button tag={Link} to={`${props.match.url}/take-a-test`} replace color="primary" data-cy="entityTakeATestButton">
+        <Button tag={Link} to={`${props.match.url}/take-a-test`} color="primary" data-cy="entityTakeATestButton">
           <FontAwesomeIcon icon="play" />{' '}
           <span className="d-none d-md-inline">
             <Translate contentKey="entity.action.take-a-test">Take a test</Translate>
           </span>
         </Button>
         <br />
-        <Line options={options} data={data()} />
+        {summaryResult && summaryResult.length > 0 && <Line options={options} data={chartData()} />}
       </Col>
     </Row>
   );

@@ -15,6 +15,10 @@ const ExamUpdateForm = (props: RouteComponentProps<{ id: string }>) => {
   const examEntity = useAppSelector(state => state.exam.entity);
   const updating = useAppSelector(state => state.exam.updating);
 
+  const handleClose = () => {
+    props.history.push('/learning-manager');
+  };
+
   const saveEntity = values => {
     const entity = {
       ...examEntity,
@@ -25,6 +29,9 @@ const ExamUpdateForm = (props: RouteComponentProps<{ id: string }>) => {
       dispatch(createExam(entity));
     } else {
       dispatch(updateExam(entity));
+    }
+    if (isNew) {
+      handleClose();
     }
   };
 
@@ -143,7 +150,7 @@ const ExamUpdateForm = (props: RouteComponentProps<{ id: string }>) => {
           {
             // translate('studySpaceApp.examStoreExam.mix.0')
           }
-          trộn loạn xạ
+          trộn ngẫu nhiên
         </option>
       </ValidatedField>
       <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/learning-manager" replace color="info">

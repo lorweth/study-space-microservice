@@ -123,14 +123,6 @@ const QuestionRepositories = (props: RouteComponentProps<{ url: string }>) => {
                   <th className="hand" onClick={sort('name')}>
                     <Translate contentKey="studySpaceApp.examStoreQuestionGroup.name">Name</Translate> <FontAwesomeIcon icon="sort" />
                   </th>
-                  <th className="hand" onClick={sort('groupId')}>
-                    <Translate contentKey="studySpaceApp.examStoreQuestionGroup.groupId">Group Id</Translate>{' '}
-                    <FontAwesomeIcon icon="sort" />
-                  </th>
-                  <th className="hand" onClick={sort('userLogin')}>
-                    <Translate contentKey="studySpaceApp.examStoreQuestionGroup.userLogin">User Login</Translate>{' '}
-                    <FontAwesomeIcon icon="sort" />
-                  </th>
                   <th>
                     <Translate contentKey="studySpaceApp.examStoreQuestionGroup.topic">Topic</Translate> <FontAwesomeIcon icon="sort" />
                   </th>
@@ -146,17 +138,15 @@ const QuestionRepositories = (props: RouteComponentProps<{ url: string }>) => {
                       </Button>
                     </td>
                     <td>{questionGroup.name}</td>
-                    <td>{questionGroup.groupId}</td>
-                    <td>{questionGroup.userLogin}</td>
                     <td>{questionGroup.topic ? <Link to={`topic/${questionGroup.topic.id}`}>{questionGroup.topic.id}</Link> : ''}</td>
                     <td className="text-end">
                       <div className="btn-group flex-btn-group-container">
-                        <Button tag={Link} to={`${match.url}/${questionGroup.id}`} color="info" size="sm" data-cy="entityDetailsButton">
+                        {/* <Button tag={Link} to={`${match.url}/${questionGroup.id}`} color="info" size="sm" data-cy="entityDetailsButton">
                           <FontAwesomeIcon icon="eye" />{' '}
                           <span className="d-none d-md-inline">
                             <Translate contentKey="entity.action.view">View</Translate>
                           </span>
-                        </Button>
+                        </Button> */}
                         <Button
                           tag={Link}
                           to={`${match.url}/${questionGroup.id}/edit`}
@@ -169,7 +159,7 @@ const QuestionRepositories = (props: RouteComponentProps<{ url: string }>) => {
                             <Translate contentKey="entity.action.edit">Edit</Translate>
                           </span>
                         </Button>
-                        <Button
+                        {/* <Button
                           tag={Link}
                           to={`${match.url}/${questionGroup.id}/delete`}
                           color="danger"
@@ -180,7 +170,7 @@ const QuestionRepositories = (props: RouteComponentProps<{ url: string }>) => {
                           <span className="d-none d-md-inline">
                             <Translate contentKey="entity.action.delete">Delete</Translate>
                           </span>
-                        </Button>
+                        </Button> */}
                       </div>
                     </td>
                   </tr>

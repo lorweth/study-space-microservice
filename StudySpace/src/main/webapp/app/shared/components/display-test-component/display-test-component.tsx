@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getQuestionsFromExam } from 'app/entities/ExamStore/question/question.reducer';
 import { getEntity as getExam } from 'app/entities/ExamStore/exam/exam.reducer';
 import { createEntity as createAnswerSheet } from 'app/entities/AnswerStore/answer-sheet/answer-sheet.reducer';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Button, Col, Form, FormGroup, Input, Label, Row } from 'reactstrap';
 import AnswerFormComponent from './answer-form-component';
@@ -26,8 +26,14 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
   // Quản lý đóng mở complete dialog.
   const [isOpenCompleteDialog, setIsOpenCompleteDialog] = useState(false);
 
+  // Lưu trữ số câu hỏi đã được trả lời
+  const [answeredQuestions, setAnsweredQuestions] = useState([] as number[]);
+
   const exam = useAppSelector(state => state.exam.entity);
   const questionList = useAppSelector(state => state.question.entities);
+
+  const answer = useAppSelector(state => state.answerSheetItem.entity);
+  const answerUpdateSuccess = useAppSelector(state => state.answerSheetItem.updateSuccess);
 
   useEffect(() => {
     dispatch(getExam(examId));
@@ -35,6 +41,20 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
     dispatch(createAnswerSheet({ examId: +examId }));
   }, []);
 
+  // Hàm thêm câu hỏi vào danh sách câu hỏi đã được trả lời.
+  const addAnsweredQuestion = (questionId: number) => {
+    if (answeredQuestions.indexOf(questionId) === -1) {
+      setAnsweredQuestions([...answeredQuestions, questionId]);
+    }
+  };
+
+  useEffect(() => {
+    if (answerUpdateSuccess) {
+      addAnsweredQuestion(answer.questionId);
+    }
+  }, [answerUpdateSuccess]);
+
+  // Hàm random câu hỏi.
   const randomizedQuestionList = () => {
     if (exam.mix === MIX_TYPES.BYGROUP) {
       const questionListMap = new Map<number, Array<IQuestion>>();
@@ -63,6 +83,9 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
     return questionList;
   };
 
+  // Hàm tính toán random câu hỏi khi cần thiết
+  const randomQuestionList = useMemo(() => randomizedQuestionList(), [questionList]);
+
   return (
     <Row className="justify-content-center">
       <Col md="8">
@@ -71,15 +94,15 @@ const DisplayTestComponent = (props: RouteComponentProps<{ id: string }>) => {
             {exam.name} <sub>{exam.duration} phút</sub>{' '}
           </legend>
           <hr />
-          {/* <CountDownTimer duration={exam.duration} history={props.history} location={props.location} match={props.match} /> */}
+          <CountDownTimer duration={exam.duration} history={props.history} location={props.location} match={props.match} />
         </div>
         {questionList && questionList.length > 0 ? (
-          randomizedQuestionList().map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
+          randomQuestionList.map((question, i) => <AnswerFormComponent key={i} index={i} question={question} />)
         ) : (
           <p>No question found</p>
         )}
         <div className="text-center">
-          <Button color="primary" onClick={() => setIsOpenCompleteDialog(true)}>
+          <Button color="primary" onClick={() => setIsOpenCompleteDialog(true)} disabled={answeredQuestions.length !== questionList.length}>
             <FontAwesomeIcon icon="check" />
             &nbsp;
             <span>Hoàn tất</span>

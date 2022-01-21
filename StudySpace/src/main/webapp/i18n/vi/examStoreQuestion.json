@@ -2,7 +2,7 @@
   "studySpaceApp": {
     "examStoreQuestion": {
       "home": {
-        "title": "Questions",
+        "title": "Danh sách câu hỏi",
         "refreshListLabel": "Refresh list",
         "createLabel": "Thêm mới một Question",
         "createOrEditLabel": "Thêm mới hoặc cập nhật Question",

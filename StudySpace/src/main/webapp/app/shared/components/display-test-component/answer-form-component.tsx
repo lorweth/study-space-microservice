@@ -5,7 +5,7 @@ import {
   createEntity as createAnswer,
   updateEntity as updateAnswer,
 } from 'app/entities/AnswerStore/answer-sheet-item/answer-sheet-item.reducer';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ValidatedField } from 'react-jhipster';
 import { RouteComponentProps } from 'react-router-dom';
 import { Form, FormGroup, Input, Label } from 'reactstrap';
@@ -66,12 +66,38 @@ const AnswerFormComponent = (props: PropType) => {
     }
   };
 
+  const renderOptionList = () => {
+    // random order, chỉ tính 1 lần khi questionId thay đổi
+    const orderOptions = useMemo(() => [0, 1, 2, 3].sort(() => Math.random() - 0.5), [question.id]);
+
+    return orderOptions.map((optionIndex, i) => (
+      <FormGroup check key={i}>
+        <Input
+          id={`question[${question.id}].option[${optionIndex}]`}
+          name={`question[${question.id}].option`}
+          type="radio"
+          onClick={() => handleClickRadioButton(question.options[optionIndex].id)}
+        />
+        <Label htmlFor={`question[${question.id}].option[${optionIndex}]`} check>
+          {question.options[optionIndex].content}
+        </Label>
+      </FormGroup>
+    ));
+  };
+
   return (
     <Form id={`answer-form-${question.id}`} className="answer-form shadow-sm p-3 mb-3 bg-white rounded">
       <legend>
         {index + 1}/. {question.content}
       </legend>
-      <FormGroup check>
+      {renderOptionList()}
+    </Form>
+  );
+};
+export default AnswerFormComponent;
+
+{
+  /* <FormGroup check>
         <Input
           id={`question[${question.id}].option[0]`}
           name={`question[${question.id}].option`}
@@ -114,8 +140,5 @@ const AnswerFormComponent = (props: PropType) => {
         <Label htmlFor={`question[${question.id}].option[3]`} check>
           {question.options[3].content}
         </Label>
-      </FormGroup>
-    </Form>
-  );
-};
-export default AnswerFormComponent;
+      </FormGroup> */
+}

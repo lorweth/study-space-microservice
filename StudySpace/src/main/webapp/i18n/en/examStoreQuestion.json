@@ -2,7 +2,7 @@
   "studySpaceApp": {
     "examStoreQuestion": {
       "home": {
-        "title": "Questions",
+        "title": "Question List",
         "refreshListLabel": "Refresh list",
         "createLabel": "Create a new Question",
         "createOrEditLabel": "Create or edit a Question",
